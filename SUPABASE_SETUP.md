@@ -19,6 +19,14 @@ In the Supabase Dashboard, go to **SQL Editor** and run the migration:
 Or run the SQL from `supabase/migrations/001_create_jobs.sql` directly in the SQL Editor.
 This migration creates the table and RLS policies required for read and insert.
 
+Then run the admin migration:
+
+```sql
+-- Copy the contents of supabase/migrations/002_admin_dashboard.sql
+```
+
+Or run the SQL from `supabase/migrations/002_admin_dashboard.sql`.
+
 ## 3. Get your API keys
 
 1. In the Supabase Dashboard, go to **Project Settings** → **API**
@@ -35,6 +43,7 @@ This migration creates the table and RLS policies required for read and insert.
    ```
    VITE_SUPABASE_URL=https://your-project-ref.supabase.co
    VITE_SUPABASE_ANON_KEY=your-anon-key
+   VITE_ADMIN_EMAILS=admin@yourcompany.com
    ```
    Use your real values from Supabase, not the placeholder text above.
 

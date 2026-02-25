@@ -6,13 +6,13 @@ import { ALL_SKILLS } from "../data/jobs";
 export default function JobsPage({
   jobsLoading, page, setPage, search, setSearch, filters, setFilters, filteredJobs,
   savedJobs, handleSave, selectedJob, setSelectedJob, applyJob, setApplyJob,
-  handleApplySubmit, toast, user, onSignOut
+  handleApplySubmit, toast, user, onSignOut, isAdmin
 }) {
   const bg = { background: "#060b18", minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", color: "#94a3b8" };
 
   return (
     <div style={bg}>
-      <Navbar page={page} setPage={setPage} user={user} onSignOut={onSignOut} />
+      <Navbar page={page} setPage={setPage} user={user} onSignOut={onSignOut} isAdmin={isAdmin} />
       <div style={{ paddingTop: 80 }} className="page-content">
         <div style={{ background: "rgba(6,11,24,0.9)", backdropFilter: "blur(20px)", borderBottom: "1px solid rgba(255,255,255,0.06)", padding: "16px 20px", display: "flex", gap: 10, flexWrap: "wrap" }}>
           <input value={search.title} onChange={e => setSearch(s => ({ ...s, title: e.target.value }))}

@@ -8,7 +8,7 @@ const navBtn = (page, p) => ({
   cursor: "pointer", fontSize: 13, fontWeight: 600, transition: "all 0.15s", fontFamily: "inherit"
 });
 
-export default function Navbar({ page, setPage, user, onSignOut }) {
+export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const email = user?.email || "";
   const userInitial = email ? email[0].toUpperCase() : "?";
@@ -30,7 +30,7 @@ export default function Navbar({ page, setPage, user, onSignOut }) {
 
       {/* Desktop nav - hidden on mobile */}
       <div className="nav-desktop" style={{ display: "flex", gap: 8, alignItems: "center" }}>
-        {[["Jobs", "jobs"], ["Dashboard", "dashboard"]].map(([label, p]) => (
+        {[["Jobs", "jobs"], ["Dashboard", "dashboard"], ...(isAdmin ? [["Admin", "admin"]] : [])].map(([label, p]) => (
           <button key={p} onClick={() => setPage(p)} style={navBtn(page, p)}>{label}</button>
         ))}
         <button onClick={() => setPage("addJob")} style={{
@@ -88,7 +88,7 @@ export default function Navbar({ page, setPage, user, onSignOut }) {
     {menuOpen && (
       <div className="nav-mobile-menu" onClick={() => setMenuOpen(false)}>
         <div className="nav-mobile-links" onClick={e => e.stopPropagation()}>
-          {[["Jobs", "jobs"], ["Dashboard", "dashboard"]].map(([label, p]) => (
+          {[["Jobs", "jobs"], ["Dashboard", "dashboard"], ...(isAdmin ? [["Admin", "admin"]] : [])].map(([label, p]) => (
             <button key={p} className={page === p ? "nav-active" : ""} onClick={() => goTo(p)}>{label}</button>
           ))}
           <button className="nav-post-job" onClick={() => goTo("addJob")}>Post Job</button>

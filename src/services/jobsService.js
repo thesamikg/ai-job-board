@@ -23,6 +23,8 @@ function toJob(row) {
     posted_at: row.posted_at ? new Date(row.posted_at) : new Date(),
     featured: Boolean(row.featured),
     category: row.category || "AI Engineering",
+    status: row.status || "approved",
+    posted_by: row.posted_by || null,
   };
 }
 
@@ -46,13 +48,16 @@ function toRow(job) {
     apply_url: job.apply_url || "",
     featured: Boolean(job.featured),
     category: job.category || "AI Engineering",
+    status: job.status || "pending",
+    posted_by: job.posted_by || null,
   };
 }
 
 /**
- * Fetch all jobs from Supabase
+ * Fetch jobs from Supabase
  */
-export async function fetchJobs() {
+export async function fetchJobs(options = {}) {
+  const { includeAll = false } = options;
   if (!isSupabaseConfigured || !supabase) {
     return [];
   }
@@ -67,7 +72,9 @@ export async function fetchJobs() {
     throw error;
   }
 
-  return (data || []).map(toJob);
+  const jobs = (data || []).map(toJob);
+  if (includeAll) return jobs;
+  return jobs.filter((job) => job.status !== "pending" && job.status !== "rejected");
 }
 
 /**
@@ -92,4 +99,20 @@ export async function addJob(job) {
   }
 
   return { ...job, id: data.id };
+}
+
+export async function updateJobStatus(jobId, status) {
+  if (!isSupabaseConfigured || !supabase) {
+    throw new Error("Supabase is not configured");
+  }
+  const { error } = await supabase.from("jobs").update({ status }).eq("id", jobId);
+  if (error) throw error;
+}
+
+export async function deleteJob(jobId) {
+  if (!isSupabaseConfigured || !supabase) {
+    throw new Error("Supabase is not configured");
+  }
+  const { error } = await supabase.from("jobs").delete().eq("id", jobId);
+  if (error) throw error;
 }

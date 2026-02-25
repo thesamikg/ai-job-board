@@ -6,13 +6,13 @@ import { CATEGORIES } from "../data/jobs";
 export default function HomePage({
   jobs, jobsLoading, setPage, search, setSearch, savedJobs, handleSave, showToast,
   selectedJob, setSelectedJob, applyJob, setApplyJob, handleApplySubmit,
-  emailInput, setEmailInput, subscribed, setSubscribed, toast, user, onSignOut
+  emailInput, setEmailInput, subscribed, setSubscribed, toast, user, onSignOut, isAdmin
 }) {
   const bg = { background: "#060b18", minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", color: "#94a3b8" };
 
   return (
     <div style={bg}>
-      <Navbar page="home" setPage={setPage} user={user} onSignOut={onSignOut} />
+      <Navbar page="home" setPage={setPage} user={user} onSignOut={onSignOut} isAdmin={isAdmin} />
       {/* Hero */}
       <div className="hero-padding" style={{ position: "relative", overflow: "hidden", paddingTop: 120, paddingBottom: 80, textAlign: "center" }}>
         {[["#7c3aed", "-10%", "20%"], ["#2563eb", "60%", "-5%"], ["#0ea5e9", "30%", "60%"]].map(([c, l, t], i) => (

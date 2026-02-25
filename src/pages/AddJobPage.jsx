@@ -29,7 +29,7 @@ function getCompanyLogo(company) {
   return company.slice(0, 2).toUpperCase();
 }
 
-export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, user, onSignOut }) {
+export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, user, onSignOut, isAdmin }) {
   const [form, setForm] = useState({
     title: "",
     company: "",
@@ -115,7 +115,7 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
 
   return (
     <div style={bg}>
-      <Navbar page={page} setPage={setPage} user={user} onSignOut={onSignOut} />
+      <Navbar page={page} setPage={setPage} user={user} onSignOut={onSignOut} isAdmin={isAdmin} />
       <div className="page-content" style={{ paddingTop: 80, maxWidth: 640, margin: "0 auto", padding: "80px 24px 48px" }}>
         <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: 28, fontWeight: 900, color: "#f1f5f9", marginBottom: 8 }}>
           Post a New Job
