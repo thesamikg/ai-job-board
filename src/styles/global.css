@@ -1,0 +1,145 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Sans:wght@400;500;600&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0f1e;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 2px;
+}
+
+@keyframes blob {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -20px) scale(1.05); }
+  66% { transform: translate(-20px, 15px) scale(0.95); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive breakpoints: 1024 tablet, 768 mobile landscape, 480 mobile portrait */
+@media (max-width: 768px) {
+  .nav-desktop { display: none !important; }
+  .nav-hamburger { display: flex !important; }
+  .logo-text { font-size: 14px !important; }
+}
+
+@media (min-width: 769px) {
+  .nav-hamburger { display: none !important; }
+  .nav-mobile-menu { display: none !important; }
+}
+
+.nav-mobile-menu {
+  position: fixed;
+  top: 60px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(6, 11, 24, 0.98);
+  backdrop-filter: blur(20px);
+  z-index: 99;
+  padding: 24px;
+  overflow-y: auto;
+  animation: fadeIn 0.2s ease;
+}
+
+.nav-mobile-menu .nav-mobile-links {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nav-mobile-menu .nav-mobile-links button,
+.nav-mobile-menu .nav-mobile-links a {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 16px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  background: rgba(255,255,255,0.03);
+  color: #94a3b8;
+  font-family: inherit;
+}
+
+.nav-mobile-menu .nav-mobile-links button:hover,
+.nav-mobile-menu .nav-mobile-links button.nav-active {
+  background: rgba(124,58,237,0.15);
+  color: #a78bfa;
+  border: 1px solid rgba(124,58,237,0.4);
+}
+
+.nav-mobile-menu .nav-post-job {
+  background: linear-gradient(135deg, #7c3aed, #2563eb) !important;
+  color: #fff !important;
+  text-align: center !important;
+  margin: 12px 0 !important;
+}
+
+.nav-mobile-menu .nav-user-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  margin-top: 24px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+/* Page content padding for mobile */
+@media (max-width: 768px) {
+  .page-content { padding-left: 16px !important; padding-right: 16px !important; }
+  .hero-padding { padding-top: 100px !important; padding-bottom: 48px !important; }
+  .section-padding { padding: 0 16px 48px !important; }
+  .footer-responsive { flex-direction: column !important; align-items: flex-start !important; padding: 24px 16px !important; text-align: left !important; }
+}
+
+@media (max-width: 480px) {
+  .hero-padding { padding-top: 90px !important; }
+  .search-stack { flex-direction: column !important; }
+  .search-stack .search-divider { display: none !important; }
+  .grid-1-mobile { grid-template-columns: 1fr !important; }
+  .categories-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+  .dashboard-stats { grid-template-columns: 1fr !important; }
+}
+
+/* Jobs page sidebar - full width stack on tablet/mobile */
+@media (max-width: 900px) {
+  .jobs-layout { flex-direction: column !important; }
+  .jobs-sidebar { width: 100% !important; max-width: 100% !important; }
+  .jobs-sidebar-inner { position: static !important; display: flex !important; flex-wrap: wrap !important; gap: 20px 24px !important; }
+  .jobs-sidebar-inner > div { min-width: 140px !important; }
+}
+
+/* Job card responsive */
+@media (max-width: 600px) {
+  .job-card-inner { flex-direction: column !important; align-items: flex-start !important; }
+  .job-card-meta { flex-direction: row !important; flex-wrap: wrap !important; width: 100% !important; }
+}
+
+/* Add job form responsive */
+@media (max-width: 520px) {
+  .add-job-grid { grid-template-columns: 1fr !important; }
+}
+
+/* Job detail modal responsive */
+@media (max-width: 600px) {
+  .job-detail-grid { grid-template-columns: 1fr !important; }
+  .job-detail-header { flex-direction: column !important; align-items: flex-start !important; gap: 16px !important; }
+  .job-detail-actions { flex-direction: column !important; }
+}
