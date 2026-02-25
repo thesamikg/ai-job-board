@@ -3,6 +3,7 @@ import { HomePage, JobsPage, DashboardPage, LoginPage, AddJobPage } from "./page
 import { SAMPLE_JOBS } from "./data/jobs";
 import { filterAndSortJobs } from "./utils/filterJobs";
 import { fetchJobs, addJob } from "./services/jobsService";
+import { signInWithPassword, signUpWithPassword, signInWithGoogle, getSession, onAuthStateChange, signOut } from "./services/authService";
 import "./styles/global.css";
 
 const LOCAL_JOBS_KEY = "ai_jobboard_local_jobs";
@@ -49,7 +50,8 @@ export default function App() {
   const [subscribed, setSubscribed] = useState(false);
   const [user, setUser] = useState(null);
   const [loginEmail, setLoginEmail] = useState("");
-  const [loginSent, setLoginSent] = useState(false);
+  const [loginPassword, setLoginPassword] = useState("");
+  const [authLoading, setAuthLoading] = useState(false);
 
   useEffect(() => {
     async function loadJobs() {
@@ -66,6 +68,22 @@ export default function App() {
       }
     }
     loadJobs();
+  }, []);
+
+  useEffect(() => {
+    getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUser({ email: session.user.email, id: session.user.id });
+      }
+    });
+    const unsubscribe = onAuthStateChange((event, session) => {
+      if (session?.user) {
+        setUser({ email: session.user.email, id: session.user.id });
+      } else {
+        setUser(null);
+      }
+    });
+    return unsubscribe;
   }, []);
 
   const showToast = (msg) => {
@@ -86,11 +104,79 @@ export default function App() {
     setTimeout(() => window.open(job.apply_url, "_blank"), 500);
   };
 
-  const handleLogin = () => {
-    if (!loginEmail.includes("@")) return;
-    setUser({ email: loginEmail });
-    setLoginSent(true);
-    setTimeout(() => { setPage("jobs"); showToast("✓ Welcome back!"); }, 1000);
+  const handleSignIn = async () => {
+    if (!loginEmail.trim() || !loginEmail.includes("@")) {
+      showToast("Please enter a valid email");
+      return;
+    }
+    if (!loginPassword || loginPassword.length < 6) {
+      showToast("Please enter your password (min 6 characters)");
+      return;
+    }
+    setAuthLoading(true);
+    try {
+      await signInWithPassword(loginEmail.trim(), loginPassword);
+      showToast("✓ Welcome back!");
+      setPage("jobs");
+      setLoginPassword("");
+    } catch (err) {
+      showToast(err?.message || "Sign in failed");
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleSignUp = async () => {
+    if (!loginEmail.trim() || !loginEmail.includes("@")) {
+      showToast("Please enter a valid email");
+      return;
+    }
+    if (!loginPassword || loginPassword.length < 6) {
+      showToast("Password must be at least 6 characters");
+      return;
+    }
+    setAuthLoading(true);
+    try {
+      const data = await signUpWithPassword(loginEmail.trim(), loginPassword);
+      if (data?.session?.user) {
+        showToast("✓ Account created and signed in!");
+        setPage("jobs");
+      } else {
+        showToast("✓ Account created! Check your email to confirm, then sign in.");
+      }
+      setLoginPassword("");
+    } catch (err) {
+      showToast(err?.message || "Sign up failed");
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setAuthLoading(true);
+    try {
+      const { url } = await signInWithGoogle();
+      if (url) {
+        window.location.href = url;
+        return;
+      }
+      showToast("Google sign-in did not return a redirect URL.");
+    } catch (err) {
+      showToast(err?.message || "Google sign-in failed");
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      setUser(null);
+      setPage("home");
+      showToast("Signed out");
+    } catch (err) {
+      showToast(err?.message || "Sign out failed");
+    }
   };
 
   const handleAddJob = async (job) => {
@@ -134,6 +220,7 @@ export default function App() {
         setSubscribed={setSubscribed}
         toast={toast}
         user={user}
+        onSignOut={handleSignOut}
       />
     );
   }
@@ -158,6 +245,7 @@ export default function App() {
         handleApplySubmit={handleApplySubmit}
         toast={toast}
         user={user}
+        onSignOut={handleSignOut}
       />
     );
   }
@@ -179,6 +267,7 @@ export default function App() {
         handleApplySubmit={handleApplySubmit}
         toast={toast}
         user={user}
+        onSignOut={handleSignOut}
       />
     );
   }
@@ -189,8 +278,12 @@ export default function App() {
         setPage={setPage}
         loginEmail={loginEmail}
         setLoginEmail={setLoginEmail}
-        loginSent={loginSent}
-        handleLogin={handleLogin}
+        loginPassword={loginPassword}
+        setLoginPassword={setLoginPassword}
+        handleSignIn={handleSignIn}
+        handleSignUp={handleSignUp}
+        handleGoogleSignIn={handleGoogleSignIn}
+        authLoading={authLoading}
         toast={toast}
       />
     );
@@ -205,6 +298,7 @@ export default function App() {
         showToast={showToast}
         toast={toast}
         user={user}
+        onSignOut={handleSignOut}
       />
     );
   }

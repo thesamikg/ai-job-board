@@ -4,13 +4,13 @@ import { Toast } from "../components/ui";
 
 export default function DashboardPage({
   jobsLoading, page, setPage, jobs = [], savedJobs, emails, handleSave, selectedJob, setSelectedJob,
-  applyJob, setApplyJob, handleApplySubmit, toast, user
+  applyJob, setApplyJob, handleApplySubmit, toast, user, onSignOut
 }) {
   const bg = { background: "#060b18", minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", color: "#94a3b8" };
 
   return (
     <div style={bg}>
-      <Navbar page={page} setPage={setPage} user={user} />
+      <Navbar page={page} setPage={setPage} user={user} onSignOut={onSignOut} />
       <div className="page-content" style={{ maxWidth: 800, margin: "0 auto", padding: "100px 24px 60px" }}>
         <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: 28, fontWeight: 800, color: "#f1f5f9", marginBottom: 8 }}>Dashboard</h1>
         <p style={{ fontSize: 14, color: "#64748b", marginBottom: 40 }}>Manage your saved jobs and preferences</p>

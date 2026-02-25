@@ -8,8 +8,10 @@ const navBtn = (page, p) => ({
   cursor: "pointer", fontSize: 13, fontWeight: 600, transition: "all 0.15s", fontFamily: "inherit"
 });
 
-export default function Navbar({ page, setPage, user }) {
+export default function Navbar({ page, setPage, user, onSignOut }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const email = user?.email || "";
+  const userInitial = email ? email[0].toUpperCase() : "?";
 
   const goTo = (p) => {
     setPage(p);
@@ -39,8 +41,22 @@ export default function Navbar({ page, setPage, user }) {
         {user ? (
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginLeft: 8 }}>
             <div style={{ width: 32, height: 32, borderRadius: "50%", background: "linear-gradient(135deg, #7c3aed, #2563eb)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, color: "#fff" }}>
-              {user.email[0].toUpperCase()}
+              {userInitial}
             </div>
+            <button
+              onClick={onSignOut}
+              style={{
+                background: "transparent",
+                border: "1px solid rgba(255,255,255,0.12)",
+                borderRadius: 8,
+                padding: "6px 12px",
+                color: "#94a3b8",
+                cursor: "pointer",
+                fontSize: 12,
+              }}
+            >
+              Sign Out
+            </button>
           </div>
         ) : (
           <button onClick={() => setPage("login")} style={{
@@ -79,9 +95,9 @@ export default function Navbar({ page, setPage, user }) {
           {user ? (
             <div className="nav-user-row">
               <div style={{ width: 40, height: 40, borderRadius: "50%", background: "linear-gradient(135deg, #7c3aed, #2563eb)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 700, color: "#fff" }}>
-                {user.email[0].toUpperCase()}
+                {userInitial}
               </div>
-              <span style={{ fontSize: 14, color: "#94a3b8" }}>{user.email}</span>
+              <span style={{ fontSize: 14, color: "#94a3b8" }}>{email || "Signed in user"}</span>
             </div>
           ) : (
             <button onClick={() => goTo("login")} style={{
@@ -89,6 +105,24 @@ export default function Navbar({ page, setPage, user }) {
               border: "none", borderRadius: 10, padding: "14px 24px", marginTop: 8,
               fontSize: 15, fontWeight: 700, cursor: "pointer", width: "100%"
             }}>Sign In</button>
+          )}
+          {user && (
+            <button
+              onClick={onSignOut}
+              style={{
+                background: "transparent",
+                border: "1px solid rgba(255,255,255,0.12)",
+                borderRadius: 10,
+                padding: "12px 20px",
+                marginTop: 10,
+                color: "#94a3b8",
+                fontSize: 14,
+                cursor: "pointer",
+                width: "100%",
+              }}
+            >
+              Sign Out
+            </button>
           )}
         </div>
       </div>
