@@ -8,7 +8,7 @@ export default function JobsPage({
   savedJobs, handleSave, selectedJob, setSelectedJob, applyJob, setApplyJob,
   handleApplySubmit, toast, user, onSignOut, isAdmin, canPostJobs
 }) {
-  const bg = { background: "#f8fafc", minHeight: "100vh", fontFamily: "'Manrope', sans-serif", color: "#475569" };
+  const bg = { background: "#f8fafc", minHeight: "100vh", fontFamily: "'Source Sans 3', sans-serif", color: "#475569" };
 
   return (
     <div style={bg}>

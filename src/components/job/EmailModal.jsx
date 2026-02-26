@@ -26,7 +26,7 @@ export default function EmailModal({ job, onClose, onSubmit }) {
         {!submitted ? (
           <>
             <div style={{ fontSize: 24, marginBottom: 8 }}>🚀</div>
-            <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, fontWeight: 800, color: "#0f172a", marginBottom: 8 }}>
+            <h3 style={{ fontFamily: "'Merriweather', serif", fontSize: 20, fontWeight: 800, color: "#0f172a", marginBottom: 8 }}>
               Apply to {job.company}
             </h3>
             <p style={{ fontSize: 13, color: "#64748b", marginBottom: 24, lineHeight: 1.6 }}>
@@ -55,7 +55,7 @@ export default function EmailModal({ job, onClose, onSubmit }) {
               width: "100%", padding: "13px 24px",
               background: "linear-gradient(135deg, #7c3aed, #2563eb)",
               border: "none", borderRadius: 10, color: "#ffffff", fontSize: 14, fontWeight: 700,
-              cursor: "pointer", fontFamily: "'Space Grotesk', sans-serif", letterSpacing: 0.3,
+              cursor: "pointer", fontFamily: "'Merriweather', serif", letterSpacing: 0.3,
               transition: "opacity 0.15s",
             }}
               onMouseEnter={e => e.target.style.opacity = 0.9}
@@ -65,7 +65,7 @@ export default function EmailModal({ job, onClose, onSubmit }) {
         ) : (
           <div style={{ textAlign: "center", padding: "20px 0" }}>
             <div style={{ fontSize: 48, marginBottom: 16 }}>✅</div>
-            <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 18, fontWeight: 800, color: "#0f172a", marginBottom: 8 }}>Redirecting you now…</h3>
+            <h3 style={{ fontFamily: "'Merriweather', serif", fontSize: 18, fontWeight: 800, color: "#0f172a", marginBottom: 8 }}>Redirecting you now…</h3>
             <p style={{ fontSize: 13, color: "#64748b" }}>Opening {job.company}'s application page</p>
           </div>
         )}

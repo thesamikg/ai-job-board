@@ -2,77 +2,41 @@ import { useState } from "react";
 import { Logo } from "../ui";
 
 const navBtn = (page, p) => ({
-  background: page === p ? "rgba(15,118,110,0.12)" : "transparent",
-  border: `1px solid ${page === p ? "rgba(15,118,110,0.35)" : "transparent"}`,
-  borderRadius: 8, padding: "6px 16px", color: page === p ? "#0f766e" : "#6f6258",
+  background: page === p ? "rgba(37,99,235,0.1)" : "transparent",
+  border: `1px solid ${page === p ? "rgba(37,99,235,0.35)" : "transparent"}`,
+  borderRadius: 8, padding: "6px 16px", color: page === p ? "#1d4ed8" : "#475569",
   cursor: "pointer", fontSize: 13, fontWeight: 600, transition: "all 0.15s", fontFamily: "inherit"
 });
 
 export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false, canPostJobs = false }) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const email = user?.email || "";
-  const userInitial = email ? email[0].toUpperCase() : "?";
 
   const goTo = (p) => {
     setPage(p);
     setMenuOpen(false);
   };
 
-  const handleSignOut = () => {
-    setMenuOpen(false);
-    if (typeof onSignOut === "function") onSignOut();
-  };
-
   return (
     <>
     <nav style={{
       position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
-      background: "rgba(253,247,239,0.96)", backdropFilter: "blur(20px)",
-      borderBottom: "1px solid rgba(180,147,118,0.35)", padding: "0 16px 0 20px",
+      background: "rgba(255,255,255,0.96)", backdropFilter: "blur(20px)",
+      borderBottom: "1px solid rgba(148,163,184,0.3)", padding: "0 16px 0 20px",
       display: "flex", alignItems: "center", justifyContent: "space-between", height: 60,
     }}>
       <div onClick={() => goTo("home")} style={{ cursor: "pointer" }}><Logo /></div>
 
       {/* Desktop nav - hidden on mobile */}
       <div className="nav-desktop" style={{ display: "flex", gap: 8, alignItems: "center" }}>
-        {[["Jobs", "jobs"], ["Dashboard", "dashboard"], ...(isAdmin ? [["Admin", "admin"]] : [])].map(([label, p]) => (
-          <button key={p} onClick={() => setPage(p)} style={navBtn(page, p)}>{label}</button>
-        ))}
-        {canPostJobs && (
-          <button onClick={() => setPage("addJob")} style={{
-            background: "linear-gradient(135deg, #0f766e, #0ea5a0)",
-            border: "none", borderRadius: 8, padding: "6px 16px", color: "#ffffff",
-            cursor: "pointer", fontSize: 13, fontWeight: 600, fontFamily: "'Space Grotesk', sans-serif"
-          }}>Post Job</button>
-        )}
-        {user ? (
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginLeft: 8 }}>
-            <div style={{ width: 32, height: 32, borderRadius: "50%", background: "linear-gradient(135deg, #0f766e, #0ea5a0)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, color: "#ffffff" }}>
-              {userInitial}
-            </div>
-            <button
-              type="button"
-              onClick={handleSignOut}
-              style={{
-                background: "transparent",
-                border: "1px solid rgba(180,147,118,0.45)",
-                borderRadius: 8,
-                padding: "6px 12px",
-                color: "#6f6258",
-                cursor: "pointer",
-                fontSize: 12,
-              }}
-            >
-              Sign Out
-            </button>
-          </div>
-        ) : (
-          <button onClick={() => setPage("login")} style={{
-            marginLeft: 8, background: "linear-gradient(135deg, #0f766e, #0ea5a0)",
-            border: "none", borderRadius: 8, padding: "7px 18px", color: "#ffffff",
-            cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "'Space Grotesk', sans-serif"
-          }}>Sign In</button>
-        )}
+        <button onClick={() => setPage(canPostJobs ? "addJob" : "login")} style={{
+          background: "transparent", border: "1px solid rgba(37,99,235,0.45)", borderRadius: 8, padding: "7px 16px", color: "#1d4ed8",
+          cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "'Source Sans 3', sans-serif"
+        }}>Post a Job</button>
+        <button onClick={() => setPage("login")} style={{
+          marginLeft: 4, background: "linear-gradient(135deg, #1d4ed8, #2563eb)",
+          border: "none", borderRadius: 8, padding: "7px 18px", color: "#ffffff",
+          cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "'Source Sans 3', sans-serif"
+        }}>Sign In / Sign Up</button>
       </div>
 
       {/* Hamburger - visible only on mobile */}
@@ -82,13 +46,13 @@ export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false
         aria-label="Menu"
         style={{
           display: "none", flexDirection: "column", gap: 5, padding: 8,
-          background: "transparent", border: "1px solid rgba(180,147,118,0.45)",
+          background: "transparent", border: "1px solid rgba(148,163,184,0.4)",
           borderRadius: 8, cursor: "pointer",
         }}
       >
-        <span style={{ width: 22, height: 2, background: "#6f6258", borderRadius: 1 }} />
-        <span style={{ width: 22, height: 2, background: "#6f6258", borderRadius: 1 }} />
-        <span style={{ width: 22, height: 2, background: "#6f6258", borderRadius: 1 }} />
+        <span style={{ width: 22, height: 2, background: "#475569", borderRadius: 1 }} />
+        <span style={{ width: 22, height: 2, background: "#475569", borderRadius: 1 }} />
+        <span style={{ width: 22, height: 2, background: "#475569", borderRadius: 1 }} />
       </button>
     </nav>
 
@@ -96,43 +60,22 @@ export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false
     {menuOpen && (
       <div className="nav-mobile-menu" onClick={() => setMenuOpen(false)}>
         <div className="nav-mobile-links" onClick={e => e.stopPropagation()}>
-          {[["Jobs", "jobs"], ["Dashboard", "dashboard"], ...(isAdmin ? [["Admin", "admin"]] : [])].map(([label, p]) => (
-            <button key={p} className={page === p ? "nav-active" : ""} onClick={() => goTo(p)}>{label}</button>
-          ))}
-          {canPostJobs && <button className="nav-post-job" onClick={() => goTo("addJob")}>Post Job</button>}
-          {user ? (
-            <div className="nav-user-row">
-              <div style={{ width: 40, height: 40, borderRadius: "50%", background: "linear-gradient(135deg, #0f766e, #0ea5a0)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 700, color: "#ffffff" }}>
-                {userInitial}
-              </div>
-              <span style={{ fontSize: 14, color: "#6f6258" }}>{email || "Signed in user"}</span>
-            </div>
-          ) : (
-            <button onClick={() => goTo("login")} style={{
-              background: "linear-gradient(135deg, #0f766e, #0ea5a0)", color: "#ffffff",
-              border: "none", borderRadius: 10, padding: "14px 24px", marginTop: 8,
-              fontSize: 15, fontWeight: 700, cursor: "pointer", width: "100%"
-            }}>Sign In</button>
-          )}
-          {user && (
-            <button
-              type="button"
-              onClick={handleSignOut}
-              style={{
-                background: "transparent",
-                border: "1px solid rgba(180,147,118,0.45)",
-                borderRadius: 10,
-                padding: "12px 20px",
-                marginTop: 10,
-                color: "#6f6258",
-                fontSize: 14,
-                cursor: "pointer",
-                width: "100%",
-              }}
-            >
-              Sign Out
-            </button>
-          )}
+          <button onClick={() => goTo(canPostJobs ? "addJob" : "login")} style={{
+            background: "transparent",
+            border: "1px solid rgba(37,99,235,0.45)",
+            borderRadius: 10,
+            padding: "12px 20px",
+            color: "#1d4ed8",
+            fontSize: 14,
+            fontWeight: 700,
+            cursor: "pointer",
+            width: "100%",
+          }}>Post a Job</button>
+          <button onClick={() => goTo("login")} style={{
+            background: "linear-gradient(135deg, #1d4ed8, #2563eb)", color: "#ffffff",
+            border: "none", borderRadius: 10, padding: "14px 24px", marginTop: 8,
+            fontSize: 15, fontWeight: 700, cursor: "pointer", width: "100%"
+          }}>Sign In / Sign Up</button>
         </div>
       </div>
     )}

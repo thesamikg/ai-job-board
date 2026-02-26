@@ -6,24 +6,24 @@ export default function DashboardPage({
   jobsLoading, page, setPage, jobs = [], savedJobs, emails, handleSave, selectedJob, setSelectedJob,
   applyJob, setApplyJob, handleApplySubmit, toast, user, onSignOut, isAdmin, canPostJobs
 }) {
-  const bg = { background: "#f8fafc", minHeight: "100vh", fontFamily: "'Manrope', sans-serif", color: "#475569" };
+  const bg = { background: "#f8fafc", minHeight: "100vh", fontFamily: "'Source Sans 3', sans-serif", color: "#475569" };
 
   return (
     <div style={bg}>
       <Navbar page={page} setPage={setPage} user={user} onSignOut={onSignOut} isAdmin={isAdmin} canPostJobs={canPostJobs} />
       <div className="page-content" style={{ maxWidth: 800, margin: "0 auto", padding: "100px 24px 60px" }}>
-        <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 28, fontWeight: 800, color: "#0f172a", marginBottom: 8 }}>Dashboard</h1>
+        <h1 style={{ fontFamily: "'Merriweather', serif", fontSize: 28, fontWeight: 800, color: "#0f172a", marginBottom: 8 }}>Dashboard</h1>
         <p style={{ fontSize: 14, color: "#64748b", marginBottom: 40 }}>Manage your saved jobs and preferences</p>
         <div className="dashboard-stats" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 40 }}>
           {[["📌", savedJobs.length, "Saved Jobs"], ["📧", emails.length, "Applications"], ["🔔", "Active", "Job Alerts"]].map(([icon, val, label]) => (
             <div key={label} style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 14, padding: "20px 24px" }}>
               <div style={{ fontSize: 24, marginBottom: 8 }}>{icon}</div>
-              <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 24, fontWeight: 800, color: "#0f172a", marginBottom: 4 }}>{val}</div>
+              <div style={{ fontFamily: "'Merriweather', serif", fontSize: 24, fontWeight: 800, color: "#0f172a", marginBottom: 4 }}>{val}</div>
               <div style={{ fontSize: 12, color: "#64748b" }}>{label}</div>
             </div>
           ))}
         </div>
-        <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 16, fontWeight: 700, color: "#1e293b", marginBottom: 16 }}>Saved Jobs</h3>
+        <h3 style={{ fontFamily: "'Merriweather', serif", fontSize: 16, fontWeight: 700, color: "#1e293b", marginBottom: 16 }}>Saved Jobs</h3>
         {jobsLoading ? (
           <div style={{ padding: 24, color: "#64748b", fontSize: 14 }}>Loading jobs…</div>
         ) : savedJobs.length === 0 ? (

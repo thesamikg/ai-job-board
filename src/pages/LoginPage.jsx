@@ -4,8 +4,8 @@ import { Logo, Toast } from "../components/ui";
 const inputStyle = {
   width: "100%",
   padding: "12px 16px",
-  background: "rgba(255,255,255,0.05)",
-  border: "1px solid rgba(255,255,255,0.1)",
+  background: "#ffffff",
+  border: "1px solid rgba(148,163,184,0.6)",
   borderRadius: 10,
   color: "#0f172a",
   fontSize: 14,
@@ -37,7 +37,7 @@ export default function LoginPage({
   const bg = {
     background: "#f8fafc",
     minHeight: "100vh",
-    fontFamily: "'Manrope', sans-serif",
+    fontFamily: "'Source Sans 3', sans-serif",
     color: "#475569",
   };
 
@@ -64,19 +64,19 @@ export default function LoginPage({
         />
       ))}
       <div style={{ position: "relative", maxWidth: 420, width: "100%", padding: "24px 16px" }}>
-        <div style={{ textAlign: "center", marginBottom: 40 }}>
+        <div style={{ textAlign: "center", marginBottom: 40, cursor: "pointer" }} onClick={() => setPage("home")}>
           <Logo />
         </div>
         <div
           style={{
-            background: "rgba(255,255,255,0.02)",
-            border: "1px solid rgba(255,255,255,0.08)",
+            background: "#ffffff",
+            border: "1px solid rgba(148,163,184,0.55)",
             borderRadius: 20,
             padding: "32px 24px",
             backdropFilter: "blur(20px)",
           }}
         >
-          <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 22, fontWeight: 800, color: "#0f172a", marginBottom: 8 }}>
+          <h2 style={{ fontFamily: "'Merriweather', serif", fontSize: 22, fontWeight: 800, color: "#0f172a", marginBottom: 8 }}>
             {mode === "signin" ? "Welcome back" : "Create an account"}
           </h2>
           <p style={{ fontSize: 13, color: "#64748b", marginBottom: 28, lineHeight: 1.6 }}>
@@ -90,7 +90,8 @@ export default function LoginPage({
               display: "flex",
               gap: 8,
               marginBottom: 24,
-              background: "rgba(255,255,255,0.03)",
+              background: "#ffffff",
+              border: "1px solid rgba(148,163,184,0.35)",
               padding: 4,
               borderRadius: 10,
             }}
@@ -102,12 +103,12 @@ export default function LoginPage({
                 flex: 1,
                 padding: "10px 16px",
                 borderRadius: 8,
-                border: "none",
+                border: mode === "signin" ? "1px solid rgba(37,99,235,0.45)" : "1px solid rgba(148,163,184,0.35)",
                 cursor: "pointer",
                 fontSize: 13,
                 fontWeight: 600,
-                background: mode === "signin" ? "linear-gradient(135deg, #7c3aed, #2563eb)" : "transparent",
-                color: mode === "signin" ? "#fff" : "#64748b",
+                background: mode === "signin" ? "linear-gradient(135deg, #1d4ed8, #2563eb)" : "#ffffff",
+                color: mode === "signin" ? "#fff" : "#475569",
               }}
             >
               Sign In
@@ -119,12 +120,12 @@ export default function LoginPage({
                 flex: 1,
                 padding: "10px 16px",
                 borderRadius: 8,
-                border: "none",
+                border: mode === "signup" ? "1px solid rgba(37,99,235,0.45)" : "1px solid rgba(148,163,184,0.35)",
                 cursor: "pointer",
                 fontSize: 13,
                 fontWeight: 600,
-                background: mode === "signup" ? "linear-gradient(135deg, #7c3aed, #2563eb)" : "transparent",
-                color: mode === "signup" ? "#fff" : "#64748b",
+                background: mode === "signup" ? "linear-gradient(135deg, #1d4ed8, #2563eb)" : "#ffffff",
+                color: mode === "signup" ? "#fff" : "#475569",
               }}
             >
               Sign Up
@@ -178,14 +179,14 @@ export default function LoginPage({
               style={{
                 width: "100%",
                 padding: "13px 24px",
-                background: "linear-gradient(135deg, #7c3aed, #2563eb)",
+                background: "linear-gradient(135deg, #1d4ed8, #2563eb)",
                 border: "none",
                 borderRadius: 10,
-                color: "#0f172a",
+                color: "#ffffff",
                 fontSize: 14,
                 fontWeight: 700,
                 cursor: authLoading ? "not-allowed" : "pointer",
-                fontFamily: "'Space Grotesk', sans-serif",
+                fontFamily: "'Merriweather', serif",
                 opacity: authLoading ? 0.7 : 1,
               }}
             >
@@ -206,8 +207,8 @@ export default function LoginPage({
             style={{
               width: "100%",
               padding: "12px 24px",
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.15)",
+              background: "#ffffff",
+              border: "1px solid rgba(148,163,184,0.5)",
               borderRadius: 10,
               color: "#0f172a",
               fontSize: 14,

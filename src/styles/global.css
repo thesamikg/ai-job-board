@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@700&family=Source+Sans+3:wght@400;500;600;700&display=swap');
 
 * {
   margin: 0;
@@ -11,11 +11,11 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #f3e8d8;
+  background: #e2e8f0;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #b49376;
+  background: #2563eb;
   border-radius: 2px;
 }
 
@@ -48,7 +48,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(253, 247, 239, 0.98);
+  background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(20px);
   z-index: 99;
   padding: 24px;
@@ -80,13 +80,13 @@
 
 .nav-mobile-menu .nav-mobile-links button:hover,
 .nav-mobile-menu .nav-mobile-links button.nav-active {
-  background: rgba(15,118,110,0.12);
-  color: #0f766e;
-  border: 1px solid rgba(15,118,110,0.4);
+  background: rgba(37,99,235,0.1);
+  color: #1d4ed8;
+  border: 1px solid rgba(37,99,235,0.4);
 }
 
 .nav-mobile-menu .nav-post-job {
-  background: linear-gradient(135deg, #0f766e, #0ea5a0) !important;
+  background: linear-gradient(135deg, #1d4ed8, #2563eb) !important;
   color: #ffffff !important;
   text-align: center !important;
   margin: 12px 0 !important;

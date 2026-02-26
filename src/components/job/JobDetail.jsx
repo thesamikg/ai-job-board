@@ -23,7 +23,7 @@ export default function JobDetail({ job, onClose, onApply, saved, onSave }) {
                 fontSize: 16, fontWeight: 800, color: "#c4b5fd",
               }}>{job.companyLogo}</div>
               <div>
-                <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 22, fontWeight: 800, color: "#0f172a", marginBottom: 6 }}>{job.title}</h2>
+                <h2 style={{ fontFamily: "'Merriweather', serif", fontSize: 22, fontWeight: 800, color: "#0f172a", marginBottom: 6 }}>{job.title}</h2>
                 <div style={{ fontSize: 14, color: "#475569" }}>{job.company} · {job.location}</div>
               </div>
             </div>
@@ -61,7 +61,7 @@ export default function JobDetail({ job, onClose, onApply, saved, onSave }) {
               flex: 1, padding: "14px 28px",
               background: "linear-gradient(135deg, #7c3aed, #2563eb)",
               border: "none", borderRadius: 12, color: "#0f172a", fontSize: 15, fontWeight: 700,
-              cursor: "pointer", fontFamily: "'Space Grotesk', sans-serif", letterSpacing: 0.3,
+              cursor: "pointer", fontFamily: "'Merriweather', serif", letterSpacing: 0.3,
             }}>Apply Now →</button>
             <button onClick={() => onSave(job.id)} style={{
               padding: "14px 20px",

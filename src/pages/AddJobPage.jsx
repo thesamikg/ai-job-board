@@ -6,8 +6,8 @@ import { CATEGORIES, ALL_SKILLS } from "../data/jobs";
 const inputStyle = {
   width: "100%",
   padding: "12px 16px",
-  background: "rgba(255,255,255,0.05)",
-  border: "1px solid rgba(255,255,255,0.1)",
+  background: "#ffffff",
+  border: "1px solid rgba(148,163,184,0.6)",
   borderRadius: 10,
   color: "#0f172a",
   fontSize: 14,
@@ -111,20 +111,20 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
     setPage("jobs");
   };
 
-  const bg = { background: "#f8fafc", minHeight: "100vh", fontFamily: "'Manrope', sans-serif", color: "#475569" };
+  const bg = { background: "#f8fafc", minHeight: "100vh", fontFamily: "'Source Sans 3', sans-serif", color: "#475569" };
 
   return (
     <div style={bg}>
       <Navbar page={page} setPage={setPage} user={user} onSignOut={onSignOut} isAdmin={isAdmin} canPostJobs={canPostJobs} />
       <div className="page-content" style={{ paddingTop: 80, maxWidth: 640, margin: "0 auto", padding: "80px 24px 48px" }}>
-        <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 28, fontWeight: 900, color: "#0f172a", marginBottom: 8 }}>
+        <h1 style={{ fontFamily: "'Merriweather', serif", fontSize: 28, fontWeight: 900, color: "#0f172a", marginBottom: 8 }}>
           Post a New Job
         </h1>
         <p style={{ fontSize: 14, color: "#64748b", marginBottom: 32, lineHeight: 1.6 }}>
           Share your AI & robotics role with thousands of qualified candidates.
         </p>
 
-        <form onSubmit={handleSubmit} style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 20, padding: "24px 20px", backdropFilter: "blur(20px)" }}>
+        <form onSubmit={handleSubmit} style={{ background: "#ffffff", border: "1px solid rgba(148,163,184,0.35)", borderRadius: 20, padding: "24px 20px", backdropFilter: "blur(20px)" }}>
           <div style={{ marginBottom: 20 }}>
             <label style={labelStyle}>JOB TITLE *</label>
             <input value={form.title} onChange={e => update("title", e.target.value)} placeholder="e.g. Senior LLM Engineer" style={inputStyle} required />
@@ -199,8 +199,8 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
                 <button key={skill} type="button" onClick={() => form.skills.includes(skill) ? removeSkill(skill) : update("skills", [...form.skills, skill])}
                   style={{
                     padding: "6px 12px", borderRadius: 8, fontSize: 12, cursor: "pointer",
-                    background: form.skills.includes(skill) ? "rgba(124,58,237,0.3)" : "rgba(255,255,255,0.05)",
-                    border: form.skills.includes(skill) ? "1px solid rgba(124,58,237,0.5)" : "1px solid rgba(255,255,255,0.1)",
+                    background: form.skills.includes(skill) ? "rgba(124,58,237,0.12)" : "#ffffff",
+                    border: form.skills.includes(skill) ? "1px solid rgba(124,58,237,0.5)" : "1px solid rgba(148,163,184,0.45)",
                     color: form.skills.includes(skill) ? "#a78bfa" : "#475569",
                   }}>
                   {skill}
@@ -210,7 +210,7 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
             <div style={{ display: "flex", gap: 8 }}>
               <input value={skillInput} onChange={e => setSkillInput(e.target.value)} onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addSkill())}
                 placeholder="Type skill and press Enter" style={{ ...inputStyle, flex: 1 }} />
-              <button type="button" onClick={addSkill} style={{ padding: "12px 20px", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, color: "#475569", fontSize: 13, cursor: "pointer" }}>
+              <button type="button" onClick={addSkill} style={{ padding: "12px 20px", background: "#ffffff", border: "1px solid rgba(148,163,184,0.55)", borderRadius: 10, color: "#475569", fontSize: 13, cursor: "pointer" }}>
                 Add
               </button>
             </div>
@@ -235,10 +235,10 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
           </div>
 
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-            <button type="submit" style={{ padding: "14px 32px", background: "linear-gradient(135deg, #7c3aed, #2563eb)", border: "none", borderRadius: 10, color: "#ffffff", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Space Grotesk', sans-serif" }}>
+            <button type="submit" style={{ padding: "14px 32px", background: "linear-gradient(135deg, #7c3aed, #2563eb)", border: "none", borderRadius: 10, color: "#ffffff", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Merriweather', serif" }}>
               Post Job
             </button>
-            <button type="button" onClick={() => setPage("jobs")} style={{ padding: "14px 24px", background: "transparent", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, color: "#64748b", fontSize: 13, cursor: "pointer" }}>
+            <button type="button" onClick={() => setPage("jobs")} style={{ padding: "14px 24px", background: "transparent", border: "1px solid rgba(148,163,184,0.5)", borderRadius: 10, color: "#64748b", fontSize: 13, cursor: "pointer" }}>
               Cancel
             </button>
           </div>

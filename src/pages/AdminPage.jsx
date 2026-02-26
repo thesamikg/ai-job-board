@@ -34,10 +34,10 @@ export default function AdminPage({
   const pendingJobs = useMemo(() => jobs.filter((j) => j.status === "pending"), [jobs]);
 
   return (
-    <div style={{ background: "#f8fafc", minHeight: "100vh", color: "#475569", fontFamily: "'Manrope', sans-serif" }}>
+    <div style={{ background: "#f8fafc", minHeight: "100vh", color: "#475569", fontFamily: "'Source Sans 3', sans-serif" }}>
       <Navbar page={page} setPage={setPage} user={user} onSignOut={onSignOut} isAdmin canPostJobs />
       <div className="page-content" style={{ maxWidth: 1050, margin: "0 auto", padding: "100px 24px 60px" }}>
-        <h1 style={{ margin: 0, color: "#0f172a", fontFamily: "'Space Grotesk', sans-serif" }}>Admin Dashboard</h1>
+        <h1 style={{ margin: 0, color: "#0f172a", fontFamily: "'Merriweather', serif" }}>Admin Dashboard</h1>
         <p style={{ marginTop: 10, marginBottom: 24 }}>Moderate jobs, remove spam, and review platform activity.</p>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12, marginBottom: 20 }}>
