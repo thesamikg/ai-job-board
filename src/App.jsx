@@ -4,7 +4,7 @@ import { SAMPLE_JOBS } from "./data/jobs";
 import { filterAndSortJobs } from "./utils/filterJobs";
 import { fetchJobs, addJob, updateJobStatus, deleteJob } from "./services/jobsService";
 import { signInWithPassword, signUpWithPassword, signInWithGoogle, getSession, onAuthStateChange, signOut } from "./services/authService";
-import { isAdminUser, ensureUserProfile, fetchUsersForAdmin, addApplication, fetchApplicationsForAdmin } from "./services/adminService";
+import { isAdminUser, ensureUserProfile, fetchUsersForAdmin, addApplication, fetchApplicationsForAdmin, fetchUserRole } from "./services/adminService";
 import "./styles/global.css";
 
 const LOCAL_JOBS_KEY = "ai_jobboard_local_jobs";
@@ -90,11 +90,14 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
+  const [signupRole, setSignupRole] = useState("job_seeker");
   const [authLoading, setAuthLoading] = useState(false);
   const [adminUsers, setAdminUsers] = useState([]);
   const [applications, setApplications] = useState([]);
   const [adminLoading, setAdminLoading] = useState(false);
-  const isAdmin = isAdminUser(user?.email);
+  const userRole = user?.role || "job_seeker";
+  const isAdmin = userRole === "admin";
+  const canPostJobs = userRole === "employer" || userRole === "admin";
 
   useEffect(() => {
     async function loadJobs() {
@@ -124,14 +127,16 @@ export default function App() {
   useEffect(() => {
     getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
-        setUser({ email: session.user.email, id: session.user.id });
-        await ensureUserProfile(session.user);
+        const role = await fetchUserRole(session.user.id, session.user.email);
+        setUser({ email: session.user.email, id: session.user.id, role });
+        await ensureUserProfile(session.user, role);
       }
     });
     const unsubscribe = onAuthStateChange(async (event, session) => {
       if (session?.user) {
-        setUser({ email: session.user.email, id: session.user.id });
-        await ensureUserProfile(session.user);
+        const role = await fetchUserRole(session.user.id, session.user.email);
+        setUser({ email: session.user.email, id: session.user.id, role });
+        await ensureUserProfile(session.user, role);
       } else {
         setUser(null);
       }
@@ -204,6 +209,11 @@ export default function App() {
     setAuthLoading(true);
     try {
       await signInWithPassword(loginEmail.trim(), loginPassword);
+      const { data: { session } } = await getSession();
+      const role = await fetchUserRole(session?.user?.id, session?.user?.email || loginEmail.trim());
+      if (session?.user) {
+        setUser({ email: session.user.email, id: session.user.id, role });
+      }
       showToast("✓ Welcome back!");
       setPage("jobs");
       setLoginPassword("");
@@ -226,7 +236,12 @@ export default function App() {
     setAuthLoading(true);
     try {
       const data = await signUpWithPassword(loginEmail.trim(), loginPassword);
+      if (data?.user) {
+        await ensureUserProfile(data.user, signupRole);
+      }
       if (data?.session?.user) {
+        const role = await fetchUserRole(data.session.user.id, data.session.user.email);
+        setUser({ email: data.session.user.email, id: data.session.user.id, role });
         showToast("✓ Account created and signed in!");
         setPage("jobs");
       } else {
@@ -257,13 +272,14 @@ export default function App() {
   };
 
   const handleSignOut = async () => {
+    setUser(null);
+    setPage("home");
     try {
       await signOut();
-      setUser(null);
-      setPage("home");
       showToast("Signed out");
     } catch (err) {
-      showToast(err?.message || "Sign out failed");
+      console.warn("Remote sign out failed:", err);
+      showToast("Signed out locally");
     }
   };
 
@@ -291,6 +307,11 @@ export default function App() {
   };
 
   const handleAddJob = async (job) => {
+    if (!canPostJobs) {
+      showToast("Only Employer and Admin accounts can post jobs.");
+      setPage("login");
+      return { ok: false };
+    }
     try {
       const saved = await addJob(job);
       setJobs(prev => [saved, ...prev]);
@@ -334,6 +355,7 @@ export default function App() {
         user={user}
         onSignOut={handleSignOut}
         isAdmin={isAdmin}
+        canPostJobs={canPostJobs}
       />
     );
   }
@@ -360,6 +382,7 @@ export default function App() {
         user={user}
         onSignOut={handleSignOut}
         isAdmin={isAdmin}
+        canPostJobs={canPostJobs}
       />
     );
   }
@@ -383,6 +406,7 @@ export default function App() {
         user={user}
         onSignOut={handleSignOut}
         isAdmin={isAdmin}
+        canPostJobs={canPostJobs}
       />
     );
   }
@@ -396,6 +420,8 @@ export default function App() {
           setLoginEmail={setLoginEmail}
           loginPassword={loginPassword}
           setLoginPassword={setLoginPassword}
+          signupRole={signupRole}
+          setSignupRole={setSignupRole}
           handleSignIn={handleSignIn}
           handleSignUp={handleSignUp}
           handleGoogleSignIn={handleGoogleSignIn}
@@ -430,6 +456,8 @@ export default function App() {
         setLoginEmail={setLoginEmail}
         loginPassword={loginPassword}
         setLoginPassword={setLoginPassword}
+        signupRole={signupRole}
+        setSignupRole={setSignupRole}
         handleSignIn={handleSignIn}
         handleSignUp={handleSignUp}
         handleGoogleSignIn={handleGoogleSignIn}
@@ -440,6 +468,24 @@ export default function App() {
   }
 
   if (page === "addJob") {
+    if (!canPostJobs) {
+      return (
+        <LoginPage
+          setPage={setPage}
+          loginEmail={loginEmail}
+          setLoginEmail={setLoginEmail}
+          loginPassword={loginPassword}
+          setLoginPassword={setLoginPassword}
+          signupRole={signupRole}
+          setSignupRole={setSignupRole}
+          handleSignIn={handleSignIn}
+          handleSignUp={handleSignUp}
+          handleGoogleSignIn={handleGoogleSignIn}
+          authLoading={authLoading}
+          toast={{ message: "Only Employer/Admin can access job posting.", visible: true }}
+        />
+      );
+    }
     return (
       <AddJobPage
         page={page}
@@ -450,6 +496,7 @@ export default function App() {
         user={user}
         onSignOut={handleSignOut}
         isAdmin={isAdmin}
+        canPostJobs={canPostJobs}
       />
     );
   }

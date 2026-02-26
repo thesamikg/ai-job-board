@@ -11,10 +11,14 @@ export function isNew(date) {
 }
 
 export function isHot(job) {
-  return (job.salary_min > 150000) || (job.currency === "LPA" && job.salary_min > 60);
+  return job.salary_min > 150000;
 }
 
 export function formatSalary(job) {
-  if (job.currency === "LPA") return `₹${job.salary_min}–${job.salary_max} LPA`;
-  return `$${(job.salary_min / 1000).toFixed(0)}K–$${(job.salary_max / 1000).toFixed(0)}K`;
+  const symbols = { USD: "$", EUR: "€", GBP: "£", INR: "₹" };
+  const symbol = symbols[job.currency] || "";
+  if (!job.currency || job.currency === "USD") {
+    return `$${(job.salary_min / 1000).toFixed(0)}K–$${(job.salary_max / 1000).toFixed(0)}K`;
+  }
+  return `${symbol}${job.salary_min.toLocaleString()}–${symbol}${job.salary_max.toLocaleString()} ${job.currency}`;
 }

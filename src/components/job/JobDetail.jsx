@@ -8,7 +8,7 @@ export default function JobDetail({ job, onClose, onApply, saved, onSave }) {
       display: "flex", alignItems: "center", justifyContent: "center", zIndex: 900, padding: 20,
     }} onClick={onClose}>
       <div onClick={e => e.stopPropagation()} style={{
-        background: "#0b1120", border: "1px solid rgba(255,255,255,0.08)",
+        background: "#ffffff", border: "1px solid rgba(255,255,255,0.08)",
         borderRadius: 20, maxWidth: 680, width: "100%", maxHeight: "88vh", overflow: "auto",
         boxShadow: "0 32px 80px rgba(0,0,0,0.7)",
       }}>
@@ -23,8 +23,8 @@ export default function JobDetail({ job, onClose, onApply, saved, onSave }) {
                 fontSize: 16, fontWeight: 800, color: "#c4b5fd",
               }}>{job.companyLogo}</div>
               <div>
-                <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: 22, fontWeight: 800, color: "#f1f5f9", marginBottom: 6 }}>{job.title}</h2>
-                <div style={{ fontSize: 14, color: "#94a3b8" }}>{job.company} · {job.location}</div>
+                <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 22, fontWeight: 800, color: "#0f172a", marginBottom: 6 }}>{job.title}</h2>
+                <div style={{ fontSize: 14, color: "#475569" }}>{job.company} · {job.location}</div>
               </div>
             </div>
             <button onClick={onClose} style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, padding: "6px 12px", color: "#64748b", cursor: "pointer", fontSize: 16 }}>✕</button>
@@ -42,7 +42,7 @@ export default function JobDetail({ job, onClose, onApply, saved, onSave }) {
             {[["💰 Salary", formatSalary(job)], ["📅 Posted", timeSince(job.posted_at)], ["🏢 Company", job.company], ["🎯 Type", job.job_type]].map(([label, val]) => (
               <div key={label} style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 10, padding: "14px 18px" }}>
                 <div style={{ fontSize: 11, color: "#64748b", marginBottom: 4, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase" }}>{label}</div>
-                <div style={{ fontSize: 14, color: "#e2e8f0", fontWeight: 600 }}>{val}</div>
+                <div style={{ fontSize: 14, color: "#1e293b", fontWeight: 600 }}>{val}</div>
               </div>
             ))}
           </div>
@@ -54,14 +54,14 @@ export default function JobDetail({ job, onClose, onApply, saved, onSave }) {
           </div>
           <div style={{ marginBottom: 32 }}>
             <h4 style={{ fontSize: 12, color: "#64748b", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", marginBottom: 12 }}>About This Role</h4>
-            <p style={{ fontSize: 14, color: "#94a3b8", lineHeight: 1.8 }}>{job.description}</p>
+            <p style={{ fontSize: 14, color: "#475569", lineHeight: 1.8 }}>{job.description}</p>
           </div>
           <div className="job-detail-actions" style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
             <button onClick={() => onApply(job)} style={{
               flex: 1, padding: "14px 28px",
               background: "linear-gradient(135deg, #7c3aed, #2563eb)",
-              border: "none", borderRadius: 12, color: "#fff", fontSize: 15, fontWeight: 700,
-              cursor: "pointer", fontFamily: "'Syne', sans-serif", letterSpacing: 0.3,
+              border: "none", borderRadius: 12, color: "#0f172a", fontSize: 15, fontWeight: 700,
+              cursor: "pointer", fontFamily: "'Space Grotesk', sans-serif", letterSpacing: 0.3,
             }}>Apply Now →</button>
             <button onClick={() => onSave(job.id)} style={{
               padding: "14px 20px",

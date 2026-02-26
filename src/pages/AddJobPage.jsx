@@ -9,14 +9,14 @@ const inputStyle = {
   background: "rgba(255,255,255,0.05)",
   border: "1px solid rgba(255,255,255,0.1)",
   borderRadius: 10,
-  color: "#f1f5f9",
+  color: "#0f172a",
   fontSize: 14,
   outline: "none",
 };
 
 const labelStyle = {
   fontSize: 12,
-  color: "#94a3b8",
+  color: "#475569",
   fontWeight: 600,
   display: "block",
   marginBottom: 8,
@@ -29,7 +29,7 @@ function getCompanyLogo(company) {
   return company.slice(0, 2).toUpperCase();
 }
 
-export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, user, onSignOut, isAdmin }) {
+export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, user, onSignOut, isAdmin, canPostJobs }) {
   const [form, setForm] = useState({
     title: "",
     company: "",
@@ -111,13 +111,13 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
     setPage("jobs");
   };
 
-  const bg = { background: "#060b18", minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", color: "#94a3b8" };
+  const bg = { background: "#f8fafc", minHeight: "100vh", fontFamily: "'Manrope', sans-serif", color: "#475569" };
 
   return (
     <div style={bg}>
-      <Navbar page={page} setPage={setPage} user={user} onSignOut={onSignOut} isAdmin={isAdmin} />
+      <Navbar page={page} setPage={setPage} user={user} onSignOut={onSignOut} isAdmin={isAdmin} canPostJobs={canPostJobs} />
       <div className="page-content" style={{ paddingTop: 80, maxWidth: 640, margin: "0 auto", padding: "80px 24px 48px" }}>
-        <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: 28, fontWeight: 900, color: "#f1f5f9", marginBottom: 8 }}>
+        <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 28, fontWeight: 900, color: "#0f172a", marginBottom: 8 }}>
           Post a New Job
         </h1>
         <p style={{ fontSize: 14, color: "#64748b", marginBottom: 32, lineHeight: 1.6 }}>
@@ -135,24 +135,26 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
           </div>
           <div style={{ marginBottom: 20 }}>
             <label style={labelStyle}>LOCATION</label>
-            <input value={form.location} onChange={e => update("location", e.target.value)} placeholder="e.g. Remote, Bangalore, India" style={inputStyle} />
+            <input value={form.location} onChange={e => update("location", e.target.value)} placeholder="e.g. Remote, Berlin, Germany" style={inputStyle} />
           </div>
 
           <div className="add-job-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
             <div>
               <label style={labelStyle}>MIN SALARY *</label>
-              <input type="number" value={form.salary_min} onChange={e => update("salary_min", e.target.value)} placeholder={form.currency === "LPA" ? "40" : "120000"} style={inputStyle} min={0} required />
+              <input type="number" value={form.salary_min} onChange={e => update("salary_min", e.target.value)} placeholder="80000" style={inputStyle} min={0} required />
             </div>
             <div>
               <label style={labelStyle}>MAX SALARY *</label>
-              <input type="number" value={form.salary_max} onChange={e => update("salary_max", e.target.value)} placeholder={form.currency === "LPA" ? "80" : "180000"} style={inputStyle} min={0} required />
+              <input type="number" value={form.salary_max} onChange={e => update("salary_max", e.target.value)} placeholder="150000" style={inputStyle} min={0} required />
             </div>
           </div>
           <div style={{ marginBottom: 20 }}>
             <label style={labelStyle}>CURRENCY</label>
             <select value={form.currency} onChange={e => update("currency", e.target.value)} style={{ ...inputStyle, cursor: "pointer" }}>
               <option value="USD">USD</option>
-              <option value="LPA">INR (LPA)</option>
+              <option value="EUR">EUR</option>
+              <option value="GBP">GBP</option>
+              <option value="INR">INR</option>
             </select>
           </div>
 
@@ -199,7 +201,7 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
                     padding: "6px 12px", borderRadius: 8, fontSize: 12, cursor: "pointer",
                     background: form.skills.includes(skill) ? "rgba(124,58,237,0.3)" : "rgba(255,255,255,0.05)",
                     border: form.skills.includes(skill) ? "1px solid rgba(124,58,237,0.5)" : "1px solid rgba(255,255,255,0.1)",
-                    color: form.skills.includes(skill) ? "#a78bfa" : "#94a3b8",
+                    color: form.skills.includes(skill) ? "#a78bfa" : "#475569",
                   }}>
                   {skill}
                 </button>
@@ -208,7 +210,7 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
             <div style={{ display: "flex", gap: 8 }}>
               <input value={skillInput} onChange={e => setSkillInput(e.target.value)} onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addSkill())}
                 placeholder="Type skill and press Enter" style={{ ...inputStyle, flex: 1 }} />
-              <button type="button" onClick={addSkill} style={{ padding: "12px 20px", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, color: "#94a3b8", fontSize: 13, cursor: "pointer" }}>
+              <button type="button" onClick={addSkill} style={{ padding: "12px 20px", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, color: "#475569", fontSize: 13, cursor: "pointer" }}>
                 Add
               </button>
             </div>
@@ -216,7 +218,7 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10 }}>
                 {form.skills.map(s => (
                   <span key={s} style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "4px 10px", background: "rgba(124,58,237,0.15)", borderRadius: 8, fontSize: 12, color: "#a78bfa" }}>
-                    {s} <button type="button" onClick={() => removeSkill(s)} style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer", padding: 0 }}>×</button>
+                    {s} <button type="button" onClick={() => removeSkill(s)} style={{ background: "none", border: "none", color: "#475569", cursor: "pointer", padding: 0 }}>×</button>
                   </span>
                 ))}
               </div>
@@ -233,7 +235,7 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
           </div>
 
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-            <button type="submit" style={{ padding: "14px 32px", background: "linear-gradient(135deg, #7c3aed, #2563eb)", border: "none", borderRadius: 10, color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Syne', sans-serif" }}>
+            <button type="submit" style={{ padding: "14px 32px", background: "linear-gradient(135deg, #7c3aed, #2563eb)", border: "none", borderRadius: 10, color: "#ffffff", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Space Grotesk', sans-serif" }}>
               Post Job
             </button>
             <button type="button" onClick={() => setPage("jobs")} style={{ padding: "14px 24px", background: "transparent", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, color: "#64748b", fontSize: 13, cursor: "pointer" }}>

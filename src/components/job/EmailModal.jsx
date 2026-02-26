@@ -17,7 +17,7 @@ export default function EmailModal({ job, onClose, onSubmit }) {
       display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: 20,
     }} onClick={onClose}>
       <div onClick={e => e.stopPropagation()} style={{
-        background: "#0f172a", border: "1px solid rgba(124,58,237,0.3)",
+        background: "#ffffff", border: "1px solid rgba(124,58,237,0.3)",
         borderRadius: 20, padding: 36, maxWidth: 420, width: "100%",
         boxShadow: "0 0 60px rgba(124,58,237,0.2), 0 32px 64px rgba(0,0,0,0.6)",
         position: "relative", overflow: "hidden"
@@ -26,20 +26,20 @@ export default function EmailModal({ job, onClose, onSubmit }) {
         {!submitted ? (
           <>
             <div style={{ fontSize: 24, marginBottom: 8 }}>🚀</div>
-            <h3 style={{ fontFamily: "'Syne', sans-serif", fontSize: 20, fontWeight: 800, color: "#f1f5f9", marginBottom: 8 }}>
+            <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, fontWeight: 800, color: "#0f172a", marginBottom: 8 }}>
               Apply to {job.company}
             </h3>
             <p style={{ fontSize: 13, color: "#64748b", marginBottom: 24, lineHeight: 1.6 }}>
               Enter your email to continue to the application. We'll also notify you of similar AI roles.
             </p>
             <div style={{ marginBottom: 16 }}>
-              <label style={{ fontSize: 12, color: "#94a3b8", fontWeight: 600, display: "block", marginBottom: 8 }}>EMAIL ADDRESS</label>
+              <label style={{ fontSize: 12, color: "#475569", fontWeight: 600, display: "block", marginBottom: 8 }}>EMAIL ADDRESS</label>
               <input
                 value={email} onChange={e => setEmail(e.target.value)}
                 placeholder="you@company.com"
                 style={{
                   width: "100%", padding: "12px 16px", background: "rgba(255,255,255,0.05)",
-                  border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, color: "#f1f5f9",
+                  border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, color: "#0f172a",
                   fontSize: 14, outline: "none", boxSizing: "border-box", transition: "border-color 0.15s",
                 }}
                 onFocus={e => e.target.style.borderColor = "#7c3aed"}
@@ -54,8 +54,8 @@ export default function EmailModal({ job, onClose, onSubmit }) {
             <button onClick={handleSubmit} style={{
               width: "100%", padding: "13px 24px",
               background: "linear-gradient(135deg, #7c3aed, #2563eb)",
-              border: "none", borderRadius: 10, color: "#fff", fontSize: 14, fontWeight: 700,
-              cursor: "pointer", fontFamily: "'Syne', sans-serif", letterSpacing: 0.3,
+              border: "none", borderRadius: 10, color: "#ffffff", fontSize: 14, fontWeight: 700,
+              cursor: "pointer", fontFamily: "'Space Grotesk', sans-serif", letterSpacing: 0.3,
               transition: "opacity 0.15s",
             }}
               onMouseEnter={e => e.target.style.opacity = 0.9}
@@ -65,7 +65,7 @@ export default function EmailModal({ job, onClose, onSubmit }) {
         ) : (
           <div style={{ textAlign: "center", padding: "20px 0" }}>
             <div style={{ fontSize: 48, marginBottom: 16 }}>✅</div>
-            <h3 style={{ fontFamily: "'Syne', sans-serif", fontSize: 18, fontWeight: 800, color: "#f1f5f9", marginBottom: 8 }}>Redirecting you now…</h3>
+            <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 18, fontWeight: 800, color: "#0f172a", marginBottom: 8 }}>Redirecting you now…</h3>
             <p style={{ fontSize: 13, color: "#64748b" }}>Opening {job.company}'s application page</p>
           </div>
         )}

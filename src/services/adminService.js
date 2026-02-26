@@ -30,12 +30,19 @@ export function isAdminUser(email) {
   return admins.includes(String(email).toLowerCase());
 }
 
-export async function ensureUserProfile(user) {
+export function normalizeRole(role) {
+  if (role === "employer") return "employer";
+  if (role === "admin") return "admin";
+  return "job_seeker";
+}
+
+export async function ensureUserProfile(user, selectedRole = "job_seeker") {
   if (!isSupabaseConfigured || !supabase || !user?.id) return;
+  const role = isAdminUser(user.email) ? "admin" : normalizeRole(selectedRole);
   const payload = {
     id: user.id,
     email: user.email || "",
-    role: isAdminUser(user.email) ? "admin" : "user",
+    role,
     last_seen_at: new Date().toISOString(),
   };
   const { error } = await supabase.from("profiles").upsert(payload, { onConflict: "id" });
@@ -43,6 +50,14 @@ export async function ensureUserProfile(user) {
     // Profile table is optional for non-admin mode.
     console.warn("Could not upsert profile:", error.message);
   }
+}
+
+export async function fetchUserRole(userId, email) {
+  if (isAdminUser(email)) return "admin";
+  if (!isSupabaseConfigured || !supabase || !userId) return "job_seeker";
+  const { data, error } = await supabase.from("profiles").select("role").eq("id", userId).maybeSingle();
+  if (error || !data?.role) return "job_seeker";
+  return normalizeRole(data.role);
 }
 
 export async function fetchUsersForAdmin() {

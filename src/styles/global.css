@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Sans:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap');
 
 * {
   margin: 0;
@@ -11,11 +11,11 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #0a0f1e;
+  background: #f3e8d8;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: #b49376;
   border-radius: 2px;
 }
 
@@ -48,7 +48,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(6, 11, 24, 0.98);
+  background: rgba(253, 247, 239, 0.98);
   backdrop-filter: blur(20px);
   z-index: 99;
   padding: 24px;
@@ -73,21 +73,21 @@
   font-weight: 600;
   cursor: pointer;
   border: none;
-  background: rgba(255,255,255,0.03);
-  color: #94a3b8;
+  background: #ffffff;
+  color: #475569;
   font-family: inherit;
 }
 
 .nav-mobile-menu .nav-mobile-links button:hover,
 .nav-mobile-menu .nav-mobile-links button.nav-active {
-  background: rgba(124,58,237,0.15);
-  color: #a78bfa;
-  border: 1px solid rgba(124,58,237,0.4);
+  background: rgba(15,118,110,0.12);
+  color: #0f766e;
+  border: 1px solid rgba(15,118,110,0.4);
 }
 
 .nav-mobile-menu .nav-post-job {
-  background: linear-gradient(135deg, #7c3aed, #2563eb) !important;
-  color: #fff !important;
+  background: linear-gradient(135deg, #0f766e, #0ea5a0) !important;
+  color: #ffffff !important;
   text-align: center !important;
   margin: 12px 0 !important;
 }
@@ -98,7 +98,7 @@
   gap: 12px;
   padding: 16px;
   margin-top: 24px;
-  border-top: 1px solid rgba(255,255,255,0.08);
+  border-top: 1px solid rgba(148,163,184,0.2);
 }
 
 /* Page content padding for mobile */
@@ -106,6 +106,7 @@
   .page-content { padding-left: 16px !important; padding-right: 16px !important; }
   .hero-padding { padding-top: 100px !important; padding-bottom: 48px !important; }
   .section-padding { padding: 0 16px 48px !important; }
+  .home-hero-grid { grid-template-columns: 1fr !important; }
   .footer-responsive { flex-direction: column !important; align-items: flex-start !important; padding: 24px 16px !important; text-align: left !important; }
 }
 
