@@ -74,6 +74,15 @@ function saveLocalDeletedJobs(ids) {
   }
 }
 
+async function fetchJobsWithTimeout(options = {}, timeoutMs = 5000) {
+  return Promise.race([
+    fetchJobs(options),
+    new Promise((_, reject) => {
+      setTimeout(() => reject(new Error("Timed out while loading jobs")), timeoutMs);
+    }),
+  ]);
+}
+
 export default function App() {
   const [jobs, setJobs] = useState([]);
   const [jobsLoading, setJobsLoading] = useState(true);
@@ -105,7 +114,7 @@ export default function App() {
       const localStatuses = loadLocalStatuses();
       const locallyDeleted = new Set(loadLocalDeletedJobs());
       try {
-        const data = await fetchJobs({ includeAll: true });
+        const data = await fetchJobsWithTimeout({ includeAll: true }, 5000);
         const baseJobs = data.length > 0 ? data : [...SAMPLE_JOBS];
         const merged = [...localJobs, ...baseJobs]
           .filter((job) => !locallyDeleted.has(String(job.id)))

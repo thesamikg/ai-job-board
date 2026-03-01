@@ -14,19 +14,19 @@ export default function JobsPage({
     <div style={bg}>
       <Navbar page={page} setPage={setPage} user={user} onSignOut={onSignOut} isAdmin={isAdmin} canPostJobs={canPostJobs} />
       <div style={{ paddingTop: 80 }} className="page-content">
-        <div style={{ background: "rgba(6,11,24,0.9)", backdropFilter: "blur(20px)", borderBottom: "1px solid rgba(255,255,255,0.06)", padding: "16px 20px", display: "flex", gap: 10, flexWrap: "wrap" }}>
+        <div style={{ background: "#f8fafc", backdropFilter: "blur(20px)", borderBottom: "1px solid rgba(148,163,184,0.3)", padding: "16px 20px", display: "flex", gap: 10, flexWrap: "wrap" }}>
           <input value={search.title} onChange={e => setSearch(s => ({ ...s, title: e.target.value }))}
             placeholder="Search roles, companies, skills…" style={{
-              flex: "2 1 200px", padding: "10px 16px", background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, color: "#0f172a", fontSize: 14, outline: "none"
+              flex: "2 1 200px", padding: "10px 16px", background: "#ffffff",
+              border: "1px solid rgba(148,163,184,0.45)", borderRadius: 10, color: "#0f172a", fontSize: 14, outline: "none"
             }} />
           <input value={search.location} onChange={e => setSearch(s => ({ ...s, location: e.target.value }))}
             placeholder="Location…" style={{
-              flex: "1 1 140px", padding: "10px 16px", background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, color: "#0f172a", fontSize: 14, outline: "none"
+              flex: "1 1 140px", padding: "10px 16px", background: "#ffffff",
+              border: "1px solid rgba(148,163,184,0.45)", borderRadius: 10, color: "#0f172a", fontSize: 14, outline: "none"
             }} />
           <select value={filters.sort} onChange={e => setFilters(f => ({ ...f, sort: e.target.value }))} style={{
-            padding: "10px 14px", background: "#ffffff", border: "1px solid rgba(255,255,255,0.1)",
+            padding: "10px 14px", background: "#ffffff", border: "1px solid rgba(148,163,184,0.5)",
             borderRadius: 10, color: "#475569", fontSize: 13, outline: "none", cursor: "pointer"
           }}>
             <option value="newest">Newest First</option>
