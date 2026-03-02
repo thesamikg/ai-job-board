@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Badge, SkillTag } from "../ui";
 import { timeSince, isNew, isHot, formatSalary } from "../../utils/jobHelpers";
 
-export default function JobCard({ job, onClick, saved, onSave }) {
+export default function JobCard({ job, onClick, onApply }) {
   const [hovered, setHovered] = useState(false);
 
   return (
@@ -18,6 +18,7 @@ export default function JobCard({ job, onClick, saved, onSave }) {
         boxShadow: hovered ? "0 0 0 2px rgba(37,99,235,0.12), 0 10px 26px rgba(15,23,42,0.12)" : "0 2px 8px rgba(15,23,42,0.05)",
         transform: hovered ? "translateY(-1px)" : "none",
         position: "relative", overflow: "hidden",
+        textAlign: "left",
       }}
     >
       {job.featured && (
@@ -51,24 +52,24 @@ export default function JobCard({ job, onClick, saved, onSave }) {
           <div style={{ fontSize: 13, fontWeight: 700, color: "#1d4ed8", marginBottom: 4 }}>{formatSalary(job)}</div>
           <div style={{ fontSize: 11, color: "#64748b" }}>{timeSince(job.posted_at)}</div>
           <button
-            onClick={(e) => { e.stopPropagation(); onSave(job.id); }}
+            onClick={(e) => { e.stopPropagation(); onApply?.(job); }}
             style={{
-              marginTop: 8, background: saved ? "rgba(37,99,235,0.12)" : "transparent",
-              border: `1px solid ${saved ? "#2563eb" : "rgba(148,163,184,0.45)"}`,
+              marginTop: 8, background: "linear-gradient(135deg, #1d4ed8, #2563eb)",
+              border: "1px solid rgba(29,78,216,0.7)",
               borderRadius: 6, padding: "4px 8px", cursor: "pointer",
-              color: saved ? "#1d4ed8" : "#64748b", fontSize: 12, transition: "all 0.15s"
+              color: "#eef6ff", fontSize: 12, fontWeight: 700, transition: "all 0.15s"
             }}
-          >{saved ? "★ Saved" : "☆ Save"}</button>
+          >Apply</button>
         </div>
       </div>
-      <div className="job-card-meta" style={{ display: "flex", gap: 8, marginTop: 14, paddingTop: 14, borderTop: "1px solid rgba(148,163,184,0.3)", flexWrap: "wrap" }}>
-        <span style={{ fontSize: 11, color: "#64748b", display: "flex", alignItems: "center", gap: 4 }}>
+      <div className="job-card-meta" style={{ display: "flex", gap: 10, marginTop: 14, paddingTop: 14, borderTop: "1px solid rgba(148,163,184,0.3)", flexWrap: "wrap", alignItems: "center" }}>
+        <span style={{ fontSize: 11, color: "#64748b", display: "flex", alignItems: "center", gap: 4, lineHeight: 1 }}>
           <span>📍</span>{job.remote ? "Remote" : "On-site"}
         </span>
-        <span style={{ color: "#94a3b8" }}>·</span>
-        <span style={{ fontSize: 11, color: "#64748b" }}>{job.job_type}</span>
-        <span style={{ color: "#94a3b8" }}>·</span>
-        <span style={{ fontSize: 11, color: "#64748b" }}>{job.experience_level} yrs</span>
+        <span style={{ color: "#94a3b8", lineHeight: 1 }}>·</span>
+        <span style={{ fontSize: 11, color: "#64748b", lineHeight: 1 }}>{job.job_type}</span>
+        <span style={{ color: "#94a3b8", lineHeight: 1 }}>·</span>
+        <span style={{ fontSize: 11, color: "#64748b", lineHeight: 1 }}>{job.experience_level} yrs</span>
       </div>
     </div>
   );
