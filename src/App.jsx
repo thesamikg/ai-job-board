@@ -330,12 +330,16 @@ export default function App() {
       setPage("login");
       return { ok: false };
     }
+    const enrichedJob = {
+      ...job,
+      posted_by: user?.id || user?.email || null,
+    };
     try {
-      const saved = await addJob(job);
+      const saved = await addJob(enrichedJob);
       setJobs(prev => [saved, ...prev]);
       return { ok: true, persisted: "supabase" };
     } catch (err) {
-      const localJob = normalizeJob(job);
+      const localJob = normalizeJob(enrichedJob);
       const nextLocal = [localJob, ...loadLocalJobs()];
       saveLocalJobs(nextLocal);
       setJobs(prev => [localJob, ...prev]);
@@ -414,6 +418,7 @@ export default function App() {
         jobs={visibleJobs}
         savedJobs={savedJobs}
         emails={emails}
+        applications={applications}
         handleSave={handleSave}
         selectedJob={selectedJob}
         setSelectedJob={setSelectedJob}
@@ -422,6 +427,7 @@ export default function App() {
         handleApplySubmit={handleApplySubmit}
         toast={toast}
         user={user}
+        userRole={userRole}
         onSignOut={handleSignOut}
         isAdmin={isAdmin}
         canPostJobs={canPostJobs}

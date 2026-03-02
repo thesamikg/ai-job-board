@@ -11,6 +11,8 @@ const navBtn = (page, p) => ({
 export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false, canPostJobs = false }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const isSignedIn = Boolean(user?.id || user?.email);
+  const role = user?.role || "job_seeker";
+  const isEmployerLike = role === "employer" || role === "admin";
 
   const goTo = (p) => {
     setPage(p);
@@ -29,10 +31,18 @@ export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false
 
       {/* Desktop nav - hidden on mobile */}
       <div className="nav-desktop" style={{ display: "flex", gap: 8, alignItems: "center" }}>
-        <button onClick={() => setPage(canPostJobs ? "addJob" : "login")} style={{
-          background: "transparent", border: "1px solid rgba(37,99,235,0.45)", borderRadius: 8, padding: "7px 16px", color: "#1d4ed8",
-          cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "'Source Sans 3', sans-serif"
-        }}>Post a Job</button>
+        {!isSignedIn && (
+          <button onClick={() => setPage("login")} style={{
+            background: "transparent", border: "1px solid rgba(37,99,235,0.45)", borderRadius: 8, padding: "7px 16px", color: "#1d4ed8",
+            cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "'Source Sans 3', sans-serif"
+          }}>Post a Job</button>
+        )}
+        {isSignedIn && isEmployerLike && (
+          <button onClick={() => setPage("addJob")} style={{
+            background: "transparent", border: "1px solid rgba(37,99,235,0.45)", borderRadius: 8, padding: "7px 16px", color: "#1d4ed8",
+            cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "'Source Sans 3', sans-serif"
+          }}>Post a Job</button>
+        )}
         {isSignedIn ? (
           <>
             <button onClick={() => setPage("jobs")} style={navBtn(page, "jobs")}>Jobs</button>
@@ -73,17 +83,32 @@ export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false
     {menuOpen && (
       <div className="nav-mobile-menu" onClick={() => setMenuOpen(false)}>
         <div className="nav-mobile-links" onClick={e => e.stopPropagation()}>
-          <button onClick={() => goTo(canPostJobs ? "addJob" : "login")} style={{
-            background: "transparent",
-            border: "1px solid rgba(37,99,235,0.45)",
-            borderRadius: 10,
-            padding: "12px 20px",
-            color: "#1d4ed8",
-            fontSize: 14,
-            fontWeight: 700,
-            cursor: "pointer",
-            width: "100%",
-          }}>Post a Job</button>
+          {!isSignedIn && (
+            <button onClick={() => goTo("login")} style={{
+              background: "transparent",
+              border: "1px solid rgba(37,99,235,0.45)",
+              borderRadius: 10,
+              padding: "12px 20px",
+              color: "#1d4ed8",
+              fontSize: 14,
+              fontWeight: 700,
+              cursor: "pointer",
+              width: "100%",
+            }}>Post a Job</button>
+          )}
+          {isSignedIn && isEmployerLike && (
+            <button onClick={() => goTo("addJob")} style={{
+              background: "transparent",
+              border: "1px solid rgba(37,99,235,0.45)",
+              borderRadius: 10,
+              padding: "12px 20px",
+              color: "#1d4ed8",
+              fontSize: 14,
+              fontWeight: 700,
+              cursor: "pointer",
+              width: "100%",
+            }}>Post a Job</button>
+          )}
           {isSignedIn ? (
             <>
               <button onClick={() => goTo("jobs")} style={{ ...navBtn(page, "jobs"), marginTop: 8, width: "100%", padding: "12px 20px" }}>Jobs</button>
