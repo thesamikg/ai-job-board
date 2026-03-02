@@ -35,7 +35,7 @@ export default function DashboardPage({
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {jobs.filter(j => savedJobs.includes(j.id)).map(job => (
-              <JobCard key={job.id} job={job} onClick={j => setSelectedJob(j)} saved={true} onSave={handleSave} />
+              <JobCard key={job.id} job={job} onClick={j => setSelectedJob(j)} onApply={j => setSelectedJob(j)} />
             ))}
           </div>
         )}

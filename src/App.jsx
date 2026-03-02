@@ -113,6 +113,14 @@ export default function App() {
       const localJobs = loadLocalJobs();
       const localStatuses = loadLocalStatuses();
       const locallyDeleted = new Set(loadLocalDeletedJobs());
+      const immediateBase = [...localJobs, ...SAMPLE_JOBS]
+        .filter((job) => !locallyDeleted.has(String(job.id)))
+        .map((job) => (localStatuses[String(job.id)] ? { ...job, status: localStatuses[String(job.id)] } : job));
+
+      // Render immediately to avoid blank/loading state on initial page open.
+      setJobs(immediateBase);
+      setJobsLoading(false);
+
       try {
         const data = await fetchJobsWithTimeout({ includeAll: true }, 5000);
         const baseJobs = data.length > 0 ? data : [...SAMPLE_JOBS];
@@ -122,12 +130,7 @@ export default function App() {
         setJobs(merged);
       } catch (err) {
         console.warn("Could not load jobs from Supabase, using sample data:", err);
-        const merged = [...localJobs, ...SAMPLE_JOBS]
-          .filter((job) => !locallyDeleted.has(String(job.id)))
-          .map((job) => (localStatuses[String(job.id)] ? { ...job, status: localStatuses[String(job.id)] } : job));
-        setJobs(merged);
-      } finally {
-        setJobsLoading(false);
+        // Keep already-rendered immediate fallback list.
       }
     }
     loadJobs();

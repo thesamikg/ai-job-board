@@ -2,6 +2,17 @@ import { Badge, SkillTag } from "../ui";
 import { timeSince, isNew, isHot, formatSalary } from "../../utils/jobHelpers";
 
 export default function JobDetail({ job, onClose, onApply, saved, onSave }) {
+  const descriptionParts = String(job?.description || "")
+    .split(/\n+/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  const handleApply = () => {
+    if (job?.apply_url) {
+      window.open(job.apply_url, "_blank", "noopener,noreferrer");
+    }
+  };
+
   return (
     <div style={{
       position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", backdropFilter: "blur(12px)",
@@ -54,13 +65,17 @@ export default function JobDetail({ job, onClose, onApply, saved, onSave }) {
           </div>
           <div style={{ marginBottom: 32 }}>
             <h4 style={{ fontSize: 12, color: "#64748b", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", marginBottom: 12 }}>About This Role</h4>
-            <p style={{ fontSize: 14, color: "#475569", lineHeight: 1.8 }}>{job.description}</p>
+            <div style={{ fontSize: 14, color: "#475569", lineHeight: 1.8, textAlign: "left", display: "grid", gap: 10 }}>
+              {(descriptionParts.length ? descriptionParts : [job.description]).map((part, idx) => (
+                <p key={idx} style={{ margin: 0 }}>{part}</p>
+              ))}
+            </div>
           </div>
           <div className="job-detail-actions" style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-            <button onClick={() => onApply(job)} style={{
+            <button onClick={handleApply} style={{
               flex: 1, padding: "14px 28px",
-              background: "linear-gradient(135deg, #7c3aed, #2563eb)",
-              border: "none", borderRadius: 12, color: "#0f172a", fontSize: 15, fontWeight: 700,
+              background: "linear-gradient(135deg, #1d4ed8, #2563eb)",
+              border: "1px solid rgba(29,78,216,0.7)", borderRadius: 12, color: "#eef6ff", fontSize: 15, fontWeight: 700,
               cursor: "pointer", fontFamily: "'Merriweather', serif", letterSpacing: 0.3,
             }}>Apply Now →</button>
             <button onClick={() => onSave(job.id)} style={{
