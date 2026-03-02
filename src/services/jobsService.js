@@ -91,7 +91,16 @@ export async function addJob(job) {
     row.posted_at = job.posted_at.toISOString();
   }
 
-  const { data, error } = await supabase.from("jobs").insert(row).select("id").single();
+  let { data, error } = await supabase.from("jobs").insert(row).select("id").single();
+
+  // Backward compatibility: some deployments may not have run later migrations
+  // that add moderation columns like `status` and `posted_by`.
+  if (error?.code === "42703" && (error.message?.includes("status") || error.message?.includes("posted_by"))) {
+    const fallbackRow = { ...row };
+    delete fallbackRow.status;
+    delete fallbackRow.posted_by;
+    ({ data, error } = await supabase.from("jobs").insert(fallbackRow).select("id").single());
+  }
 
   if (error) {
     console.error("Error adding job:", error);
