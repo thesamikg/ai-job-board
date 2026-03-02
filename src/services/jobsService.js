@@ -91,7 +91,16 @@ export async function addJob(job) {
     row.posted_at = job.posted_at.toISOString();
   }
 
-  const { data, error } = await supabase.from("jobs").insert(row).select("id").single();
+  let { data, error } = await supabase.from("jobs").insert(row).select("id").single();
+
+  // Backward compatibility: some existing DB schemas may not have posted_by yet.
+  if (error && String(error.message || "").toLowerCase().includes("posted_by")) {
+    const fallbackRow = { ...row };
+    delete fallbackRow.posted_by;
+    const retry = await supabase.from("jobs").insert(fallbackRow).select("id").single();
+    data = retry.data;
+    error = retry.error;
+  }
 
   if (error) {
     console.error("Error adding job:", error);

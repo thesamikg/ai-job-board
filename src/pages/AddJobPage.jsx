@@ -59,6 +59,7 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const urlCandidate = form.apply_url.trim();
     const min = Number(form.salary_min);
     const max = Number(form.salary_max);
     if (!form.title.trim()) {
@@ -81,34 +82,47 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
       showToast("Please add an application URL");
       return;
     }
-
-    const job = {
-      id: Date.now(),
-      title: form.title.trim(),
-      company: form.company.trim(),
-      companyLogo: getCompanyLogo(form.company),
-      location: form.location.trim() || "Remote",
-      salary_min: min,
-      salary_max: max,
-      currency: form.currency,
-      job_type: form.job_type,
-      experience_level: form.experience_level,
-      remote: form.remote,
-      skills: form.skills.length ? form.skills : ["Python", "AI"],
-      description: form.description.trim(),
-      apply_url: form.apply_url.trim().startsWith("http") ? form.apply_url.trim() : `https://${form.apply_url.trim()}`,
-      category: form.category,
-      posted_at: new Date(),
-      featured: false,
-    };
-
-    const result = await onAddJob(job);
-    if (result?.persisted === "supabase") {
-      showToast("✓ Job posted successfully! It will appear in the Jobs list.");
-    } else {
-      showToast("Saved locally. It will persist on this browser after refresh.");
+    if (!/^https?:\/\/.+/i.test(urlCandidate) && !/^[a-z0-9.-]+\.[a-z]{2,}.+/i.test(urlCandidate)) {
+      showToast("Please enter a valid application URL");
+      return;
     }
-    setPage("jobs");
+
+    try {
+      const job = {
+        id: Date.now(),
+        title: form.title.trim(),
+        company: form.company.trim(),
+        companyLogo: getCompanyLogo(form.company),
+        location: form.location.trim() || "Remote",
+        salary_min: min,
+        salary_max: max,
+        currency: form.currency,
+        job_type: form.job_type,
+        experience_level: form.experience_level,
+        remote: form.remote,
+        skills: form.skills.length ? form.skills : ["Python", "AI"],
+        description: form.description.trim(),
+        apply_url: urlCandidate.startsWith("http") ? urlCandidate : `https://${urlCandidate}`,
+        category: form.category,
+        posted_at: new Date(),
+        featured: false,
+        status: "approved",
+      };
+
+      const result = await onAddJob(job);
+      if (result?.ok === false) {
+        showToast("You do not have permission to post jobs.");
+        return;
+      }
+      if (result?.persisted === "supabase") {
+        showToast("✓ Job posted successfully! It will appear in the Jobs list.");
+      } else {
+        showToast("Saved locally. It will persist on this browser after refresh.");
+      }
+      setPage("jobs");
+    } catch (err) {
+      showToast(err?.message || "Could not post job. Please try again.");
+    }
   };
 
   const bg = { background: "#f8fafc", minHeight: "100vh", fontFamily: "'Source Sans 3', sans-serif", color: "#475569" };
@@ -124,7 +138,7 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
           Share your AI & robotics role with thousands of qualified candidates.
         </p>
 
-        <form onSubmit={handleSubmit} style={{ background: "#ffffff", border: "1px solid rgba(148,163,184,0.35)", borderRadius: 20, padding: "24px 20px", backdropFilter: "blur(20px)" }}>
+        <form noValidate onSubmit={handleSubmit} style={{ background: "#ffffff", border: "1px solid rgba(148,163,184,0.35)", borderRadius: 20, padding: "24px 20px", backdropFilter: "blur(20px)" }}>
           <div style={{ marginBottom: 20 }}>
             <label style={labelStyle}>JOB TITLE *</label>
             <input value={form.title} onChange={e => update("title", e.target.value)} placeholder="e.g. Senior LLM Engineer" style={inputStyle} required />
