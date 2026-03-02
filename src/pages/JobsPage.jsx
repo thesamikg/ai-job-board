@@ -85,7 +85,7 @@ export default function JobsPage({
                   <div style={{ fontSize: 16, color: "#64748b" }}>No jobs match your filters</div>
                 </div>
               ) : filteredJobs.map(job => (
-                <JobCard key={job.id} job={job} onClick={j => setSelectedJob(j)} onApply={j => setSelectedJob(j)} />
+                <JobCard key={job.id} job={job} onClick={j => setSelectedJob(j)} onApply={j => setApplyJob(j)} />
               ))}
             </div>
           </div>

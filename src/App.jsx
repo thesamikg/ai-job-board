@@ -107,6 +107,17 @@ export default function App() {
   const userRole = user?.role || "job_seeker";
   const isAdmin = userRole === "admin";
   const canPostJobs = userRole === "employer" || userRole === "admin";
+  
+  const applySessionUser = async (sessionUser) => {
+    if (!sessionUser) {
+      setUser(null);
+      return null;
+    }
+    const role = await fetchUserRole(sessionUser.id, sessionUser.email);
+    setUser({ email: sessionUser.email, id: sessionUser.id, role });
+    await ensureUserProfile(sessionUser, role);
+    return role;
+  };
 
   useEffect(() => {
     async function loadJobs() {
@@ -139,16 +150,15 @@ export default function App() {
   useEffect(() => {
     getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
-        const role = await fetchUserRole(session.user.id, session.user.email);
-        setUser({ email: session.user.email, id: session.user.id, role });
-        await ensureUserProfile(session.user, role);
+        await applySessionUser(session.user);
       }
     });
     const unsubscribe = onAuthStateChange(async (event, session) => {
       if (session?.user) {
-        const role = await fetchUserRole(session.user.id, session.user.email);
-        setUser({ email: session.user.email, id: session.user.id, role });
-        await ensureUserProfile(session.user, role);
+        await applySessionUser(session.user);
+        if (event === "SIGNED_IN") {
+          setPage("dashboard");
+        }
       } else {
         setUser(null);
       }
@@ -222,12 +232,9 @@ export default function App() {
     try {
       await signInWithPassword(loginEmail.trim(), loginPassword);
       const { data: { session } } = await getSession();
-      const role = await fetchUserRole(session?.user?.id, session?.user?.email || loginEmail.trim());
-      if (session?.user) {
-        setUser({ email: session.user.email, id: session.user.id, role });
-      }
+      if (session?.user) await applySessionUser(session.user);
       showToast("✓ Welcome back!");
-      setPage("jobs");
+      setPage("dashboard");
       setLoginPassword("");
     } catch (err) {
       showToast(err?.message || "Sign in failed");
@@ -252,10 +259,9 @@ export default function App() {
         await ensureUserProfile(data.user, signupRole);
       }
       if (data?.session?.user) {
-        const role = await fetchUserRole(data.session.user.id, data.session.user.email);
-        setUser({ email: data.session.user.email, id: data.session.user.id, role });
+        await applySessionUser(data.session.user);
         showToast("✓ Account created and signed in!");
-        setPage("jobs");
+        setPage("dashboard");
       } else {
         showToast("✓ Account created! Check your email to confirm, then sign in.");
       }
@@ -405,7 +411,7 @@ export default function App() {
         jobsLoading={jobsLoading}
         page={page}
         setPage={setPage}
-        jobs={jobs}
+        jobs={visibleJobs}
         savedJobs={savedJobs}
         emails={emails}
         handleSave={handleSave}

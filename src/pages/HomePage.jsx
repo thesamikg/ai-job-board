@@ -59,7 +59,7 @@ export default function HomePage({
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 900, margin: "0 auto" }}>
             {(jobs || []).slice(0, 2).map(job => (
-              <JobCard key={job.id} job={job} onClick={j => setSelectedJob(j)} onApply={j => setSelectedJob(j)} />
+              <JobCard key={job.id} job={job} onClick={j => setSelectedJob(j)} onApply={j => setApplyJob(j)} />
             ))}
           </div>
             </div>
@@ -99,7 +99,7 @@ export default function HomePage({
             <div style={{ textAlign: "center", padding: 40, color: "#64748b", fontSize: 14 }}>Loading jobs…</div>
           ) : (
             (jobs || []).slice(2, 8).map(job => (
-              <JobCard key={job.id} job={job} onClick={j => setSelectedJob(j)} onApply={j => setSelectedJob(j)} />
+              <JobCard key={job.id} job={job} onClick={j => setSelectedJob(j)} onApply={j => setApplyJob(j)} />
             ))
           )}
         </div>

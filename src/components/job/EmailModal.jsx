@@ -53,8 +53,8 @@ export default function EmailModal({ job, onClose, onSubmit }) {
             </label>
             <button onClick={handleSubmit} style={{
               width: "100%", padding: "13px 24px",
-              background: "linear-gradient(135deg, #7c3aed, #2563eb)",
-              border: "none", borderRadius: 10, color: "#ffffff", fontSize: 14, fontWeight: 700,
+              background: "#2563eb",
+              border: "1px solid #1d4ed8", borderRadius: 10, color: "#ffffff", fontSize: 14, fontWeight: 700,
               cursor: "pointer", fontFamily: "'Merriweather', serif", letterSpacing: 0.3,
               transition: "opacity 0.15s",
             }}

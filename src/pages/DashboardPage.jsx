@@ -35,7 +35,18 @@ export default function DashboardPage({
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {jobs.filter(j => savedJobs.includes(j.id)).map(job => (
-              <JobCard key={job.id} job={job} onClick={j => setSelectedJob(j)} onApply={j => setSelectedJob(j)} />
+              <JobCard key={job.id} job={job} onClick={j => setSelectedJob(j)} onApply={j => setApplyJob(j)} />
+            ))}
+          </div>
+        )}
+
+        <h3 style={{ fontFamily: "'Merriweather', serif", fontSize: 16, fontWeight: 700, color: "#1e293b", margin: "32px 0 16px" }}>Recommended Jobs</h3>
+        {jobsLoading ? (
+          <div style={{ padding: 24, color: "#64748b", fontSize: 14 }}>Loading jobs…</div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {(jobs || []).slice(0, 5).map(job => (
+              <JobCard key={job.id} job={job} onClick={j => setSelectedJob(j)} onApply={j => setApplyJob(j)} />
             ))}
           </div>
         )}
