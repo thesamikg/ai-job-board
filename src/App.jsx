@@ -4,13 +4,14 @@ import { SAMPLE_JOBS } from "./data/jobs";
 import { filterAndSortJobs } from "./utils/filterJobs";
 import { fetchJobs, addJob, updateJobStatus, deleteJob } from "./services/jobsService";
 import { signInWithPassword, signUpWithPassword, signInWithGoogle, getSession, onAuthStateChange, signOut } from "./services/authService";
-import { isAdminUser, ensureUserProfile, fetchUsersForAdmin, addApplication, fetchApplicationsForAdmin, fetchUserRole } from "./services/adminService";
+import { isAdminUser, ensureUserProfile, fetchUsersForAdmin, addApplication, fetchApplicationsForAdmin, fetchApplicationsForUser, fetchUserRole } from "./services/adminService";
 import "./styles/global.css";
 
 const LOCAL_JOBS_KEY = "ai_jobboard_local_jobs";
 const LOCAL_JOB_STATUS_KEY = "ai_jobboard_job_status";
 const LOCAL_DELETED_JOBS_KEY = "ai_jobboard_deleted_jobs";
 const PENDING_SIGNUP_ROLE_KEY = "ai_jobboard_pending_signup_role";
+const SAVED_JOBS_BY_USER_KEY = "ai_jobboard_saved_jobs_by_user";
 
 function normalizeJob(job) {
   return {
@@ -75,11 +76,51 @@ function saveLocalDeletedJobs(ids) {
   }
 }
 
+function getUserStorageId(user) {
+  if (!user) return "";
+  return String(user.id || user.email || "").toLowerCase();
+}
+
+function loadSavedJobsForUser(user) {
+  const userKey = getUserStorageId(user);
+  if (!userKey) return [];
+  try {
+    const raw = localStorage.getItem(SAVED_JOBS_BY_USER_KEY);
+    const parsed = raw ? JSON.parse(raw) : {};
+    const list = parsed?.[userKey];
+    return Array.isArray(list) ? list : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveSavedJobsForUser(user, savedJobs) {
+  const userKey = getUserStorageId(user);
+  if (!userKey) return;
+  try {
+    const raw = localStorage.getItem(SAVED_JOBS_BY_USER_KEY);
+    const parsed = raw ? JSON.parse(raw) : {};
+    parsed[userKey] = savedJobs;
+    localStorage.setItem(SAVED_JOBS_BY_USER_KEY, JSON.stringify(parsed));
+  } catch {
+    // Ignore storage errors.
+  }
+}
+
 async function fetchJobsWithTimeout(options = {}, timeoutMs = 5000) {
   return Promise.race([
     fetchJobs(options),
     new Promise((_, reject) => {
       setTimeout(() => reject(new Error("Timed out while loading jobs")), timeoutMs);
+    }),
+  ]);
+}
+
+async function withTimeout(promise, timeoutMs, message) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => {
+      setTimeout(() => reject(new Error(message)), timeoutMs);
     }),
   ]);
 }
@@ -91,7 +132,6 @@ export default function App() {
   const [selectedJob, setSelectedJob] = useState(null);
   const [applyJob, setApplyJob] = useState(null);
   const [savedJobs, setSavedJobs] = useState([]);
-  const [emails, setEmails] = useState([]);
   const [toast, setToast] = useState({ message: "", visible: false });
   const [search, setSearch] = useState({ title: "", location: "" });
   const [filters, setFilters] = useState({ remote: false, skills: [], exp: "", sort: "newest" });
@@ -116,10 +156,20 @@ export default function App() {
     }
     const pendingRole = localStorage.getItem(PENDING_SIGNUP_ROLE_KEY);
     const metaRole = sessionUser?.user_metadata?.role;
-    const fetchedRole = await fetchUserRole(sessionUser.id, sessionUser.email, metaRole || preferredRole);
+    let fetchedRole = "job_seeker";
+    try {
+      fetchedRole = await fetchUserRole(sessionUser.id, sessionUser.email, metaRole || preferredRole);
+    } catch (err) {
+      console.warn("Could not fetch role, using fallback:", err);
+      fetchedRole = metaRole || preferredRole || "job_seeker";
+    }
     const role = pendingRole && pendingRole !== "job_seeker" ? pendingRole : fetchedRole;
-    setUser({ email: sessionUser.email, id: sessionUser.id, role });
-    await ensureUserProfile(sessionUser, role);
+    const nextUser = { email: sessionUser.email, id: sessionUser.id, role };
+    setUser(nextUser);
+    setSavedJobs(loadSavedJobsForUser(nextUser));
+    ensureUserProfile(sessionUser, role).catch((err) => {
+      console.warn("Could not ensure profile:", err);
+    });
     if (pendingRole) {
       localStorage.removeItem(PENDING_SIGNUP_ROLE_KEY);
     }
@@ -194,15 +244,25 @@ export default function App() {
 
   useEffect(() => {
     async function loadApplications() {
+      if (!user?.id && !user?.email) {
+        setApplications([]);
+        return;
+      }
       try {
-        const rows = await fetchApplicationsForAdmin();
+        if (isAdmin) {
+          const rows = await fetchApplicationsForAdmin();
+          setApplications(rows);
+          return;
+        }
+        const rows = await fetchApplicationsForUser(user?.id, user?.email);
         setApplications(rows);
       } catch (err) {
         console.warn("Could not load applications:", err);
+        setApplications([]);
       }
     }
     loadApplications();
-  }, []);
+  }, [user?.id, user?.email, isAdmin]);
 
   const showToast = (msg) => {
     setToast({ message: msg, visible: true });
@@ -210,17 +270,26 @@ export default function App() {
   };
 
   const handleSave = (jobId) => {
-    setSavedJobs(prev => prev.includes(jobId) ? prev.filter(id => id !== jobId) : [...prev, jobId]);
+    const nextSaved = savedJobs.includes(jobId)
+      ? savedJobs.filter((id) => id !== jobId)
+      : [...savedJobs, jobId];
+    setSavedJobs(nextSaved);
+    if (user) saveSavedJobsForUser(user, nextSaved);
     const isSaving = !savedJobs.includes(jobId);
     showToast(isSaving ? "✓ Job saved to your dashboard" : "Job removed from saved");
   };
 
   const handleApplySubmit = (email, job) => {
-    setEmails(prev => [...prev, { email, jobId: job.id, at: new Date() }]);
-    addApplication({ id: Date.now(), email, jobId: job.id }).catch((err) => {
+    addApplication({ id: Date.now(), userId: user?.id || null, email, jobId: job.id }).catch((err) => {
       console.warn("Could not save application:", err);
     });
-    setApplications((prev) => [{ id: Date.now(), applicant_email: email, job_id: job.id, submitted_at: new Date().toISOString() }, ...prev]);
+    setApplications((prev) => [{
+      id: Date.now(),
+      applicant_id: user?.id || null,
+      applicant_email: email,
+      job_id: job.id,
+      submitted_at: new Date().toISOString(),
+    }, ...prev]);
     setApplyJob(null);
     showToast("✓ Redirecting to application...");
     setTimeout(() => window.open(job.apply_url, "_blank"), 500);
@@ -237,14 +306,39 @@ export default function App() {
     }
     setAuthLoading(true);
     try {
-      await signInWithPassword(loginEmail.trim(), loginPassword);
-      const { data: { session } } = await getSession();
-      if (session?.user) await applySessionUser(session.user);
-      showToast("✓ Welcome back!");
-      setPage("dashboard");
-      setLoginPassword("");
+      const data = await withTimeout(
+        signInWithPassword(loginEmail.trim(), loginPassword),
+        10000,
+        "Sign-in timed out. Please try again."
+      );
+      if (data?.session?.user) {
+        await applySessionUser(data.session.user);
+        showToast("✓ Welcome back!");
+        setPage("dashboard");
+        setLoginPassword("");
+        return;
+      }
+      const { data: { session } } = await withTimeout(
+        getSession(),
+        8000,
+        "Could not restore session after sign-in."
+      );
+      if (session?.user) {
+        await applySessionUser(session.user);
+        showToast("✓ Welcome back!");
+        setPage("dashboard");
+        setLoginPassword("");
+        return;
+      }
+      showToast("Sign-in succeeded but no active session was found. Please verify your email and try again.");
+      return;
     } catch (err) {
-      showToast(err?.message || "Sign in failed");
+      const msg = String(err?.message || "Sign in failed");
+      if (msg.toLowerCase().includes("email not confirmed")) {
+        showToast("Please confirm your email before signing in.");
+      } else {
+        showToast(msg);
+      }
     } finally {
       setAuthLoading(false);
     }
@@ -300,6 +394,8 @@ export default function App() {
 
   const handleSignOut = async () => {
     setUser(null);
+    setSavedJobs([]);
+    setApplications([]);
     setPage("home");
     try {
       await signOut();
@@ -426,7 +522,6 @@ export default function App() {
         setPage={setPage}
         jobs={visibleJobs}
         savedJobs={savedJobs}
-        emails={emails}
         applications={applications}
         handleSave={handleSave}
         selectedJob={selectedJob}

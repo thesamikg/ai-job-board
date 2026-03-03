@@ -3,7 +3,7 @@ import Navbar from "../components/layout/Navbar";
 import { Toast } from "../components/ui";
 
 export default function DashboardPage({
-  jobsLoading, page, setPage, jobs = [], savedJobs, emails, handleSave, selectedJob, setSelectedJob,
+  jobsLoading, page, setPage, jobs = [], savedJobs, handleSave, selectedJob, setSelectedJob,
   applyJob, setApplyJob, handleApplySubmit, toast, user, userRole = "job_seeker", applications = [], onSignOut, isAdmin, canPostJobs
 }) {
   const bg = { background: "#f8fafc", minHeight: "100vh", fontFamily: "'Source Sans 3', sans-serif", color: "#475569" };
@@ -15,9 +15,15 @@ export default function DashboardPage({
   const activeJobs = postedJobs.filter((job) => job.status === "approved");
   const inactiveJobs = postedJobs.filter((job) => job.status !== "approved");
   const seekerApplications = (applications || []).filter((item) => {
+    const userId = String(user?.id || "");
+    const appId = String(item?.applicant_id || "");
     const email = String(item?.applicant_email || "").toLowerCase();
-    return email && email === String(user?.email || "").toLowerCase();
+    const userEmail = String(user?.email || "").toLowerCase();
+    return (userId && appId === userId) || (email && userEmail && email === userEmail);
   });
+  const appliedJobs = seekerApplications
+    .map((app) => (jobs || []).find((job) => String(job.id) === String(app.job_id)))
+    .filter(Boolean);
 
   return (
     <div style={bg}>
@@ -30,7 +36,7 @@ export default function DashboardPage({
         <div className="dashboard-stats" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 40 }}>
           {(isEmployerLike
             ? [["📝", postedJobs.length, "Posted Jobs"], ["✅", activeJobs.length, "Active Jobs"], ["⏸", inactiveJobs.length, "Inactive Jobs"]]
-            : [["📧", seekerApplications.length || emails.length, "Applied Jobs"], ["📌", savedJobs.length, "Saved Jobs"], ["🔎", "Browse", "Browse Jobs"]]
+            : [["📧", seekerApplications.length, "Applied Jobs"], ["📌", savedJobs.length, "Saved Jobs"], ["🔎", "Browse", "Browse Jobs"]]
           ).map(([icon, val, label]) => (
             <div key={label} style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 14, padding: "20px 24px" }}>
               <div style={{ fontSize: 24, marginBottom: 8 }}>{icon}</div>
@@ -59,6 +65,21 @@ export default function DashboardPage({
           </>
         ) : (
           <>
+            <h3 style={{ fontFamily: "'Merriweather', serif", fontSize: 16, fontWeight: 700, color: "#1e293b", marginBottom: 16 }}>Applied Jobs</h3>
+            {jobsLoading ? (
+              <div style={{ padding: 24, color: "#64748b", fontSize: 14 }}>Loading jobs…</div>
+            ) : appliedJobs.length === 0 ? (
+              <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 14, padding: "30px 24px", textAlign: "center", marginBottom: 24 }}>
+                <div style={{ fontSize: 14, color: "#64748b" }}>No applications yet.</div>
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
+                {appliedJobs.map((job) => (
+                  <JobCard key={`applied-${job.id}`} job={job} onClick={(j) => setSelectedJob(j)} onApply={(j) => setApplyJob(j)} />
+                ))}
+              </div>
+            )}
+
             <h3 style={{ fontFamily: "'Merriweather', serif", fontSize: 16, fontWeight: 700, color: "#1e293b", marginBottom: 16 }}>Saved Jobs</h3>
             {jobsLoading ? (
               <div style={{ padding: 24, color: "#64748b", fontSize: 14 }}>Loading jobs…</div>

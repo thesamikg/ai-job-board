@@ -121,6 +121,7 @@ export async function fetchUsersForAdmin() {
 export async function addApplication(application) {
   const row = {
     job_id: application.jobId,
+    applicant_id: application.userId || null,
     applicant_email: application.email,
     submitted_at: new Date().toISOString(),
   };
@@ -152,4 +153,36 @@ export async function fetchApplicationsForAdmin() {
   }
 
   return safeReadLocal(LOCAL_APPLICATIONS_KEY);
+}
+
+export async function fetchApplicationsForUser(userId, email) {
+  if (isSupabaseConfigured && supabase) {
+    // Preferred path: scoped by user id
+    if (userId) {
+      const byId = await supabase
+        .from("applications")
+        .select("id,job_id,applicant_id,applicant_email,submitted_at")
+        .eq("applicant_id", userId)
+        .order("submitted_at", { ascending: false });
+      if (!byId.error) return byId.data || [];
+    }
+
+    // Backward-compatible path: older schemas may not have applicant_id
+    if (email) {
+      const byEmail = await supabase
+        .from("applications")
+        .select("id,job_id,applicant_email,submitted_at")
+        .eq("applicant_email", email)
+        .order("submitted_at", { ascending: false });
+      if (!byEmail.error) return byEmail.data || [];
+    }
+  }
+
+  const normalizedEmail = String(email || "").toLowerCase();
+  return safeReadLocal(LOCAL_APPLICATIONS_KEY).filter((item) => {
+    const byId = userId && String(item?.applicant_id || "") === String(userId);
+    const byEmail =
+      normalizedEmail && String(item?.applicant_email || "").toLowerCase() === normalizedEmail;
+    return Boolean(byId || byEmail);
+  });
 }

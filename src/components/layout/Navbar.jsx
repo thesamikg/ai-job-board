@@ -11,8 +11,7 @@ const navBtn = (page, p) => ({
 export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false, canPostJobs = false }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const isSignedIn = Boolean(user?.id || user?.email);
-  const role = user?.role || "job_seeker";
-  const isEmployerLike = role === "employer" || role === "admin";
+  const isEmployerLike = Boolean(canPostJobs);
 
   const goTo = (p) => {
     setPage(p);
@@ -42,12 +41,6 @@ export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false
             background: "transparent", border: "1px solid rgba(37,99,235,0.45)", borderRadius: 8, padding: "7px 16px", color: "#1d4ed8",
             cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "'Source Sans 3', sans-serif"
           }}>Post a Job</button>
-        )}
-        {isSignedIn && !isEmployerLike && (
-          <button onClick={() => setPage("jobs")} style={{
-            background: "transparent", border: "1px solid rgba(37,99,235,0.45)", borderRadius: 8, padding: "7px 16px", color: "#1d4ed8",
-            cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "'Source Sans 3', sans-serif"
-          }}>Browse Jobs</button>
         )}
         {isSignedIn ? (
           <>
@@ -114,19 +107,6 @@ export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false
               cursor: "pointer",
               width: "100%",
             }}>Post a Job</button>
-          )}
-          {isSignedIn && !isEmployerLike && (
-            <button onClick={() => goTo("jobs")} style={{
-              background: "transparent",
-              border: "1px solid rgba(37,99,235,0.45)",
-              borderRadius: 10,
-              padding: "12px 20px",
-              color: "#1d4ed8",
-              fontSize: 14,
-              fontWeight: 700,
-              cursor: "pointer",
-              width: "100%",
-            }}>Browse Jobs</button>
           )}
           {isSignedIn ? (
             <>
