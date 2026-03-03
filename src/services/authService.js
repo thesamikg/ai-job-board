@@ -15,11 +15,19 @@ export async function signInWithPassword(email, password) {
 /**
  * Sign up with email and password
  */
-export async function signUpWithPassword(email, password) {
+export async function signUpWithPassword(email, password, role = "job_seeker") {
   if (!isSupabaseConfigured || !supabase) {
     throw new Error("Supabase is not configured");
   }
-  const { data, error } = await supabase.auth.signUp({ email, password });
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: {
+        role,
+      },
+    },
+  });
   if (error) throw error;
   return data;
 }

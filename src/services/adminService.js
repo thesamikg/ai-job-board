@@ -1,6 +1,7 @@
 import { supabase, isSupabaseConfigured } from "../lib/supabase";
 
 const LOCAL_APPLICATIONS_KEY = "ai_jobboard_applications";
+const LOCAL_USER_ROLES_KEY = "ai_jobboard_user_roles";
 
 function safeReadLocal(key, fallback = []) {
   try {
@@ -19,6 +20,34 @@ function safeWriteLocal(key, value) {
   } catch {
     // Ignore local storage errors.
   }
+}
+
+function readRoleMap() {
+  try {
+    const raw = localStorage.getItem(LOCAL_USER_ROLES_KEY);
+    const parsed = raw ? JSON.parse(raw) : {};
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function getCachedRole(userId, email) {
+  const map = readRoleMap();
+  const byId = userId ? map[String(userId)] : null;
+  if (byId) return normalizeRole(byId);
+  const key = String(email || "").toLowerCase();
+  const byEmail = key ? map[key] : null;
+  return normalizeRole(byEmail);
+}
+
+export function cacheUserRole(userId, email, role) {
+  const normalized = normalizeRole(role);
+  const map = readRoleMap();
+  if (userId) map[String(userId)] = normalized;
+  const emailKey = String(email || "").toLowerCase();
+  if (emailKey) map[emailKey] = normalized;
+  safeWriteLocal(LOCAL_USER_ROLES_KEY, map);
 }
 
 export function isAdminUser(email) {
@@ -50,7 +79,7 @@ export async function ensureUserProfile(user, selectedRole = "job_seeker") {
       .maybeSingle();
     role = normalizeRole(existingProfile?.role || preferredRole);
   }
-
+  cacheUserRole(user.id, user.email, role);
   const payload = {
     id: user.id,
     email: user.email || "",
@@ -64,12 +93,18 @@ export async function ensureUserProfile(user, selectedRole = "job_seeker") {
   }
 }
 
-export async function fetchUserRole(userId, email) {
+export async function fetchUserRole(userId, email, fallbackRole = "job_seeker") {
   if (isAdminUser(email)) return "admin";
-  if (!isSupabaseConfigured || !supabase || !userId) return "job_seeker";
+  if (!isSupabaseConfigured || !supabase || !userId) {
+    return normalizeRole(fallbackRole || getCachedRole(userId, email));
+  }
   const { data, error } = await supabase.from("profiles").select("role").eq("id", userId).maybeSingle();
-  if (error || !data?.role) return "job_seeker";
-  return normalizeRole(data.role);
+  if (error || !data?.role) {
+    return normalizeRole(fallbackRole || getCachedRole(userId, email));
+  }
+  const role = normalizeRole(data.role);
+  cacheUserRole(userId, email, role);
+  return role;
 }
 
 export async function fetchUsersForAdmin() {

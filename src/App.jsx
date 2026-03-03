@@ -109,13 +109,14 @@ export default function App() {
   const isAdmin = userRole === "admin";
   const canPostJobs = userRole === "employer" || userRole === "admin";
   
-  const applySessionUser = async (sessionUser) => {
+  const applySessionUser = async (sessionUser, preferredRole = "job_seeker") => {
     if (!sessionUser) {
       setUser(null);
       return null;
     }
-    const fetchedRole = await fetchUserRole(sessionUser.id, sessionUser.email);
     const pendingRole = localStorage.getItem(PENDING_SIGNUP_ROLE_KEY);
+    const metaRole = sessionUser?.user_metadata?.role;
+    const fetchedRole = await fetchUserRole(sessionUser.id, sessionUser.email, metaRole || preferredRole);
     const role = pendingRole && pendingRole !== "job_seeker" ? pendingRole : fetchedRole;
     setUser({ email: sessionUser.email, id: sessionUser.id, role });
     await ensureUserProfile(sessionUser, role);
@@ -260,12 +261,12 @@ export default function App() {
     }
     setAuthLoading(true);
     try {
-      const data = await signUpWithPassword(loginEmail.trim(), loginPassword);
+      const data = await signUpWithPassword(loginEmail.trim(), loginPassword, signupRole);
       if (data?.user) {
         await ensureUserProfile(data.user, signupRole);
       }
       if (data?.session?.user) {
-        await applySessionUser(data.session.user);
+        await applySessionUser(data.session.user, signupRole);
         showToast("✓ Account created and signed in!");
         setPage("dashboard");
       } else {

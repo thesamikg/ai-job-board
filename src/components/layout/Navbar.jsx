@@ -43,6 +43,12 @@ export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false
             cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "'Source Sans 3', sans-serif"
           }}>Post a Job</button>
         )}
+        {isSignedIn && !isEmployerLike && (
+          <button onClick={() => setPage("jobs")} style={{
+            background: "transparent", border: "1px solid rgba(37,99,235,0.45)", borderRadius: 8, padding: "7px 16px", color: "#1d4ed8",
+            cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "'Source Sans 3', sans-serif"
+          }}>Browse Jobs</button>
+        )}
         {isSignedIn ? (
           <>
             <button onClick={() => setPage("jobs")} style={navBtn(page, "jobs")}>Jobs</button>
@@ -108,6 +114,19 @@ export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false
               cursor: "pointer",
               width: "100%",
             }}>Post a Job</button>
+          )}
+          {isSignedIn && !isEmployerLike && (
+            <button onClick={() => goTo("jobs")} style={{
+              background: "transparent",
+              border: "1px solid rgba(37,99,235,0.45)",
+              borderRadius: 10,
+              padding: "12px 20px",
+              color: "#1d4ed8",
+              fontSize: 14,
+              fontWeight: 700,
+              cursor: "pointer",
+              width: "100%",
+            }}>Browse Jobs</button>
           )}
           {isSignedIn ? (
             <>
