@@ -10,6 +10,7 @@ import "./styles/global.css";
 const LOCAL_JOBS_KEY = "ai_jobboard_local_jobs";
 const LOCAL_JOB_STATUS_KEY = "ai_jobboard_job_status";
 const LOCAL_DELETED_JOBS_KEY = "ai_jobboard_deleted_jobs";
+const PENDING_SIGNUP_ROLE_KEY = "ai_jobboard_pending_signup_role";
 
 function normalizeJob(job) {
   return {
@@ -113,9 +114,14 @@ export default function App() {
       setUser(null);
       return null;
     }
-    const role = await fetchUserRole(sessionUser.id, sessionUser.email);
+    const fetchedRole = await fetchUserRole(sessionUser.id, sessionUser.email);
+    const pendingRole = localStorage.getItem(PENDING_SIGNUP_ROLE_KEY);
+    const role = pendingRole && pendingRole !== "job_seeker" ? pendingRole : fetchedRole;
     setUser({ email: sessionUser.email, id: sessionUser.id, role });
     await ensureUserProfile(sessionUser, role);
+    if (pendingRole) {
+      localStorage.removeItem(PENDING_SIGNUP_ROLE_KEY);
+    }
     return role;
   };
 
@@ -276,6 +282,7 @@ export default function App() {
   const handleGoogleSignIn = async () => {
     setAuthLoading(true);
     try {
+      localStorage.setItem(PENDING_SIGNUP_ROLE_KEY, signupRole);
       const { url } = await signInWithGoogle();
       if (url) {
         window.location.href = url;
@@ -283,6 +290,7 @@ export default function App() {
       }
       showToast("Google sign-in did not return a redirect URL.");
     } catch (err) {
+      localStorage.removeItem(PENDING_SIGNUP_ROLE_KEY);
       showToast(err?.message || "Google sign-in failed");
     } finally {
       setAuthLoading(false);
