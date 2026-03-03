@@ -38,7 +38,19 @@ export function normalizeRole(role) {
 
 export async function ensureUserProfile(user, selectedRole = "job_seeker") {
   if (!isSupabaseConfigured || !supabase || !user?.id) return;
-  const role = isAdminUser(user.email) ? "admin" : normalizeRole(selectedRole);
+  const preferredRole = isAdminUser(user.email) ? "admin" : normalizeRole(selectedRole);
+  let role = preferredRole;
+
+  // Never downgrade an existing employer/admin profile to job_seeker due temporary lookup issues.
+  if (preferredRole === "job_seeker") {
+    const { data: existingProfile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+    role = normalizeRole(existingProfile?.role || preferredRole);
+  }
+
   const payload = {
     id: user.id,
     email: user.email || "",
