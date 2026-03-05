@@ -18,7 +18,7 @@ export default function JobDetail({ job, onClose, onApply, saved, onSave }) {
         boxShadow: "0 20px 44px rgba(15,23,42,0.24)",
       }}>
         <div style={{ padding: "24px 20px", borderBottom: "1px solid rgba(148,163,184,0.28)" }}>
-          <div className="job-detail-header" style={{ display: "flex", justifyContent: "space-between", marginBottom: 24, alignItems: "flex-start", gap: 16 }}>
+          <div className="job-detail-header" style={{ marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16 }}>
             <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
               <div style={{
                 width: 56, height: 56, borderRadius: 12, flexShrink: 0,
@@ -32,14 +32,51 @@ export default function JobDetail({ job, onClose, onApply, saved, onSave }) {
                 <div style={{ fontSize: 14, color: "#475569" }}>{job.company} · {job.location}</div>
               </div>
             </div>
-            <button onClick={onClose} style={{ background: "#ffffff", border: "1px solid rgba(148,163,184,0.4)", borderRadius: 8, padding: "6px 12px", color: "#64748b", cursor: "pointer", fontSize: 16 }}>✕</button>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <button
+                onClick={onClose}
+                style={{
+                  background: "#ffffff",
+                  border: "1px solid rgba(148,163,184,0.4)",
+                  borderRadius: 10,
+                  padding: "8px 14px",
+                  color: "#64748b",
+                  cursor: "pointer",
+                  fontSize: 16,
+                }}
+              >✕</button>
+            </div>
           </div>
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            {isNew(job.posted_at) && <Badge color="#22c55e">New</Badge>}
-            {isHot(job) && <Badge color="#f97316">Hot</Badge>}
-            {job.featured && <Badge color="#a78bfa">Featured</Badge>}
-            <span style={{ fontSize: 12, color: "#64748b", display: "flex", alignItems: "center", gap: 4 }}>📍 {job.remote ? "Remote" : "On-site"}</span>
-            <span style={{ fontSize: 12, color: "#64748b" }}>· {job.job_type} · {job.experience_level} yrs exp</span>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, flexWrap: "wrap" }}>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+              {isNew(job.posted_at) && <Badge color="#22c55e">New</Badge>}
+              {isHot(job) && <Badge color="#f97316">Hot</Badge>}
+              {job.featured && <Badge color="#a78bfa">Featured</Badge>}
+              <span style={{ fontSize: 13, color: "#64748b", display: "inline-flex", alignItems: "center", gap: 6, lineHeight: 1 }}>
+                <span style={{ fontSize: 13 }}>📍</span>{job.remote ? "Remote" : "On-site"}
+              </span>
+              <span style={{ color: "#94a3b8", lineHeight: 1 }}>•</span>
+              <span style={{ fontSize: 13, color: "#64748b", lineHeight: 1 }}>{job.job_type}</span>
+              <span style={{ color: "#94a3b8", lineHeight: 1 }}>•</span>
+              <span style={{ fontSize: 13, color: "#64748b", lineHeight: 1 }}>{job.experience_level} yrs exp</span>
+            </div>
+            <button
+              onClick={() => onApply(job)}
+              style={{
+                minWidth: 170,
+                padding: "13px 22px",
+                background: "#2563eb",
+                border: "1px solid #1d4ed8",
+                borderRadius: 12,
+                color: "#ffffff",
+                fontSize: 16,
+                fontWeight: 700,
+                cursor: "pointer",
+                fontFamily: "'Source Sans 3', sans-serif",
+              }}
+            >
+              Apply Now
+            </button>
           </div>
         </div>
         <div style={{ padding: "24px 20px" }}>
