@@ -12,6 +12,7 @@ const LOCAL_JOB_STATUS_KEY = "ai_jobboard_job_status";
 const LOCAL_DELETED_JOBS_KEY = "ai_jobboard_deleted_jobs";
 const PENDING_SIGNUP_ROLE_KEY = "ai_jobboard_pending_signup_role";
 const SAVED_JOBS_BY_USER_KEY = "ai_jobboard_saved_jobs_by_user";
+const BLOCKED_EMPLOYER_DOMAINS = new Set(["gmail.com", "yahoo.com", "outlook.com", "hotmail.com"]);
 
 function normalizeJob(job) {
   return {
@@ -107,6 +108,12 @@ function saveSavedJobsForUser(user, savedJobs) {
   }
 }
 
+function getEmailDomain(email) {
+  const value = String(email || "").toLowerCase().trim();
+  const at = value.lastIndexOf("@");
+  return at === -1 ? "" : value.slice(at + 1);
+}
+
 async function fetchJobsWithTimeout(options = {}, timeoutMs = 5000) {
   return Promise.race([
     fetchJobs(options),
@@ -141,13 +148,14 @@ export default function App() {
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [signupRole, setSignupRole] = useState("job_seeker");
+  const [signupCompanyName, setSignupCompanyName] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
   const [adminUsers, setAdminUsers] = useState([]);
   const [applications, setApplications] = useState([]);
   const [adminLoading, setAdminLoading] = useState(false);
   const userRole = user?.role || "job_seeker";
   const isAdmin = userRole === "admin";
-  const canPostJobs = userRole === "employer" || userRole === "admin";
+  const canPostJobs = userRole === "employer";
   
   const applySessionUser = async (sessionUser, preferredRole = "job_seeker") => {
     if (!sessionUser) {
@@ -167,7 +175,8 @@ export default function App() {
     const nextUser = { email: sessionUser.email, id: sessionUser.id, role };
     setUser(nextUser);
     setSavedJobs(loadSavedJobsForUser(nextUser));
-    ensureUserProfile(sessionUser, role).catch((err) => {
+    const companyName = sessionUser?.user_metadata?.company_name || "";
+    ensureUserProfile(sessionUser, { role, companyName }).catch((err) => {
       console.warn("Could not ensure profile:", err);
     });
     if (pendingRole) {
@@ -353,11 +362,19 @@ export default function App() {
       showToast("Password must be at least 6 characters");
       return;
     }
+    if (signupRole === "employer") {
+      const domain = getEmailDomain(loginEmail);
+      if (BLOCKED_EMPLOYER_DOMAINS.has(domain)) {
+        showToast("Please use a company email address to register as an employer.");
+        return;
+      }
+    }
     setAuthLoading(true);
     try {
-      const data = await signUpWithPassword(loginEmail.trim(), loginPassword, signupRole);
+      const companyName = signupCompanyName.trim();
+      const data = await signUpWithPassword(loginEmail.trim(), loginPassword, signupRole, companyName);
       if (data?.user) {
-        await ensureUserProfile(data.user, signupRole);
+        await ensureUserProfile(data.user, { role: signupRole, companyName });
       }
       if (data?.session?.user) {
         await applySessionUser(data.session.user, signupRole);
@@ -367,6 +384,7 @@ export default function App() {
         showToast("✓ Account created! Check your email to confirm, then sign in.");
       }
       setLoginPassword("");
+      setSignupCompanyName("");
     } catch (err) {
       showToast(err?.message || "Sign up failed");
     } finally {
@@ -431,7 +449,7 @@ export default function App() {
 
   const handleAddJob = async (job) => {
     if (!canPostJobs) {
-      showToast("Only Employer and Admin accounts can post jobs.");
+      showToast("Only employers can post jobs.");
       setPage("login");
       return { ok: false };
     }
@@ -550,6 +568,8 @@ export default function App() {
           setLoginPassword={setLoginPassword}
           signupRole={signupRole}
           setSignupRole={setSignupRole}
+          signupCompanyName={signupCompanyName}
+          setSignupCompanyName={setSignupCompanyName}
           handleSignIn={handleSignIn}
           handleSignUp={handleSignUp}
           handleGoogleSignIn={handleGoogleSignIn}
@@ -586,6 +606,8 @@ export default function App() {
         setLoginPassword={setLoginPassword}
         signupRole={signupRole}
         setSignupRole={setSignupRole}
+        signupCompanyName={signupCompanyName}
+        setSignupCompanyName={setSignupCompanyName}
         handleSignIn={handleSignIn}
         handleSignUp={handleSignUp}
         handleGoogleSignIn={handleGoogleSignIn}
@@ -606,11 +628,13 @@ export default function App() {
           setLoginPassword={setLoginPassword}
           signupRole={signupRole}
           setSignupRole={setSignupRole}
+          signupCompanyName={signupCompanyName}
+          setSignupCompanyName={setSignupCompanyName}
           handleSignIn={handleSignIn}
           handleSignUp={handleSignUp}
           handleGoogleSignIn={handleGoogleSignIn}
           authLoading={authLoading}
-          toast={{ message: "Only Employer/Admin can access job posting.", visible: true }}
+          toast={{ message: "Only employers can post jobs.", visible: true }}
         />
       );
     }

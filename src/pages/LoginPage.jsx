@@ -20,6 +20,8 @@ export default function LoginPage({
   setLoginPassword,
   signupRole,
   setSignupRole,
+  signupCompanyName,
+  setSignupCompanyName,
   handleSignIn,
   handleSignUp,
   handleGoogleSignIn,
@@ -170,6 +172,20 @@ export default function LoginPage({
                   <option value="job_seeker">Job Seeker</option>
                   <option value="employer">Employer</option>
                 </select>
+                {signupRole === "employer" && (
+                  <>
+                    <label style={{ fontSize: 12, color: "#475569", fontWeight: 600, display: "block", marginBottom: 8, letterSpacing: 0.5 }}>
+                      COMPANY NAME (OPTIONAL)
+                    </label>
+                    <input
+                      type="text"
+                      value={signupCompanyName}
+                      onChange={(e) => setSignupCompanyName(e.target.value)}
+                      placeholder="e.g. OpenAI"
+                      style={{ ...inputStyle, marginBottom: 24 }}
+                    />
+                  </>
+                )}
               </>
             )}
 

@@ -15,7 +15,7 @@ export async function signInWithPassword(email, password) {
 /**
  * Sign up with email and password
  */
-export async function signUpWithPassword(email, password, role = "job_seeker") {
+export async function signUpWithPassword(email, password, role = "job_seeker", companyName = "") {
   if (!isSupabaseConfigured || !supabase) {
     throw new Error("Supabase is not configured");
   }
@@ -25,6 +25,7 @@ export async function signUpWithPassword(email, password, role = "job_seeker") {
     options: {
       data: {
         role,
+        company_name: companyName || "",
       },
     },
   });

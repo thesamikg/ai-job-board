@@ -65,9 +65,11 @@ export function normalizeRole(role) {
   return "job_seeker";
 }
 
-export async function ensureUserProfile(user, selectedRole = "job_seeker") {
+export async function ensureUserProfile(user, selectedRole = "job_seeker", companyName = "") {
   if (!isSupabaseConfigured || !supabase || !user?.id) return;
-  const preferredRole = isAdminUser(user.email) ? "admin" : normalizeRole(selectedRole);
+  const requestedRole = typeof selectedRole === "object" ? selectedRole?.role : selectedRole;
+  const requestedCompanyName = typeof selectedRole === "object" ? selectedRole?.companyName : companyName;
+  const preferredRole = isAdminUser(user.email) ? "admin" : normalizeRole(requestedRole);
   let role = preferredRole;
 
   // Never downgrade an existing employer/admin profile to job_seeker due temporary lookup issues.
@@ -84,6 +86,7 @@ export async function ensureUserProfile(user, selectedRole = "job_seeker") {
     id: user.id,
     email: user.email || "",
     role,
+    company_name: requestedCompanyName || user?.user_metadata?.company_name || null,
     last_seen_at: new Date().toISOString(),
   };
   const { error } = await supabase.from("profiles").upsert(payload, { onConflict: "id" });

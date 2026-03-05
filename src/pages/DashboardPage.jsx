@@ -7,7 +7,7 @@ export default function DashboardPage({
   applyJob, setApplyJob, handleApplySubmit, toast, user, userRole = "job_seeker", applications = [], onSignOut, isAdmin, canPostJobs
 }) {
   const bg = { background: "#f8fafc", minHeight: "100vh", fontFamily: "'Source Sans 3', sans-serif", color: "#475569" };
-  const isEmployerLike = userRole === "employer" || userRole === "admin";
+  const isEmployerLike = userRole === "employer";
   const postedJobs = (jobs || []).filter((job) => {
     const owner = String(job?.posted_by || "");
     return owner && (owner === String(user?.id || "") || owner.toLowerCase() === String(user?.email || "").toLowerCase());
