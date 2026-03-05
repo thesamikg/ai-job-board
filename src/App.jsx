@@ -3,7 +3,7 @@ import { HomePage, JobsPage, DashboardPage, LoginPage, AddJobPage, AdminPage } f
 import { SAMPLE_JOBS } from "./data/jobs";
 import { filterAndSortJobs } from "./utils/filterJobs";
 import { fetchJobs, addJob, updateJobStatus, deleteJob } from "./services/jobsService";
-import { signInWithPassword, signUpWithPassword, signInWithGoogle, getSession, onAuthStateChange, signOut } from "./services/authService";
+import { signInWithPassword, signUpWithPassword, signInWithGoogle, getSession, onAuthStateChange, signOut, isEmailRegistered } from "./services/authService";
 import { isAdminUser, ensureUserProfile, fetchUsersForAdmin, addApplication, fetchApplicationsForAdmin, fetchApplicationsForUser, fetchUserRole } from "./services/adminService";
 import "./styles/global.css";
 
@@ -314,7 +314,14 @@ export default function App() {
       return;
     }
     setAuthLoading(true);
+    let registrationKnown = null;
     try {
+      registrationKnown = await isEmailRegistered(loginEmail.trim());
+      if (registrationKnown === false) {
+        showToast("Email is not registered, continue to sign up.");
+        setPage("signup");
+        return;
+      }
       const data = await withTimeout(
         signInWithPassword(loginEmail.trim(), loginPassword),
         10000,
@@ -345,6 +352,9 @@ export default function App() {
       const msg = String(err?.message || "Sign in failed");
       if (msg.toLowerCase().includes("email not confirmed")) {
         showToast("Please confirm your email before signing in.");
+      } else if (msg.toLowerCase().includes("invalid login credentials") && registrationKnown !== true) {
+        showToast("Email is not registered, continue to sign up.");
+        setPage("signup");
       } else {
         showToast(msg);
       }
@@ -373,6 +383,11 @@ export default function App() {
     try {
       const companyName = signupCompanyName.trim();
       const data = await signUpWithPassword(loginEmail.trim(), loginPassword, signupRole, companyName);
+      const hasIdentity = Array.isArray(data?.user?.identities) ? data.user.identities.length > 0 : true;
+      if (!hasIdentity) {
+        showToast("Email id is already in use.");
+        return;
+      }
       if (data?.user) {
         await ensureUserProfile(data.user, { role: signupRole, companyName });
       }
@@ -386,7 +401,12 @@ export default function App() {
       setLoginPassword("");
       setSignupCompanyName("");
     } catch (err) {
-      showToast(err?.message || "Sign up failed");
+      const msg = String(err?.message || "Sign up failed");
+      if (msg.toLowerCase().includes("already registered")) {
+        showToast("Email id is already in use.");
+      } else {
+        showToast(msg);
+      }
     } finally {
       setAuthLoading(false);
     }
@@ -575,6 +595,7 @@ export default function App() {
           handleGoogleSignIn={handleGoogleSignIn}
           authLoading={authLoading}
           toast={{ message: "Admin access required.", visible: true }}
+          initialMode="signin"
         />
       );
     }
@@ -596,7 +617,7 @@ export default function App() {
     );
   }
 
-  if (page === "login") {
+  if (page === "login" || page === "signup") {
     return (
       <LoginPage
         setPage={setPage}
@@ -613,6 +634,7 @@ export default function App() {
         handleGoogleSignIn={handleGoogleSignIn}
         authLoading={authLoading}
         toast={toast}
+        initialMode={page === "signup" ? "signup" : "signin"}
       />
     );
   }
@@ -635,6 +657,7 @@ export default function App() {
           handleGoogleSignIn={handleGoogleSignIn}
           authLoading={authLoading}
           toast={{ message: "Only employers can post jobs.", visible: true }}
+          initialMode="signin"
         />
       );
     }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Logo, Toast } from "../components/ui";
 
 const inputStyle = {
@@ -27,8 +27,13 @@ export default function LoginPage({
   handleGoogleSignIn,
   authLoading,
   toast,
+  initialMode = "signin",
 }) {
-  const [mode, setMode] = useState("signin"); // "signin" | "signup"
+  const [mode, setMode] = useState(initialMode); // "signin" | "signup"
+
+  useEffect(() => {
+    setMode(initialMode || "signin");
+  }, [initialMode]);
 
   const handleSubmit = (e) => {
     e.preventDefault();

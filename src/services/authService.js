@@ -56,6 +56,22 @@ export async function getSession() {
 }
 
 /**
+ * Best-effort registration lookup by email (via profiles table).
+ * Returns true/false when known, null when unknown (e.g. RLS blocked).
+ */
+export async function isEmailRegistered(email) {
+  if (!isSupabaseConfigured || !supabase || !email) return null;
+  const normalized = String(email).trim().toLowerCase();
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id")
+    .ilike("email", normalized)
+    .limit(1);
+  if (error) return null;
+  return Array.isArray(data) && data.length > 0;
+}
+
+/**
  * Subscribe to auth state changes
  */
 export function onAuthStateChange(callback) {

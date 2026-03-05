@@ -53,11 +53,17 @@ export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false
             }}>Sign Out</button>
           </>
         ) : (
-          <button onClick={() => setPage("login")} style={{
-            marginLeft: 4, background: "linear-gradient(135deg, #1d4ed8, #2563eb)",
-            border: "none", borderRadius: 8, padding: "7px 18px", color: "#ffffff",
-            cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "'Source Sans 3', sans-serif"
-          }}>Sign In / Sign Up</button>
+          <>
+            <button onClick={() => setPage("login")} style={{
+              background: "transparent", border: "1px solid rgba(37,99,235,0.45)", borderRadius: 8, padding: "7px 16px", color: "#1d4ed8",
+              cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "'Source Sans 3', sans-serif"
+            }}>Sign In</button>
+            <button onClick={() => setPage("signup")} style={{
+              marginLeft: 4, background: "linear-gradient(135deg, #1d4ed8, #2563eb)",
+              border: "none", borderRadius: 8, padding: "7px 18px", color: "#ffffff",
+              cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "'Source Sans 3', sans-serif"
+            }}>Sign Up</button>
+          </>
         )}
       </div>
 
@@ -119,11 +125,18 @@ export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false
               }}>Sign Out</button>
             </>
           ) : (
-            <button onClick={() => goTo("login")} style={{
-              background: "linear-gradient(135deg, #1d4ed8, #2563eb)", color: "#ffffff",
-              border: "none", borderRadius: 10, padding: "14px 24px", marginTop: 8,
-              fontSize: 15, fontWeight: 700, cursor: "pointer", width: "100%"
-            }}>Sign In / Sign Up</button>
+            <>
+              <button onClick={() => goTo("login")} style={{
+                background: "transparent", color: "#1d4ed8",
+                border: "1px solid rgba(37,99,235,0.45)", borderRadius: 10, padding: "12px 24px", marginTop: 8,
+                fontSize: 15, fontWeight: 700, cursor: "pointer", width: "100%"
+              }}>Sign In</button>
+              <button onClick={() => goTo("signup")} style={{
+                background: "linear-gradient(135deg, #1d4ed8, #2563eb)", color: "#ffffff",
+                border: "none", borderRadius: 10, padding: "14px 24px", marginTop: 8,
+                fontSize: 15, fontWeight: 700, cursor: "pointer", width: "100%"
+              }}>Sign Up</button>
+            </>
           )}
         </div>
       </div>
