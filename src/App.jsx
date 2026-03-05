@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { HomePage, JobsPage, DashboardPage, LoginPage, AddJobPage, AdminPage } from "./pages";
-import { SAMPLE_JOBS } from "./data/jobs";
 import { filterAndSortJobs } from "./utils/filterJobs";
 import { fetchJobs, addJob, updateJobStatus, deleteJob } from "./services/jobsService";
 import { signInWithPassword, signUpWithPassword, signInWithGoogle, getSession, onAuthStateChange, signOut, isEmailRegistered } from "./services/authService";
@@ -13,6 +12,8 @@ const LOCAL_DELETED_JOBS_KEY = "ai_jobboard_deleted_jobs";
 const PENDING_SIGNUP_ROLE_KEY = "ai_jobboard_pending_signup_role";
 const SAVED_JOBS_BY_USER_KEY = "ai_jobboard_saved_jobs_by_user";
 const BLOCKED_EMPLOYER_DOMAINS = new Set(["gmail.com", "yahoo.com", "outlook.com", "hotmail.com"]);
+const LOCAL_PAGE_KEY = "ai_jobboard_current_page";
+const LOCAL_USER_KEY = "ai_jobboard_current_user";
 
 function normalizeJob(job) {
   return {
@@ -114,6 +115,48 @@ function getEmailDomain(email) {
   return at === -1 ? "" : value.slice(at + 1);
 }
 
+function loadCurrentPage() {
+  try {
+    const page = localStorage.getItem(LOCAL_PAGE_KEY);
+    return page || "home";
+  } catch {
+    return "home";
+  }
+}
+
+function saveCurrentPage(page) {
+  try {
+    localStorage.setItem(LOCAL_PAGE_KEY, page);
+  } catch {
+    // Ignore storage errors.
+  }
+}
+
+function loadCurrentUser() {
+  try {
+    const raw = localStorage.getItem(LOCAL_USER_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") return null;
+    if (!parsed.id && !parsed.email) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function saveCurrentUser(user) {
+  try {
+    if (!user) {
+      localStorage.removeItem(LOCAL_USER_KEY);
+      return;
+    }
+    localStorage.setItem(LOCAL_USER_KEY, JSON.stringify(user));
+  } catch {
+    // Ignore storage errors.
+  }
+}
+
 async function fetchJobsWithTimeout(options = {}, timeoutMs = 5000) {
   return Promise.race([
     fetchJobs(options),
@@ -135,7 +178,7 @@ async function withTimeout(promise, timeoutMs, message) {
 export default function App() {
   const [jobs, setJobs] = useState([]);
   const [jobsLoading, setJobsLoading] = useState(true);
-  const [page, setPage] = useState("home");
+  const [page, setPage] = useState(loadCurrentPage);
   const [selectedJob, setSelectedJob] = useState(null);
   const [applyJob, setApplyJob] = useState(null);
   const [savedJobs, setSavedJobs] = useState([]);
@@ -144,7 +187,7 @@ export default function App() {
   const [filters, setFilters] = useState({ remote: false, skills: [], exp: "", sort: "newest" });
   const [emailInput, setEmailInput] = useState("");
   const [subscribed, setSubscribed] = useState(false);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(loadCurrentUser);
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [signupRole, setSignupRole] = useState("job_seeker");
@@ -174,6 +217,7 @@ export default function App() {
     const role = pendingRole && pendingRole !== "job_seeker" ? pendingRole : fetchedRole;
     const nextUser = { email: sessionUser.email, id: sessionUser.id, role };
     setUser(nextUser);
+    saveCurrentUser(nextUser);
     setSavedJobs(loadSavedJobsForUser(nextUser));
     const companyName = sessionUser?.user_metadata?.company_name || "";
     ensureUserProfile(sessionUser, { role, companyName }).catch((err) => {
@@ -190,28 +234,31 @@ export default function App() {
       const localJobs = loadLocalJobs();
       const localStatuses = loadLocalStatuses();
       const locallyDeleted = new Set(loadLocalDeletedJobs());
-      const immediateBase = [...localJobs, ...SAMPLE_JOBS]
+      const localOnly = [...localJobs]
         .filter((job) => !locallyDeleted.has(String(job.id)))
         .map((job) => (localStatuses[String(job.id)] ? { ...job, status: localStatuses[String(job.id)] } : job));
 
       // Render immediately to avoid blank/loading state on initial page open.
-      setJobs(immediateBase);
+      setJobs(localOnly);
       setJobsLoading(false);
 
       try {
         const data = await fetchJobsWithTimeout({ includeAll: true }, 5000);
-        const baseJobs = data.length > 0 ? data : [...SAMPLE_JOBS];
-        const merged = [...localJobs, ...baseJobs]
+        const merged = [...localJobs, ...data]
           .filter((job) => !locallyDeleted.has(String(job.id)))
           .map((job) => (localStatuses[String(job.id)] ? { ...job, status: localStatuses[String(job.id)] } : job));
         setJobs(merged);
       } catch (err) {
-        console.warn("Could not load jobs from Supabase, using sample data:", err);
-        // Keep already-rendered immediate fallback list.
+        console.warn("Could not load jobs from Supabase, using local jobs only:", err);
+        // Keep already-rendered local-only list.
       }
     }
     loadJobs();
   }, []);
+
+  useEffect(() => {
+    saveCurrentPage(page);
+  }, [page]);
 
   useEffect(() => {
     getSession().then(async ({ data: { session } }) => {
@@ -227,6 +274,7 @@ export default function App() {
         }
       } else {
         setUser(null);
+        saveCurrentUser(null);
       }
     });
     return unsubscribe;
@@ -432,6 +480,7 @@ export default function App() {
 
   const handleSignOut = async () => {
     setUser(null);
+    saveCurrentUser(null);
     setSavedJobs([]);
     setApplications([]);
     setPage("home");
