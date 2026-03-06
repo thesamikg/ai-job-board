@@ -1,7 +1,6 @@
 import { Logo, Toast } from "../components/ui";
 import { JobCard, JobDetail, EmailModal } from "../components/job";
 import Navbar from "../components/layout/Navbar";
-import { CATEGORIES } from "../data/jobs";
 
 export default function HomePage({
   jobs, jobsLoading, setPage, search, setSearch, savedJobs, handleSave, showToast,
@@ -66,30 +65,8 @@ export default function HomePage({
         </div>
       </div>
 
-      {/* Categories */}
-      <div className="section-padding" style={{ maxWidth: 1200, margin: "0 auto", padding: "1rem 24px 48px" }}>
-        <h2 style={{ fontFamily: "'Merriweather', serif", fontSize: 18, fontWeight: 700, color: "#0f172a", textAlign: "center", marginBottom: 16 }}>Browse by Category</h2>
-        <div className="categories-grid" style={{ display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "center" }}>
-          {CATEGORIES.map(cat => (
-            <div key={cat.name} onClick={() => setPage("jobs")} style={{
-              background: "#fff", border: "1px dashed rgba(148,163,184,0.45)",
-              borderRadius: 16, padding: "10px 16px", textAlign: "center", cursor: "pointer",
-              transition: "all 0.2s",
-              minWidth: 150,
-            }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = cat.color + "60"; e.currentTarget.style.background = cat.color + "10"; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(148,163,184,0.45)"; e.currentTarget.style.background = "#fff"; }}
-            >
-              <div style={{ fontSize: 16, marginBottom: 3 }}>{cat.icon}</div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: "#0f172a", marginBottom: 1 }}>{cat.name}</div>
-              <div style={{ fontSize: 11, color: cat.color, fontWeight: 700 }}>{cat.count}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* Available Jobs */}
-      <div className="section-padding page-content" style={{ maxWidth: 900, margin: "0 auto", padding: "0 24px 80px" }}>
+      <div className="section-padding page-content home-jobs-section" style={{ maxWidth: 900, margin: "0 auto", padding: "40px 24px 80px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
           <h2 style={{ fontFamily: "'Merriweather', serif", fontSize: 22, fontWeight: 700, color: "#0f172a" }}>Jobs Available Now</h2>
           <button onClick={() => setPage("jobs")} style={{ background: "#fff", border: "1px solid rgba(148,163,184,0.4)", borderRadius: 8, padding: "7px 14px", color: "#334155", cursor: "pointer", fontSize: 13, fontWeight: 700 }}>View all →</button>
