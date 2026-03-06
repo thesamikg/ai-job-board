@@ -157,6 +157,14 @@ function saveCurrentUser(user) {
   }
 }
 
+function deriveDisplayName(sessionUser) {
+  const fullName = sessionUser?.user_metadata?.full_name || sessionUser?.user_metadata?.name || "";
+  if (fullName && String(fullName).trim()) return String(fullName).trim();
+  const email = String(sessionUser?.email || "");
+  const prefix = email.split("@")[0] || "User";
+  return prefix;
+}
+
 async function fetchJobsWithTimeout(options = {}, timeoutMs = 5000) {
   return Promise.race([
     fetchJobs(options),
@@ -215,7 +223,7 @@ export default function App() {
       fetchedRole = metaRole || preferredRole || "job_seeker";
     }
     const role = pendingRole && pendingRole !== "job_seeker" ? pendingRole : fetchedRole;
-    const nextUser = { email: sessionUser.email, id: sessionUser.id, role };
+    const nextUser = { email: sessionUser.email, id: sessionUser.id, role, name: deriveDisplayName(sessionUser) };
     setUser(nextUser);
     saveCurrentUser(nextUser);
     setSavedJobs(loadSavedJobsForUser(nextUser));
@@ -353,6 +361,7 @@ export default function App() {
   };
 
   const handleSignIn = async () => {
+    if (authLoading) return;
     if (!loginEmail.trim() || !loginEmail.includes("@")) {
       showToast("Please enter a valid email");
       return;
@@ -364,7 +373,11 @@ export default function App() {
     setAuthLoading(true);
     let registrationKnown = null;
     try {
-      registrationKnown = await isEmailRegistered(loginEmail.trim());
+      registrationKnown = await withTimeout(
+        isEmailRegistered(loginEmail.trim()),
+        3000,
+        "Email lookup timed out."
+      ).catch(() => null);
       if (registrationKnown === false) {
         showToast("Email is not registered, continue to sign up.");
         setPage("signup");
@@ -412,6 +425,7 @@ export default function App() {
   };
 
   const handleSignUp = async () => {
+    if (authLoading) return;
     if (!loginEmail.trim() || !loginEmail.includes("@")) {
       showToast("Please enter a valid email");
       return;
@@ -461,14 +475,21 @@ export default function App() {
   };
 
   const handleGoogleSignIn = async () => {
+    if (authLoading) return;
     setAuthLoading(true);
     try {
       localStorage.setItem(PENDING_SIGNUP_ROLE_KEY, signupRole);
-      const { url } = await signInWithGoogle();
+      const redirectTo = window.location.origin + window.location.pathname;
+      const { url } = await withTimeout(
+        signInWithGoogle(redirectTo),
+        10000,
+        "Google sign-in timed out. Please try again."
+      );
       if (url) {
         window.location.href = url;
         return;
       }
+      localStorage.removeItem(PENDING_SIGNUP_ROLE_KEY);
       showToast("Google sign-in did not return a redirect URL.");
     } catch (err) {
       localStorage.removeItem(PENDING_SIGNUP_ROLE_KEY);

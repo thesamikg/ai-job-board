@@ -36,12 +36,13 @@ export async function signUpWithPassword(email, password, role = "job_seeker", c
 /**
  * Sign in with Google OAuth
  */
-export async function signInWithGoogle() {
+export async function signInWithGoogle(redirectTo) {
   if (!isSupabaseConfigured || !supabase) {
     throw new Error("Supabase is not configured");
   }
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
+    options: redirectTo ? { redirectTo } : undefined,
   });
   if (error) throw error;
   return data;
