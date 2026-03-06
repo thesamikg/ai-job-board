@@ -14,7 +14,7 @@ export default function JobsPage({
     <div style={bg}>
       <Navbar page={page} setPage={setPage} user={user} onSignOut={onSignOut} isAdmin={isAdmin} canPostJobs={canPostJobs} />
       <div style={{ paddingTop: 80 }} className="page-content">
-        <div style={{ background: "#f8fafc", backdropFilter: "blur(20px)", borderBottom: "1px solid rgba(148,163,184,0.3)", padding: "16px 20px", display: "flex", gap: 10, flexWrap: "wrap" }}>
+        <div className="jobs-toolbar" style={{ background: "#f8fafc", backdropFilter: "blur(20px)", borderBottom: "1px solid rgba(148,163,184,0.3)", padding: "16px 20px", display: "flex", gap: 10, flexWrap: "wrap" }}>
           <input value={search.title} onChange={e => setSearch(s => ({ ...s, title: e.target.value }))}
             placeholder="Search roles, companies, skills…" style={{
               flex: "2 1 200px", padding: "10px 16px", background: "#ffffff",
@@ -25,7 +25,7 @@ export default function JobsPage({
               flex: "1 1 140px", padding: "10px 16px", background: "#ffffff",
               border: "1px solid rgba(148,163,184,0.45)", borderRadius: 10, color: "#0f172a", fontSize: 14, outline: "none"
             }} />
-          <select value={filters.sort} onChange={e => setFilters(f => ({ ...f, sort: e.target.value }))} style={{
+          <select className="jobs-sort" value={filters.sort} onChange={e => setFilters(f => ({ ...f, sort: e.target.value }))} style={{
             padding: "10px 14px", background: "#ffffff", border: "1px solid rgba(148,163,184,0.5)",
             borderRadius: 10, color: "#475569", fontSize: 13, outline: "none", cursor: "pointer"
           }}>
@@ -69,8 +69,8 @@ export default function JobsPage({
               </div>
             </div>
           </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div className="jobs-results-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
               <span style={{ fontSize: 13, color: "#64748b" }}><span style={{ color: "#1e293b", fontWeight: 700 }}>{filteredJobs.length}</span> jobs found</span>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>

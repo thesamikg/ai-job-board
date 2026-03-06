@@ -7,6 +7,7 @@ export default function JobCard({ job, onClick, onApply }) {
 
   return (
     <div
+      className="job-card"
       onClick={() => onClick(job)}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -25,7 +26,7 @@ export default function JobCard({ job, onClick, onApply }) {
         <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 1, background: "linear-gradient(90deg, transparent, #2563eb, transparent)" }} />
       )}
       <div className="job-card-inner" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16 }}>
-        <div style={{ display: "flex", gap: 14, flex: 1, alignItems: "flex-start" }}>
+        <div className="job-card-summary" style={{ display: "flex", gap: 14, flex: 1, alignItems: "flex-start", minWidth: 0 }}>
           <div style={{
             width: 44, height: 44, borderRadius: 10, flexShrink: 0,
             background: "linear-gradient(135deg, rgba(37,99,235,0.2), rgba(96,165,250,0.25))",
@@ -48,7 +49,7 @@ export default function JobCard({ job, onClick, onApply }) {
             </div>
           </div>
         </div>
-        <div style={{ textAlign: "right", flexShrink: 0, minWidth: 140 }}>
+        <div className="job-card-side" style={{ textAlign: "right", flexShrink: 0, minWidth: 140 }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: "#1d4ed8", marginBottom: 4 }}>{formatSalary(job)}</div>
           <div style={{ fontSize: 11, color: "#64748b" }}>{timeSince(job.posted_at)}</div>
           <button

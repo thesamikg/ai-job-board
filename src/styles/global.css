@@ -129,7 +129,36 @@
 
 /* Job card responsive */
 @media (max-width: 600px) {
+  .jobs-toolbar {
+    padding: 16px !important;
+  }
+  .jobs-toolbar input,
+  .jobs-toolbar .jobs-sort {
+    width: 100% !important;
+    min-width: 0 !important;
+    flex: 1 1 100% !important;
+  }
+  .jobs-results-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+  .job-card {
+    padding: 14px !important;
+  }
   .job-card-inner { flex-direction: column !important; align-items: flex-start !important; }
+  .job-card-summary {
+    width: 100% !important;
+  }
+  .job-card-side {
+    width: 100% !important;
+    min-width: 0 !important;
+    text-align: left !important;
+  }
+  .job-card-side button {
+    width: 100% !important;
+    padding: 10px 12px !important;
+  }
   .job-card-meta { flex-direction: row !important; flex-wrap: wrap !important; width: 100% !important; }
 }
 
