@@ -26,6 +26,7 @@ Then run the admin migration:
 ```
 
 Or run the SQL from `supabase/migrations/002_admin_dashboard.sql`.
+This migration also adds the `profiles.company_name` and `applications.applicant_id` columns expected by the app.
 
 ## 3. Get your API keys
 
@@ -46,6 +47,16 @@ Or run the SQL from `supabase/migrations/002_admin_dashboard.sql`.
    VITE_ADMIN_EMAILS=admin@yourcompany.com
    ```
    Use your real values from Supabase, not the placeholder text above.
+
+## 4.1. Enable Google login (optional)
+
+If you want Google sign-in to work:
+
+1. In Supabase, go to **Authentication** → **Providers** → **Google**
+2. Enable the provider and add your Google OAuth client ID/secret
+3. Add your app URL to the allowed redirect URLs
+   - Local: `http://localhost:5173`
+   - Production: your deployed site URL
 
 ## 5. Seed sample jobs (optional)
 

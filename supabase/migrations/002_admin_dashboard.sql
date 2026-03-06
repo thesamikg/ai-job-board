@@ -24,10 +24,34 @@ END$$;
 create table if not exists public.profiles (
   id uuid primary key,
   email text not null,
-  role text default 'user',
+  role text default 'job_seeker',
+  company_name text,
   created_at timestamptz default now(),
   last_seen_at timestamptz default now()
 );
+
+alter table public.profiles
+  add column if not exists role text default 'job_seeker',
+  add column if not exists company_name text,
+  add column if not exists last_seen_at timestamptz default now();
+
+update public.profiles
+set role = case
+  when role in ('admin', 'employer', 'job_seeker') then role
+  else 'job_seeker'
+end;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint
+    WHERE conname = 'profiles_role_check'
+  ) THEN
+    ALTER TABLE public.profiles
+      ADD CONSTRAINT profiles_role_check CHECK (role IN ('job_seeker', 'employer', 'admin'));
+  END IF;
+END$$;
 
 alter table public.profiles enable row level security;
 
@@ -66,9 +90,13 @@ END$$;
 create table if not exists public.applications (
   id uuid primary key default gen_random_uuid(),
   job_id uuid references public.jobs(id) on delete set null,
+  applicant_id uuid,
   applicant_email text not null,
   submitted_at timestamptz default now()
 );
+
+alter table public.applications
+  add column if not exists applicant_id uuid;
 
 alter table public.applications enable row level security;
 
@@ -85,6 +113,13 @@ BEGIN
       WITH CHECK (true);
   END IF;
 END$$;
+
+create index if not exists jobs_posted_at_idx on public.jobs (posted_at desc);
+create index if not exists jobs_status_idx on public.jobs (status);
+create index if not exists profiles_email_idx on public.profiles (lower(email));
+create index if not exists applications_job_id_idx on public.applications (job_id);
+create index if not exists applications_applicant_id_idx on public.applications (applicant_id);
+create index if not exists applications_applicant_email_idx on public.applications (lower(applicant_email));
 
 -- Authenticated users can read applications (used by admin UI)
 DO $$
