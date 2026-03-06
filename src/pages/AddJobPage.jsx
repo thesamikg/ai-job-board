@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Navbar from "../components/layout/Navbar";
 import { Toast } from "../components/ui";
 import { CATEGORIES, ALL_SKILLS } from "../data/jobs";
@@ -23,10 +23,40 @@ const labelStyle = {
   letterSpacing: 0.5,
 };
 
+const defaultInputBorderColor = "rgba(148,163,184,0.6)";
+
 function getCompanyLogo(company) {
   const words = company.trim().split(/\s+/);
   if (words.length >= 2) return (words[0][0] + words[1][0]).toUpperCase();
   return company.slice(0, 2).toUpperCase();
+}
+
+function validateForm(form) {
+  const errors = {};
+  const title = form.title.trim();
+  const company = form.company.trim();
+  const description = form.description.trim();
+  const url = form.apply_url.trim();
+  const minRaw = String(form.salary_min ?? "").trim();
+  const maxRaw = String(form.salary_max ?? "").trim();
+  const min = Number(form.salary_min);
+  const max = Number(form.salary_max);
+
+  if (!title) errors.title = "Please enter a job title.";
+  if (!company) errors.company = "Please enter a company name.";
+  if (!minRaw || !maxRaw) {
+    errors.salary = "Please enter both min and max salary.";
+  } else if (isNaN(min) || min < 0 || isNaN(max) || max < 0 || min > max) {
+    errors.salary = "Please enter a valid salary range.";
+  }
+  if (!description) errors.description = "Please add a job description.";
+  if (!url) {
+    errors.apply_url = "Please add an application URL.";
+  } else if (!/^https?:\/\/.+/i.test(url) && !/^[a-z0-9.-]+\.[a-z]{2,}.+/i.test(url)) {
+    errors.apply_url = "Please enter a valid application URL.";
+  }
+
+  return errors;
 }
 
 export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, user, onSignOut, isAdmin, canPostJobs }) {
@@ -46,8 +76,37 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
     category: "AI Engineering",
   });
   const [skillInput, setSkillInput] = useState("");
+  const [errors, setErrors] = useState({});
+  const [submitError, setSubmitError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const fieldRefs = {
+    title: useRef(null),
+    company: useRef(null),
+    salary_min: useRef(null),
+    description: useRef(null),
+    apply_url: useRef(null),
+  };
 
-  const update = (key, value) => setForm(f => ({ ...f, [key]: value }));
+  const focusField = (name) => {
+    const ref = fieldRefs[name];
+    if (!ref?.current) return;
+    ref.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    ref.current.focus();
+  };
+
+  const update = (key, value) => {
+    setForm((f) => ({ ...f, [key]: value }));
+    setSubmitError("");
+    setErrors((prev) => {
+      if (!prev[key] && !(key === "salary_min" && prev.salary) && !(key === "salary_max" && prev.salary)) {
+        return prev;
+      }
+      const next = { ...prev };
+      delete next[key];
+      if (key === "salary_min" || key === "salary_max") delete next.salary;
+      return next;
+    });
+  };
 
   const addSkill = () => {
     const s = skillInput.trim();
@@ -59,35 +118,26 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
     const urlCandidate = form.apply_url.trim();
     const min = Number(form.salary_min);
     const max = Number(form.salary_max);
-    if (!form.title.trim()) {
-      showToast("Please enter a job title");
-      return;
-    }
-    if (!form.company.trim()) {
-      showToast("Please enter a company name");
-      return;
-    }
-    if (isNaN(min) || min < 0 || isNaN(max) || max < 0 || min > max) {
-      showToast("Please enter valid salary range");
-      return;
-    }
-    if (!form.description.trim()) {
-      showToast("Please add a job description");
-      return;
-    }
-    if (!form.apply_url.trim()) {
-      showToast("Please add an application URL");
-      return;
-    }
-    if (!/^https?:\/\/.+/i.test(urlCandidate) && !/^[a-z0-9.-]+\.[a-z]{2,}.+/i.test(urlCandidate)) {
-      showToast("Please enter a valid application URL");
+    const nextErrors = validateForm(form);
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors);
+      setSubmitError("Fix the highlighted fields and try again.");
+      showToast("Please complete the required fields.");
+      if (nextErrors.title) focusField("title");
+      else if (nextErrors.company) focusField("company");
+      else if (nextErrors.salary) focusField("salary_min");
+      else if (nextErrors.description) focusField("description");
+      else if (nextErrors.apply_url) focusField("apply_url");
       return;
     }
 
     try {
+      setIsSubmitting(true);
+      setSubmitError("");
       const job = {
         id: Date.now(),
         title: form.title.trim(),
@@ -112,6 +162,7 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
       const result = await onAddJob(job);
       if (result?.ok === false) {
         showToast("You do not have permission to post jobs.");
+        setSubmitError("You do not have permission to post jobs.");
         return;
       }
       if (result?.persisted === "supabase") {
@@ -121,7 +172,11 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
       }
       setPage("jobs");
     } catch (err) {
-      showToast(err?.message || "Could not post job. Please try again.");
+      const message = err?.message || "Could not post job. Please try again.";
+      setSubmitError(message);
+      showToast(message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -139,13 +194,20 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
         </p>
 
         <form noValidate onSubmit={handleSubmit} style={{ background: "#ffffff", border: "1px solid rgba(148,163,184,0.35)", borderRadius: 20, padding: "24px 20px", backdropFilter: "blur(20px)" }}>
+          {submitError && (
+            <div style={{ marginBottom: 20, padding: "12px 14px", borderRadius: 12, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.22)", color: "#b91c1c", fontSize: 13, fontWeight: 600 }}>
+              {submitError}
+            </div>
+          )}
           <div style={{ marginBottom: 20 }}>
             <label style={labelStyle}>JOB TITLE *</label>
-            <input value={form.title} onChange={e => update("title", e.target.value)} placeholder="e.g. Senior LLM Engineer" style={inputStyle} required />
+            <input ref={fieldRefs.title} value={form.title} onChange={e => update("title", e.target.value)} placeholder="e.g. Senior LLM Engineer" style={{ ...inputStyle, borderColor: errors.title ? "rgba(239,68,68,0.7)" : defaultInputBorderColor }} required />
+            {errors.title && <div style={{ marginTop: 6, fontSize: 12, color: "#dc2626" }}>{errors.title}</div>}
           </div>
           <div style={{ marginBottom: 20 }}>
             <label style={labelStyle}>COMPANY *</label>
-            <input value={form.company} onChange={e => update("company", e.target.value)} placeholder="e.g. DeepMind" style={inputStyle} required />
+            <input ref={fieldRefs.company} value={form.company} onChange={e => update("company", e.target.value)} placeholder="e.g. DeepMind" style={{ ...inputStyle, borderColor: errors.company ? "rgba(239,68,68,0.7)" : defaultInputBorderColor }} required />
+            {errors.company && <div style={{ marginTop: 6, fontSize: 12, color: "#dc2626" }}>{errors.company}</div>}
           </div>
           <div style={{ marginBottom: 20 }}>
             <label style={labelStyle}>LOCATION</label>
@@ -155,13 +217,14 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
           <div className="add-job-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
             <div>
               <label style={labelStyle}>MIN SALARY *</label>
-              <input type="number" value={form.salary_min} onChange={e => update("salary_min", e.target.value)} placeholder="80000" style={inputStyle} min={0} required />
+              <input ref={fieldRefs.salary_min} type="number" value={form.salary_min} onChange={e => update("salary_min", e.target.value)} placeholder="80000" style={{ ...inputStyle, borderColor: errors.salary ? "rgba(239,68,68,0.7)" : defaultInputBorderColor }} min={0} required />
             </div>
             <div>
               <label style={labelStyle}>MAX SALARY *</label>
-              <input type="number" value={form.salary_max} onChange={e => update("salary_max", e.target.value)} placeholder="150000" style={inputStyle} min={0} required />
+              <input type="number" value={form.salary_max} onChange={e => update("salary_max", e.target.value)} placeholder="150000" style={{ ...inputStyle, borderColor: errors.salary ? "rgba(239,68,68,0.7)" : defaultInputBorderColor }} min={0} required />
             </div>
           </div>
+          {errors.salary && <div style={{ marginTop: -12, marginBottom: 16, fontSize: 12, color: "#dc2626" }}>{errors.salary}</div>}
           <div style={{ marginBottom: 20 }}>
             <label style={labelStyle}>CURRENCY</label>
             <select value={form.currency} onChange={e => update("currency", e.target.value)} style={{ ...inputStyle, cursor: "pointer" }}>
@@ -241,16 +304,18 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
 
           <div style={{ marginBottom: 20 }}>
             <label style={labelStyle}>DESCRIPTION *</label>
-            <textarea value={form.description} onChange={e => update("description", e.target.value)} placeholder="Describe the role, responsibilities, and what you're looking for..." rows={5} style={{ ...inputStyle, resize: "vertical", minHeight: 120 }} required />
+            <textarea ref={fieldRefs.description} value={form.description} onChange={e => update("description", e.target.value)} placeholder="Describe the role, responsibilities, and what you're looking for..." rows={5} style={{ ...inputStyle, resize: "vertical", minHeight: 120, borderColor: errors.description ? "rgba(239,68,68,0.7)" : defaultInputBorderColor }} required />
+            {errors.description && <div style={{ marginTop: 6, fontSize: 12, color: "#dc2626" }}>{errors.description}</div>}
           </div>
           <div style={{ marginBottom: 24 }}>
             <label style={labelStyle}>APPLICATION URL *</label>
-            <input value={form.apply_url} onChange={e => update("apply_url", e.target.value)} placeholder="https://company.com/careers or company.com/apply" style={inputStyle} required />
+            <input ref={fieldRefs.apply_url} value={form.apply_url} onChange={e => update("apply_url", e.target.value)} placeholder="https://company.com/careers or company.com/apply" style={{ ...inputStyle, borderColor: errors.apply_url ? "rgba(239,68,68,0.7)" : defaultInputBorderColor }} required />
+            {errors.apply_url && <div style={{ marginTop: 6, fontSize: 12, color: "#dc2626" }}>{errors.apply_url}</div>}
           </div>
 
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-            <button type="submit" style={{ padding: "14px 32px", background: "linear-gradient(135deg, #7c3aed, #2563eb)", border: "none", borderRadius: 10, color: "#ffffff", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Merriweather', serif" }}>
-              Post Job
+            <button type="submit" disabled={isSubmitting} style={{ padding: "14px 32px", background: "linear-gradient(135deg, #7c3aed, #2563eb)", border: "none", borderRadius: 10, color: "#ffffff", fontSize: 14, fontWeight: 700, cursor: isSubmitting ? "not-allowed" : "pointer", opacity: isSubmitting ? 0.75 : 1, fontFamily: "'Merriweather', serif" }}>
+              {isSubmitting ? "Posting..." : "Post Job"}
             </button>
             <button type="button" onClick={() => setPage("jobs")} style={{ padding: "14px 24px", background: "transparent", border: "1px solid rgba(148,163,184,0.5)", borderRadius: 10, color: "#64748b", fontSize: 13, cursor: "pointer" }}>
               Cancel
