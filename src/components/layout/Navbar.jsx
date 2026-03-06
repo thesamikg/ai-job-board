@@ -10,12 +10,17 @@ const navBtn = (page, p) => ({
 
 export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false, canPostJobs = false }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const isSignedIn = Boolean(user?.id || user?.email);
   const isEmployerLike = Boolean(canPostJobs);
+  const displayName = String(user?.name || user?.email?.split("@")[0] || "User");
+  const email = String(user?.email || "");
+  const initial = (displayName.trim().charAt(0) || "U").toUpperCase();
 
   const goTo = (p) => {
     setPage(p);
     setMenuOpen(false);
+    setProfileOpen(false);
   };
 
   return (
@@ -46,11 +51,88 @@ export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false
           <>
             <button onClick={() => setPage("jobs")} style={navBtn(page, "jobs")}>Jobs</button>
             <button onClick={() => setPage("dashboard")} style={navBtn(page, "dashboard")}>Dashboard</button>
-            <button onClick={onSignOut} style={{
-              marginLeft: 4, background: "linear-gradient(135deg, #1d4ed8, #2563eb)",
-              border: "none", borderRadius: 8, padding: "7px 18px", color: "#ffffff",
-              cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "'Source Sans 3', sans-serif"
-            }}>Sign Out</button>
+            <div style={{ position: "relative", marginLeft: 4 }}>
+              <button
+                onClick={() => setProfileOpen((v) => !v)}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                  background: "#ffffff",
+                  border: "1px solid rgba(148,163,184,0.45)",
+                  borderRadius: 999,
+                  padding: "4px 10px 4px 4px",
+                  cursor: "pointer",
+                }}
+              >
+                <span style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: "50%",
+                  background: "linear-gradient(135deg, #1d4ed8, #2563eb)",
+                  color: "#ffffff",
+                  fontSize: 13,
+                  fontWeight: 800,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontFamily: "'Source Sans 3', sans-serif",
+                }}>{initial}</span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: "#334155" }}>Profile</span>
+              </button>
+              {profileOpen && (
+                <div style={{
+                  position: "absolute",
+                  top: "calc(100% + 8px)",
+                  right: 0,
+                  minWidth: 240,
+                  background: "#ffffff",
+                  border: "1px solid rgba(148,163,184,0.35)",
+                  borderRadius: 12,
+                  padding: 12,
+                  boxShadow: "0 12px 28px rgba(15,23,42,0.18)",
+                  zIndex: 120,
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+                    <span style={{
+                      width: 34,
+                      height: 34,
+                      borderRadius: "50%",
+                      background: "linear-gradient(135deg, #1d4ed8, #2563eb)",
+                      color: "#ffffff",
+                      fontSize: 14,
+                      fontWeight: 800,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}>{initial}</span>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: "#0f172a", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{displayName}</div>
+                      <div style={{ fontSize: 12, color: "#64748b", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{email}</div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setProfileOpen(false);
+                      onSignOut();
+                    }}
+                    style={{
+                      width: "100%",
+                      background: "linear-gradient(135deg, #1d4ed8, #2563eb)",
+                      border: "none",
+                      borderRadius: 8,
+                      padding: "10px 12px",
+                      color: "#ffffff",
+                      fontSize: 13,
+                      fontWeight: 700,
+                      cursor: "pointer",
+                    }}
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              )}
+            </div>
           </>
         ) : (
           <>
@@ -118,11 +200,39 @@ export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false
             <>
               <button onClick={() => goTo("jobs")} style={{ ...navBtn(page, "jobs"), marginTop: 8, width: "100%", padding: "12px 20px" }}>Jobs</button>
               <button onClick={() => goTo("dashboard")} style={{ ...navBtn(page, "dashboard"), marginTop: 8, width: "100%", padding: "12px 20px" }}>Dashboard</button>
-              <button onClick={onSignOut} style={{
-                background: "linear-gradient(135deg, #1d4ed8, #2563eb)", color: "#ffffff",
-                border: "none", borderRadius: 10, padding: "14px 24px", marginTop: 8,
-                fontSize: 15, fontWeight: 700, cursor: "pointer", width: "100%"
-              }}>Sign Out</button>
+              <button
+                onClick={() => setProfileOpen((v) => !v)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  width: "100%",
+                  background: "#ffffff",
+                  border: "1px solid rgba(148,163,184,0.45)",
+                  borderRadius: 10,
+                  padding: "10px 12px",
+                  marginTop: 8,
+                  cursor: "pointer",
+                }}
+              >
+                <span style={{
+                  width: 30, height: 30, borderRadius: "50%",
+                  background: "linear-gradient(135deg, #1d4ed8, #2563eb)",
+                  color: "#ffffff", fontSize: 13, fontWeight: 800,
+                  display: "inline-flex", alignItems: "center", justifyContent: "center",
+                }}>{initial}</span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: "#334155" }}>Profile</span>
+              </button>
+              {profileOpen && (
+                <div style={{ width: "100%", border: "1px solid rgba(148,163,184,0.35)", borderRadius: 10, padding: 10, marginTop: 8 }}>
+                  <div style={{ fontSize: 12, color: "#64748b", marginBottom: 8, wordBreak: "break-word" }}>{email}</div>
+                  <button onClick={() => { setProfileOpen(false); onSignOut(); }} style={{
+                    background: "linear-gradient(135deg, #1d4ed8, #2563eb)", color: "#ffffff",
+                    border: "none", borderRadius: 10, padding: "12px 16px",
+                    fontSize: 14, fontWeight: 700, cursor: "pointer", width: "100%"
+                  }}>Sign Out</button>
+                </div>
+              )}
             </>
           ) : (
             <>
