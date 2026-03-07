@@ -25,24 +25,15 @@ const labelStyle = {
 };
 
 const defaultInputBorderColor = "rgba(148,163,184,0.6)";
+const MAX_LOGO_SIZE_BYTES = 2 * 1024 * 1024;
 
-function normalizeCompanyLogoUrl(value) {
-  const trimmed = String(value || "").trim();
-  if (!trimmed) return "";
-  if (/^data:image\/[a-zA-Z]+;base64,/i.test(trimmed)) return trimmed;
-  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
-}
-
-function isValidCompanyLogoUrl(value) {
-  const normalized = normalizeCompanyLogoUrl(value);
-  if (!normalized) return true;
-  if (/^data:image\/[a-zA-Z]+;base64,/i.test(normalized)) return true;
-  try {
-    const url = new URL(normalized);
-    return url.protocol === "http:" || url.protocol === "https:";
-  } catch {
-    return false;
-  }
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error("Could not read image file."));
+    reader.readAsDataURL(file);
+  });
 }
 
 function validateForm(form) {
@@ -51,7 +42,7 @@ function validateForm(form) {
   const company = form.company.trim();
   const description = form.description.trim();
   const url = form.apply_url.trim();
-  const companyLogo = form.company_logo.trim();
+  const companyLogo = String(form.company_logo || "").trim();
   const minRaw = String(form.salary_min ?? "").trim();
   const maxRaw = String(form.salary_max ?? "").trim();
   const min = Number(form.salary_min);
@@ -59,9 +50,7 @@ function validateForm(form) {
 
   if (!title) errors.title = "Please enter a job title.";
   if (!company) errors.company = "Please enter a company name.";
-  if (companyLogo && !isValidCompanyLogoUrl(companyLogo)) {
-    errors.company_logo = "Please enter a valid image URL.";
-  }
+  if (!companyLogo || !/^data:image\/[a-zA-Z]+;base64,/i.test(companyLogo)) errors.company_logo = "Company logo image is required.";
   if (!minRaw || !maxRaw) {
     errors.salary = "Please enter both min and max salary.";
   } else if (isNaN(min) || min < 0 || isNaN(max) || max < 0 || min > max) {
@@ -82,6 +71,7 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
     title: "",
     company: "",
     company_logo: "",
+    company_logo_name: "",
     location: "",
     salary_min: "",
     salary_max: "",
@@ -136,11 +126,46 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
 
   const removeSkill = (s) => update("skills", form.skills.filter(x => x !== s));
 
+  const handleCompanyLogoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      update("company_logo", "");
+      update("company_logo_name", "");
+      return;
+    }
+    if (!String(file.type || "").startsWith("image/")) {
+      update("company_logo", "");
+      update("company_logo_name", "");
+      e.target.value = "";
+      setErrors((prev) => ({ ...prev, company_logo: "Please upload an image file." }));
+      setSubmitError("Please upload an image file for the company logo.");
+      showToast("Please upload an image file for the company logo.");
+      return;
+    }
+    if (file.size > MAX_LOGO_SIZE_BYTES) {
+      update("company_logo", "");
+      update("company_logo_name", "");
+      e.target.value = "";
+      setErrors((prev) => ({ ...prev, company_logo: "Image must be 2MB or smaller." }));
+      setSubmitError("Company logo image must be 2MB or smaller.");
+      showToast("Company logo image must be 2MB or smaller.");
+      return;
+    }
+    try {
+      const dataUrl = await readFileAsDataUrl(file);
+      update("company_logo", dataUrl);
+      update("company_logo_name", file.name);
+    } catch (err) {
+      setErrors((prev) => ({ ...prev, company_logo: "Could not read selected image." }));
+      setSubmitError("Could not read selected image.");
+      showToast(err?.message || "Could not read selected image.");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
     const urlCandidate = form.apply_url.trim();
-    const logoCandidate = form.company_logo.trim();
     const min = Number(form.salary_min);
     const max = Number(form.salary_max);
     const nextErrors = validateForm(form);
@@ -164,7 +189,7 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
         id: Date.now(),
         title: form.title.trim(),
         company: form.company.trim(),
-        companyLogo: logoCandidate ? normalizeCompanyLogoUrl(logoCandidate) : getCompanyInitials(form.company),
+        companyLogo: form.company_logo || getCompanyInitials(form.company),
         location: form.location.trim() || "Remote",
         salary_min: min,
         salary_max: max,
@@ -229,9 +254,23 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
             {errors.company && <div style={{ marginTop: 6, fontSize: 12, color: "#dc2626" }}>{errors.company}</div>}
           </div>
           <div style={{ marginBottom: 20 }}>
-            <label style={labelStyle}>COMPANY LOGO URL (OPTIONAL)</label>
-            <input ref={fieldRefs.company_logo} value={form.company_logo} onChange={e => update("company_logo", e.target.value)} placeholder="https://yourcompany.com/logo.png" style={{ ...inputStyle, borderColor: errors.company_logo ? "rgba(239,68,68,0.7)" : defaultInputBorderColor }} />
+            <label style={labelStyle}>COMPANY LOGO IMAGE *</label>
+            <input
+              ref={fieldRefs.company_logo}
+              type="file"
+              accept="image/*"
+              onChange={handleCompanyLogoUpload}
+              style={{ ...inputStyle, padding: "10px 12px", borderColor: errors.company_logo ? "rgba(239,68,68,0.7)" : defaultInputBorderColor }}
+              required
+            />
+            <div style={{ marginTop: 6, fontSize: 11, color: "#64748b" }}>Upload JPG, PNG, or WEBP (max 2MB).</div>
             {errors.company_logo && <div style={{ marginTop: 6, fontSize: 12, color: "#dc2626" }}>{errors.company_logo}</div>}
+            {form.company_logo && (
+              <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 10 }}>
+                <img src={form.company_logo} alt="Company logo preview" style={{ width: 44, height: 44, borderRadius: 10, objectFit: "cover", border: "1px solid rgba(148,163,184,0.4)" }} />
+                <div style={{ fontSize: 12, color: "#475569" }}>{form.company_logo_name || "Logo uploaded"}</div>
+              </div>
+            )}
           </div>
           <div style={{ marginBottom: 20 }}>
             <label style={labelStyle}>LOCATION</label>
