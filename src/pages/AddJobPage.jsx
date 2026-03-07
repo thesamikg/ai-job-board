@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import Navbar from "../components/layout/Navbar";
 import { Toast } from "../components/ui";
 import { CATEGORIES, ALL_SKILLS } from "../data/jobs";
+import { getCompanyInitials } from "../utils/jobHelpers";
 
 const inputStyle = {
   width: "100%",
@@ -25,10 +26,23 @@ const labelStyle = {
 
 const defaultInputBorderColor = "rgba(148,163,184,0.6)";
 
-function getCompanyLogo(company) {
-  const words = company.trim().split(/\s+/);
-  if (words.length >= 2) return (words[0][0] + words[1][0]).toUpperCase();
-  return company.slice(0, 2).toUpperCase();
+function normalizeCompanyLogoUrl(value) {
+  const trimmed = String(value || "").trim();
+  if (!trimmed) return "";
+  if (/^data:image\/[a-zA-Z]+;base64,/i.test(trimmed)) return trimmed;
+  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+}
+
+function isValidCompanyLogoUrl(value) {
+  const normalized = normalizeCompanyLogoUrl(value);
+  if (!normalized) return true;
+  if (/^data:image\/[a-zA-Z]+;base64,/i.test(normalized)) return true;
+  try {
+    const url = new URL(normalized);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
 }
 
 function validateForm(form) {
@@ -37,6 +51,7 @@ function validateForm(form) {
   const company = form.company.trim();
   const description = form.description.trim();
   const url = form.apply_url.trim();
+  const companyLogo = form.company_logo.trim();
   const minRaw = String(form.salary_min ?? "").trim();
   const maxRaw = String(form.salary_max ?? "").trim();
   const min = Number(form.salary_min);
@@ -44,6 +59,9 @@ function validateForm(form) {
 
   if (!title) errors.title = "Please enter a job title.";
   if (!company) errors.company = "Please enter a company name.";
+  if (companyLogo && !isValidCompanyLogoUrl(companyLogo)) {
+    errors.company_logo = "Please enter a valid image URL.";
+  }
   if (!minRaw || !maxRaw) {
     errors.salary = "Please enter both min and max salary.";
   } else if (isNaN(min) || min < 0 || isNaN(max) || max < 0 || min > max) {
@@ -63,6 +81,7 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
   const [form, setForm] = useState({
     title: "",
     company: "",
+    company_logo: "",
     location: "",
     salary_min: "",
     salary_max: "",
@@ -82,6 +101,7 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
   const fieldRefs = {
     title: useRef(null),
     company: useRef(null),
+    company_logo: useRef(null),
     salary_min: useRef(null),
     description: useRef(null),
     apply_url: useRef(null),
@@ -120,6 +140,7 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
     e.preventDefault();
     if (isSubmitting) return;
     const urlCandidate = form.apply_url.trim();
+    const logoCandidate = form.company_logo.trim();
     const min = Number(form.salary_min);
     const max = Number(form.salary_max);
     const nextErrors = validateForm(form);
@@ -129,6 +150,7 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
       showToast("Please complete the required fields.");
       if (nextErrors.title) focusField("title");
       else if (nextErrors.company) focusField("company");
+      else if (nextErrors.company_logo) focusField("company_logo");
       else if (nextErrors.salary) focusField("salary_min");
       else if (nextErrors.description) focusField("description");
       else if (nextErrors.apply_url) focusField("apply_url");
@@ -142,7 +164,7 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
         id: Date.now(),
         title: form.title.trim(),
         company: form.company.trim(),
-        companyLogo: getCompanyLogo(form.company),
+        companyLogo: logoCandidate ? normalizeCompanyLogoUrl(logoCandidate) : getCompanyInitials(form.company),
         location: form.location.trim() || "Remote",
         salary_min: min,
         salary_max: max,
@@ -161,15 +183,12 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
 
       const result = await onAddJob(job);
       if (result?.ok === false) {
-        showToast("You do not have permission to post jobs.");
-        setSubmitError("You do not have permission to post jobs.");
+        const message = result?.error ? String(result.error) : "Could not post job. Please try again.";
+        showToast(message);
+        setSubmitError(message);
         return;
       }
-      if (result?.persisted === "supabase") {
-        showToast("✓ Job posted successfully! It will appear in the Jobs list.");
-      } else {
-        showToast("Saved locally. It will persist on this browser after refresh.");
-      }
+      showToast("✓ Job posted successfully! It will appear in the Jobs list.");
       setPage("jobs");
     } catch (err) {
       const message = err?.message || "Could not post job. Please try again.";
@@ -208,6 +227,11 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
             <label style={labelStyle}>COMPANY *</label>
             <input ref={fieldRefs.company} value={form.company} onChange={e => update("company", e.target.value)} placeholder="e.g. DeepMind" style={{ ...inputStyle, borderColor: errors.company ? "rgba(239,68,68,0.7)" : defaultInputBorderColor }} required />
             {errors.company && <div style={{ marginTop: 6, fontSize: 12, color: "#dc2626" }}>{errors.company}</div>}
+          </div>
+          <div style={{ marginBottom: 20 }}>
+            <label style={labelStyle}>COMPANY LOGO URL (OPTIONAL)</label>
+            <input ref={fieldRefs.company_logo} value={form.company_logo} onChange={e => update("company_logo", e.target.value)} placeholder="https://yourcompany.com/logo.png" style={{ ...inputStyle, borderColor: errors.company_logo ? "rgba(239,68,68,0.7)" : defaultInputBorderColor }} />
+            {errors.company_logo && <div style={{ marginTop: 6, fontSize: 12, color: "#dc2626" }}>{errors.company_logo}</div>}
           </div>
           <div style={{ marginBottom: 20 }}>
             <label style={labelStyle}>LOCATION</label>

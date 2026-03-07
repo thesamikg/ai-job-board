@@ -1,11 +1,16 @@
+import { useState } from "react";
 import { Badge, SkillTag } from "../ui";
-import { timeSince, isNew, isHot, formatSalary } from "../../utils/jobHelpers";
+import { timeSince, isNew, isHot, formatSalary, isCompanyLogoImage, getCompanyInitials } from "../../utils/jobHelpers";
 
 export default function JobDetail({ job, onClose, onApply, saved, onSave }) {
+  const [logoFailed, setLogoFailed] = useState(false);
   const descriptionParts = String(job?.description || "")
     .split(/\n+/)
     .map((part) => part.trim())
     .filter(Boolean);
+  const companyLogo = String(job?.companyLogo || "").trim();
+  const useLogoImage = isCompanyLogoImage(companyLogo) && !logoFailed;
+  const companyInitials = getCompanyInitials(job?.company, companyLogo);
 
   return (
     <div style={{
@@ -25,8 +30,19 @@ export default function JobDetail({ job, onClose, onApply, saved, onSave }) {
                 background: "linear-gradient(135deg, rgba(124,58,237,0.4), rgba(37,99,235,0.4))",
                 border: "1px solid rgba(255,255,255,0.1)",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 16, fontWeight: 800, color: "#c4b5fd",
-              }}>{job.companyLogo}</div>
+                fontSize: 16, fontWeight: 800, color: "#c4b5fd", overflow: "hidden",
+              }}>
+                {useLogoImage ? (
+                  <img
+                    src={companyLogo}
+                    alt={`${job.company} logo`}
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    onError={() => setLogoFailed(true)}
+                  />
+                ) : (
+                  companyInitials
+                )}
+              </div>
               <div>
                 <h2 style={{ fontFamily: "'Merriweather', serif", fontSize: 22, fontWeight: 800, color: "#0f172a", marginBottom: 6 }}>{job.title}</h2>
                 <div style={{ fontSize: 14, color: "#475569" }}>{job.company} · {job.location}</div>

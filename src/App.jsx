@@ -1,104 +1,16 @@
 import { useState, useEffect } from "react";
 import { HomePage, JobsPage, DashboardPage, LoginPage, AddJobPage, AdminPage } from "./pages";
-import { SAMPLE_JOBS } from "./data/jobs";
 import { filterAndSortJobs } from "./utils/filterJobs";
 import { fetchJobs, addJob, updateJobStatus, deleteJob } from "./services/jobsService";
 import { signInWithPassword, signUpWithPassword, signInWithGoogle, getSession, onAuthStateChange, signOut, isEmailRegistered } from "./services/authService";
 import { isAdminUser, ensureUserProfile, fetchUsersForAdmin, addApplication, fetchApplicationsForAdmin, fetchApplicationsForUser, fetchUserRole } from "./services/adminService";
 import "./styles/global.css";
 
-const LOCAL_JOBS_KEY = "ai_jobboard_local_jobs";
-const LOCAL_JOB_STATUS_KEY = "ai_jobboard_job_status";
-const LOCAL_DELETED_JOBS_KEY = "ai_jobboard_deleted_jobs";
 const PENDING_SIGNUP_ROLE_KEY = "ai_jobboard_pending_signup_role";
 const SAVED_JOBS_BY_USER_KEY = "ai_jobboard_saved_jobs_by_user";
 const BLOCKED_EMPLOYER_DOMAINS = new Set(["gmail.com", "yahoo.com", "outlook.com", "hotmail.com"]);
 const LOCAL_PAGE_KEY = "ai_jobboard_current_page";
 const LOCAL_USER_KEY = "ai_jobboard_current_user";
-const REMOTE_JOBS_CACHE_KEY = "ai_jobboard_remote_jobs_cache";
-
-function normalizeJob(job) {
-  return {
-    ...job,
-    posted_at: job?.posted_at ? new Date(job.posted_at) : new Date(),
-  };
-}
-
-function loadLocalJobs() {
-  try {
-    const raw = localStorage.getItem(LOCAL_JOBS_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed.map(normalizeJob);
-  } catch {
-    return [];
-  }
-}
-
-function saveLocalJobs(jobs) {
-  try {
-    localStorage.setItem(LOCAL_JOBS_KEY, JSON.stringify(jobs));
-  } catch {
-    // Ignore storage write errors.
-  }
-}
-
-function loadCachedRemoteJobs() {
-  try {
-    const raw = localStorage.getItem(REMOTE_JOBS_CACHE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed.map(normalizeJob);
-  } catch {
-    return [];
-  }
-}
-
-function saveCachedRemoteJobs(jobs) {
-  try {
-    localStorage.setItem(REMOTE_JOBS_CACHE_KEY, JSON.stringify(jobs));
-  } catch {
-    // Ignore storage write errors.
-  }
-}
-
-function loadLocalStatuses() {
-  try {
-    const raw = localStorage.getItem(LOCAL_JOB_STATUS_KEY);
-    const parsed = raw ? JSON.parse(raw) : {};
-    return parsed && typeof parsed === "object" ? parsed : {};
-  } catch {
-    return {};
-  }
-}
-
-function saveLocalStatuses(statuses) {
-  try {
-    localStorage.setItem(LOCAL_JOB_STATUS_KEY, JSON.stringify(statuses));
-  } catch {
-    // Ignore local storage errors.
-  }
-}
-
-function loadLocalDeletedJobs() {
-  try {
-    const raw = localStorage.getItem(LOCAL_DELETED_JOBS_KEY);
-    const parsed = raw ? JSON.parse(raw) : [];
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveLocalDeletedJobs(ids) {
-  try {
-    localStorage.setItem(LOCAL_DELETED_JOBS_KEY, JSON.stringify(ids));
-  } catch {
-    // Ignore local storage errors.
-  }
-}
 
 function getUserStorageId(user) {
   if (!user) return "";
@@ -187,38 +99,15 @@ function deriveDisplayName(sessionUser) {
   return prefix;
 }
 
-function getJobFingerprint(job) {
-  const title = String(job?.title || "").trim().toLowerCase();
-  const company = String(job?.company || "").trim().toLowerCase();
-  const location = String(job?.location || "").trim().toLowerCase();
-  if (title || company || location) {
-    return [title, company, location].join("|");
+function clearLegacyLocalJobCache() {
+  try {
+    localStorage.removeItem("ai_jobboard_local_jobs");
+    localStorage.removeItem("ai_jobboard_job_status");
+    localStorage.removeItem("ai_jobboard_deleted_jobs");
+    localStorage.removeItem("ai_jobboard_remote_jobs_cache");
+  } catch {
+    // Ignore storage errors.
   }
-  return `id:${String(job?.id ?? "")}`;
-}
-
-function sortJobsByPostedAt(jobs) {
-  return [...jobs].sort((a, b) => {
-    const left = a?.posted_at instanceof Date ? a.posted_at.getTime() : new Date(a?.posted_at || 0).getTime();
-    const right = b?.posted_at instanceof Date ? b.posted_at.getTime() : new Date(b?.posted_at || 0).getTime();
-    return right - left;
-  });
-}
-
-function mergeJobs(...groups) {
-  const merged = new Map();
-  groups.flat().forEach((job) => {
-    if (!job) return;
-    const normalized = normalizeJob(job);
-    merged.set(getJobFingerprint(normalized), normalized);
-  });
-  return sortJobsByPostedAt(Array.from(merged.values()));
-}
-
-function applyLocalJobState(jobs, statuses, deletedIds) {
-  return jobs
-    .filter((job) => !deletedIds.has(String(job.id)))
-    .map((job) => (statuses[String(job.id)] ? { ...job, status: statuses[String(job.id)] } : job));
 }
 
 async function fetchJobsWithTimeout(options = {}, timeoutMs = 5000) {
@@ -295,33 +184,16 @@ export default function App() {
 
   useEffect(() => {
     async function loadJobs() {
-      const sampleJobs = SAMPLE_JOBS.map(normalizeJob);
-      const localJobs = loadLocalJobs();
-      const cachedRemoteJobs = loadCachedRemoteJobs();
-      const localStatuses = loadLocalStatuses();
-      const locallyDeleted = new Set(loadLocalDeletedJobs());
-      const initialJobs = applyLocalJobState(
-        mergeJobs(sampleJobs, cachedRemoteJobs, localJobs),
-        localStatuses,
-        locallyDeleted
-      );
-
-      // Render immediately to avoid blank/loading state on initial page open.
-      setJobs(initialJobs);
-      setJobsLoading(false);
-
+      clearLegacyLocalJobCache();
+      setJobsLoading(true);
       try {
         const data = await fetchJobsWithTimeout({ includeAll: true }, 5000);
-        saveCachedRemoteJobs(data);
-        const mergedJobs = applyLocalJobState(
-          mergeJobs(sampleJobs, data, localJobs),
-          localStatuses,
-          locallyDeleted
-        );
-        setJobs(mergedJobs);
+        setJobs(Array.isArray(data) ? data : []);
       } catch (err) {
-        console.warn("Could not load jobs from Supabase, using cached/sample jobs:", err);
-        // Keep already-rendered merged fallback list.
+        console.warn("Could not load jobs from Supabase:", err);
+        setJobs([]);
+      } finally {
+        setJobsLoading(false);
       }
     }
     loadJobs();
@@ -578,14 +450,7 @@ export default function App() {
   };
 
   const handleModerateJob = async (jobId, status) => {
-    setJobs((prev) => {
-      const nextJobs = prev.map((job) => (String(job.id) === String(jobId) ? { ...job, status } : job));
-      saveCachedRemoteJobs(nextJobs);
-      return nextJobs;
-    });
-    const statuses = loadLocalStatuses();
-    statuses[String(jobId)] = status;
-    saveLocalStatuses(statuses);
+    setJobs((prev) => prev.map((job) => (String(job.id) === String(jobId) ? { ...job, status } : job)));
     try {
       await updateJobStatus(jobId, status);
     } catch (err) {
@@ -594,13 +459,7 @@ export default function App() {
   };
 
   const handleDeleteJob = async (jobId) => {
-    setJobs((prev) => {
-      const nextJobs = prev.filter((job) => String(job.id) !== String(jobId));
-      saveCachedRemoteJobs(nextJobs);
-      return nextJobs;
-    });
-    const deleted = Array.from(new Set([...loadLocalDeletedJobs(), String(jobId)]));
-    saveLocalDeletedJobs(deleted);
+    setJobs((prev) => prev.filter((job) => String(job.id) !== String(jobId)));
     try {
       await deleteJob(jobId);
     } catch (err) {
@@ -615,21 +474,13 @@ export default function App() {
     };
     try {
       const saved = await addJob(enrichedJob);
-      setJobs((prev) => {
-        const nextJobs = mergeJobs([saved], prev);
-        saveCachedRemoteJobs(nextJobs);
-        return nextJobs;
-      });
+      setJobs((prev) => [saved, ...prev.filter((item) => String(item.id) !== String(saved.id))]);
       return { ok: true, persisted: "supabase" };
     } catch (err) {
-      const localJob = normalizeJob(enrichedJob);
-      const nextLocal = mergeJobs([localJob], loadLocalJobs());
-      saveLocalJobs(nextLocal);
-      setJobs((prev) => mergeJobs([localJob], prev));
       const msg = err?.message || err?.error_description || String(err);
       console.error("Add job failed:", err);
       showToast(msg.includes("relation") ? "Database table missing. Run the migration in Supabase." : `Could not save to DB: ${msg.slice(0, 50)}`);
-      return { ok: true, persisted: "local" };
+      return { ok: false, error: msg };
     }
   };
 

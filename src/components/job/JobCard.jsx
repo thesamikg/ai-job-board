@@ -1,9 +1,13 @@
 import { useState } from "react";
 import { Badge, SkillTag } from "../ui";
-import { timeSince, isNew, isHot, formatSalary } from "../../utils/jobHelpers";
+import { timeSince, isNew, isHot, formatSalary, isCompanyLogoImage, getCompanyInitials } from "../../utils/jobHelpers";
 
 export default function JobCard({ job, onClick, onApply }) {
   const [hovered, setHovered] = useState(false);
+  const [logoFailed, setLogoFailed] = useState(false);
+  const companyLogo = String(job?.companyLogo || "").trim();
+  const useLogoImage = isCompanyLogoImage(companyLogo) && !logoFailed;
+  const companyInitials = getCompanyInitials(job?.company, companyLogo);
 
   return (
     <div
@@ -32,8 +36,19 @@ export default function JobCard({ job, onClick, onApply }) {
             background: "linear-gradient(135deg, rgba(37,99,235,0.2), rgba(96,165,250,0.25))",
             border: "1px solid rgba(255,255,255,0.1)",
             display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 12, fontWeight: 800, color: "#1d4ed8", letterSpacing: -0.5
-          }}>{job.companyLogo}</div>
+            fontSize: 12, fontWeight: 800, color: "#1d4ed8", letterSpacing: -0.5, overflow: "hidden"
+          }}>
+            {useLogoImage ? (
+              <img
+                src={companyLogo}
+                alt={`${job.company} logo`}
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                onError={() => setLogoFailed(true)}
+              />
+            ) : (
+              companyInitials
+            )}
+          </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 4 }}>
               <span style={{ fontFamily: "'Merriweather', serif", fontWeight: 700, fontSize: 15, color: "#0f172a" }}>{job.title}</span>

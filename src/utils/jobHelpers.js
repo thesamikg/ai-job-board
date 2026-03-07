@@ -22,3 +22,22 @@ export function formatSalary(job) {
   }
   return `${symbol}${job.salary_min.toLocaleString()}–${symbol}${job.salary_max.toLocaleString()} ${job.currency}`;
 }
+
+export function isCompanyLogoImage(logoValue) {
+  const value = String(logoValue || "").trim();
+  return /^https?:\/\/.+/i.test(value) || /^data:image\/[a-zA-Z]+;base64,/i.test(value);
+}
+
+export function getCompanyInitials(companyName, logoValue = "") {
+  const logoText = String(logoValue || "").trim();
+  if (logoText && !isCompanyLogoImage(logoText)) {
+    return logoText.slice(0, 3).toUpperCase();
+  }
+  const words = String(companyName || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  if (words.length >= 2) return (words[0][0] + words[1][0]).toUpperCase();
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+  return "CO";
+}
