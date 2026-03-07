@@ -36,7 +36,7 @@ export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false
       {/* Desktop nav - hidden on mobile */}
       <div className="nav-desktop" style={{ display: "flex", gap: 8, alignItems: "center" }}>
         {!isSignedIn && (
-          <button onClick={() => setPage("login")} style={{
+          <button onClick={() => setPage("addJob")} style={{
             background: "transparent", border: "1px solid rgba(37,99,235,0.45)", borderRadius: 8, padding: "7px 16px", color: "#1d4ed8",
             cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "'Source Sans 3', sans-serif"
           }}>Post a Job</button>
@@ -134,19 +134,7 @@ export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false
               )}
             </div>
           </>
-        ) : (
-          <>
-            <button onClick={() => setPage("login")} style={{
-              background: "transparent", border: "1px solid rgba(37,99,235,0.45)", borderRadius: 8, padding: "7px 16px", color: "#1d4ed8",
-              cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "'Source Sans 3', sans-serif"
-            }}>Sign In</button>
-            <button onClick={() => setPage("signup")} style={{
-              marginLeft: 4, background: "linear-gradient(135deg, #1d4ed8, #2563eb)",
-              border: "none", borderRadius: 8, padding: "7px 18px", color: "#ffffff",
-              cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "'Source Sans 3', sans-serif"
-            }}>Sign Up</button>
-          </>
-        )}
+        ) : null}
       </div>
 
       {/* Hamburger - visible only on mobile */}
@@ -171,7 +159,7 @@ export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false
       <div className="nav-mobile-menu" onClick={() => setMenuOpen(false)}>
         <div className="nav-mobile-links" onClick={e => e.stopPropagation()}>
           {!isSignedIn && (
-            <button onClick={() => goTo("login")} style={{
+            <button onClick={() => goTo("addJob")} style={{
               background: "transparent",
               border: "1px solid rgba(37,99,235,0.45)",
               borderRadius: 10,
@@ -234,20 +222,7 @@ export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false
                 </div>
               )}
             </>
-          ) : (
-            <>
-              <button onClick={() => goTo("login")} style={{
-                background: "transparent", color: "#1d4ed8",
-                border: "1px solid rgba(37,99,235,0.45)", borderRadius: 10, padding: "12px 24px", marginTop: 8,
-                fontSize: 15, fontWeight: 700, cursor: "pointer", width: "100%"
-              }}>Sign In</button>
-              <button onClick={() => goTo("signup")} style={{
-                background: "linear-gradient(135deg, #1d4ed8, #2563eb)", color: "#ffffff",
-                border: "none", borderRadius: 10, padding: "14px 24px", marginTop: 8,
-                fontSize: 15, fontWeight: 700, cursor: "pointer", width: "100%"
-              }}>Sign Up</button>
-            </>
-          )}
+          ) : null}
         </div>
       </div>
     )}

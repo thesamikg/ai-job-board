@@ -609,11 +609,6 @@ export default function App() {
   };
 
   const handleAddJob = async (job) => {
-    if (!canPostJobs) {
-      showToast("Only employers can post jobs.");
-      setPage("login");
-      return { ok: false };
-    }
     const enrichedJob = {
       ...job,
       posted_by: user?.id || user?.email || null,
@@ -785,27 +780,6 @@ export default function App() {
   }
 
   if (page === "addJob") {
-    if (!canPostJobs) {
-      return (
-        <LoginPage
-          setPage={setPage}
-          loginEmail={loginEmail}
-          setLoginEmail={setLoginEmail}
-          loginPassword={loginPassword}
-          setLoginPassword={setLoginPassword}
-          signupRole={signupRole}
-          setSignupRole={setSignupRole}
-          signupCompanyName={signupCompanyName}
-          setSignupCompanyName={setSignupCompanyName}
-          handleSignIn={handleSignIn}
-          handleSignUp={handleSignUp}
-          handleGoogleSignIn={handleGoogleSignIn}
-          authLoading={authLoading}
-          toast={{ message: "Only employers can post jobs.", visible: true }}
-          initialMode="signin"
-        />
-      );
-    }
     return (
       <AddJobPage
         page={page}
