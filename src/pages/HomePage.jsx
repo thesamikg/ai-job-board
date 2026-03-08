@@ -14,9 +14,9 @@ export default function HomePage({
       <Navbar page="home" setPage={setPage} user={user} onSignOut={onSignOut} isAdmin={isAdmin} canPostJobs={canPostJobs} />
       {/* Hero */}
       <div className="hero-padding" style={{ position: "relative", overflow: "hidden", paddingTop: 92, paddingBottom: 24, background: "#eaf3ff" }}>
-        <div style={{ position: "relative", maxWidth: 900, margin: "0 auto", padding: "0 24px", animation: "fadeIn 0.8s ease forwards" }}>
+        <div className="home-hero-shell" style={{ position: "relative", maxWidth: 900, margin: "0 auto", padding: "0 24px", animation: "fadeIn 0.8s ease forwards" }}>
             <div style={{ padding: "12px 8px", textAlign: "center" }}>
-              <div style={{
+              <div className="home-role-pill" style={{
             display: "inline-flex", alignItems: "center", gap: 8, marginBottom: 16,
             background: "rgba(37,99,235,0.1)", border: "1px solid rgba(37,99,235,0.35)",
             borderRadius: 99, padding: "6px 16px"
@@ -24,14 +24,14 @@ export default function HomePage({
             <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#2563eb", display: "inline-block", boxShadow: "0 0 8px #2563eb55" }} />
             <span style={{ fontSize: 12, color: "#1d4ed8", fontWeight: 600 }}>{(jobs || []).length} roles live now</span>
           </div>
-          <h1 style={{ fontFamily: "'Merriweather', serif", fontSize: "clamp(32px, 5vw, 54px)", fontWeight: 700, color: "#0f172a", lineHeight: 1.15, marginBottom: 16 }}>
+          <h1 className="home-hero-title" style={{ fontFamily: "'Merriweather', serif", fontSize: "clamp(32px, 5vw, 54px)", fontWeight: 700, color: "#0f172a", lineHeight: 1.15, marginBottom: 16 }}>
             Find the Best<br />
             <span style={{ background: "linear-gradient(135deg, #1d4ed8, #60a5fa)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>AI & Robotics Jobs</span>
           </h1>
-          <p style={{ fontSize: "clamp(15px, 2vw, 18px)", color: "#475569", maxWidth: 560, margin: "0 auto 16px", lineHeight: 1.6 }}>
+          <p className="home-hero-subtitle" style={{ fontSize: "clamp(15px, 2vw, 18px)", color: "#475569", maxWidth: 560, margin: "0 auto 16px", lineHeight: 1.6 }}>
             The premier job board for AI Engineers, ML Scientists, Robotics Engineers, and LLM specialists worldwide.
           </p>
-          <div className="search-stack" style={{
+          <div className="search-stack home-search-stack" style={{
             display: "flex", gap: 8, background: "#ffffff",
             border: "1px solid rgba(148,163,184,0.35)", borderRadius: 14, padding: 8,
             maxWidth: 600, margin: "0 auto 14px", flexWrap: "wrap",
@@ -53,10 +53,10 @@ export default function HomePage({
               cursor: "pointer", fontFamily: "'Source Sans 3', sans-serif", whiteSpace: "nowrap"
             }}>Browse Jobs</button>
           </div>
-          <div style={{ fontSize: 12, color: "#64748b", marginBottom: 12 }}>
+          <div className="home-popular-links" style={{ fontSize: 12, color: "#64748b", marginBottom: 12 }}>
             Popular: <span style={{ color: "#1d4ed8", cursor: "pointer" }}>LLM Engineer</span> · <span style={{ color: "#1d4ed8", cursor: "pointer" }}>ML Research</span> · <span style={{ color: "#1d4ed8", cursor: "pointer" }}>Computer Vision</span> · <span style={{ color: "#1d4ed8", cursor: "pointer" }}>Robotics</span>
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 900, margin: "0 auto" }}>
+          <div className="home-jobs-preview" style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 900, margin: "0 auto" }}>
             {(jobs || []).slice(0, 2).map(job => (
               <JobCard key={job.id} job={job} onClick={j => setSelectedJob(j)} onApply={j => setApplyJob(j)} />
             ))}
@@ -67,7 +67,7 @@ export default function HomePage({
 
       {/* Available Jobs */}
       <div className="section-padding page-content home-jobs-section" style={{ maxWidth: 900, margin: "0 auto", padding: "40px 24px 80px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+        <div className="home-jobs-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
           <h2 style={{ fontFamily: "'Merriweather', serif", fontSize: 22, fontWeight: 700, color: "#0f172a" }}>Jobs Available Now</h2>
           <button onClick={() => setPage("jobs")} style={{ background: "#fff", border: "1px solid rgba(148,163,184,0.4)", borderRadius: 8, padding: "7px 14px", color: "#334155", cursor: "pointer", fontSize: 13, fontWeight: 700 }}>View all →</button>
         </div>

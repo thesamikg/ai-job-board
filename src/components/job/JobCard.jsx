@@ -65,9 +65,12 @@ export default function JobCard({ job, onClick, onApply }) {
           </div>
         </div>
         <div className="job-card-side" style={{ textAlign: "right", flexShrink: 0, minWidth: 140 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: "#1d4ed8", marginBottom: 4 }}>{formatSalary(job)}</div>
-          <div style={{ fontSize: 11, color: "#64748b" }}>{timeSince(job.posted_at)}</div>
+          <div className="job-card-pay" style={{ marginBottom: 8 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "#1d4ed8", marginBottom: 4 }}>{formatSalary(job)}</div>
+            <div style={{ fontSize: 11, color: "#64748b" }}>{timeSince(job.posted_at)}</div>
+          </div>
           <button
+            className="job-card-apply-btn"
             onClick={(e) => {
               e.stopPropagation();
               if (onApply) onApply(job);
