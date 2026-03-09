@@ -11,6 +11,7 @@ const SAVED_JOBS_BY_USER_KEY = "ai_jobboard_saved_jobs_by_user";
 const BLOCKED_EMPLOYER_DOMAINS = new Set(["gmail.com", "yahoo.com", "outlook.com", "hotmail.com"]);
 const LOCAL_PAGE_KEY = "ai_jobboard_current_page";
 const LOCAL_USER_KEY = "ai_jobboard_current_user";
+const JOBS_CACHE_KEY = "ai_jobboard_jobs_cache_v1";
 
 function getUserStorageId(user) {
   if (!user) return "";
@@ -110,6 +111,32 @@ function clearLegacyLocalJobCache() {
   }
 }
 
+function normalizeCachedJob(job) {
+  return {
+    ...job,
+    posted_at: job?.posted_at ? new Date(job.posted_at) : new Date(),
+  };
+}
+
+function loadJobsCache() {
+  try {
+    const raw = localStorage.getItem(JOBS_CACHE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.map(normalizeCachedJob) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveJobsCache(jobs) {
+  try {
+    localStorage.setItem(JOBS_CACHE_KEY, JSON.stringify(jobs));
+  } catch {
+    // Ignore storage errors.
+  }
+}
+
 async function fetchJobsWithTimeout(options = {}, timeoutMs = 5000) {
   return Promise.race([
     fetchJobs(options),
@@ -185,19 +212,44 @@ export default function App() {
   useEffect(() => {
     async function loadJobs() {
       clearLegacyLocalJobCache();
-      setJobsLoading(true);
+      const cachedJobs = loadJobsCache();
+      if (cachedJobs.length > 0) {
+        setJobs(cachedJobs);
+        setJobsLoading(false);
+      } else {
+        setJobsLoading(true);
+      }
       try {
-        const data = await fetchJobsWithTimeout({ includeAll: true }, 5000);
-        setJobs(Array.isArray(data) ? data : []);
+        const data = await fetchJobsWithTimeout({ includeAll: false }, 5000);
+        const nextJobs = Array.isArray(data) ? data : [];
+        setJobs(nextJobs);
+        saveJobsCache(nextJobs);
       } catch (err) {
         console.warn("Could not load jobs from Supabase:", err);
-        setJobs([]);
+        if (cachedJobs.length === 0) {
+          setJobs([]);
+        }
       } finally {
         setJobsLoading(false);
       }
     }
     loadJobs();
   }, []);
+
+  useEffect(() => {
+    async function loadAdminJobs() {
+      if (!isAdmin || page !== "admin") return;
+      try {
+        const data = await fetchJobsWithTimeout({ includeAll: true }, 5000);
+        if (Array.isArray(data)) {
+          setJobs(data);
+        }
+      } catch (err) {
+        console.warn("Could not load full admin jobs:", err);
+      }
+    }
+    loadAdminJobs();
+  }, [isAdmin, page]);
 
   useEffect(() => {
     saveCurrentPage(page);
@@ -450,7 +502,11 @@ export default function App() {
   };
 
   const handleModerateJob = async (jobId, status) => {
-    setJobs((prev) => prev.map((job) => (String(job.id) === String(jobId) ? { ...job, status } : job)));
+    setJobs((prev) => {
+      const nextJobs = prev.map((job) => (String(job.id) === String(jobId) ? { ...job, status } : job));
+      saveJobsCache(nextJobs.filter((job) => job.status !== "pending" && job.status !== "rejected"));
+      return nextJobs;
+    });
     try {
       await updateJobStatus(jobId, status);
     } catch (err) {
@@ -459,7 +515,11 @@ export default function App() {
   };
 
   const handleDeleteJob = async (jobId) => {
-    setJobs((prev) => prev.filter((job) => String(job.id) !== String(jobId)));
+    setJobs((prev) => {
+      const nextJobs = prev.filter((job) => String(job.id) !== String(jobId));
+      saveJobsCache(nextJobs.filter((job) => job.status !== "pending" && job.status !== "rejected"));
+      return nextJobs;
+    });
     try {
       await deleteJob(jobId);
     } catch (err) {
@@ -474,7 +534,11 @@ export default function App() {
     };
     try {
       const saved = await addJob(enrichedJob);
-      setJobs((prev) => [saved, ...prev.filter((item) => String(item.id) !== String(saved.id))]);
+      setJobs((prev) => {
+        const nextJobs = [saved, ...prev.filter((item) => String(item.id) !== String(saved.id))];
+        saveJobsCache(nextJobs.filter((jobItem) => jobItem.status !== "pending" && jobItem.status !== "rejected"));
+        return nextJobs;
+      });
       return { ok: true, persisted: "supabase" };
     } catch (err) {
       const msg = err?.message || err?.error_description || String(err);
