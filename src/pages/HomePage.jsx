@@ -85,7 +85,7 @@ export default function HomePage({
       {/* Why choose */}
       <div style={{ background: "rgba(37,99,235,0.05)", borderTop: "1px solid rgba(37,99,235,0.14)", borderBottom: "1px solid rgba(37,99,235,0.14)", padding: "64px 24px", marginBottom: 80 }}>
         <div className="section-padding" style={{ maxWidth: 900, margin: "0 auto" }}>
-          <h2 style={{ fontFamily: "'Merriweather', serif", fontSize: 22, fontWeight: 700, color: "#0f172a", textAlign: "center", marginBottom: 48 }}>Why NeuralHire?</h2>
+          <h2 style={{ fontFamily: "'Merriweather', serif", fontSize: 22, fontWeight: 700, color: "#0f172a", textAlign: "center", marginBottom: 48 }}>Why AIRoboticsjob?</h2>
           <div className="grid-1-mobile" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 24 }}>
             {[["⚡", "AI-First", "Built exclusively for AI, ML, and Robotics professionals. No noise."],
             ["🎯", "Curated Roles", "Every listing is reviewed for quality, accuracy, and salary transparency."],
@@ -125,7 +125,7 @@ export default function HomePage({
       {/* Footer */}
       <div className="footer-responsive" style={{ borderTop: "1px solid rgba(148,163,184,0.3)", padding: "32px 32px", display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
         <Logo />
-        <div style={{ fontSize: 12, color: "#64748b" }}>© 2025 NeuralHire · Built for the AI generation</div>
+        <div style={{ fontSize: 12, color: "#64748b" }}>© 2026 AIRoboticsjob · Built for AI and robotics hiring</div>
         <div style={{ display: "flex", gap: 24 }}>
           {["Privacy", "Terms", "Contact"].map(l => (
             <span key={l} style={{ fontSize: 12, color: "#64748b", cursor: "pointer" }}>{l}</span>
