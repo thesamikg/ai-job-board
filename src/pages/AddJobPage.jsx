@@ -66,7 +66,7 @@ function validateForm(form) {
   return errors;
 }
 
-export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, user, onSignOut, isAdmin, canPostJobs }) {
+export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, user, onSignOut, isAdmin, canPostJobs, onSelectCategory }) {
   const [form, setForm] = useState({
     title: "",
     company: "",
@@ -228,7 +228,7 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
 
   return (
     <div style={bg}>
-      <Navbar page={page} setPage={setPage} user={user} onSignOut={onSignOut} isAdmin={isAdmin} canPostJobs={canPostJobs} />
+      <Navbar page={page} setPage={setPage} user={user} onSignOut={onSignOut} isAdmin={isAdmin} canPostJobs={canPostJobs} onSelectCategory={onSelectCategory} />
       <div className="page-content" style={{ paddingTop: 80, maxWidth: 640, margin: "0 auto", padding: "80px 24px 48px" }}>
         <h1 style={{ fontFamily: "'Merriweather', serif", fontSize: 28, fontWeight: 900, color: "#0f172a", marginBottom: 8 }}>
           Post a New Job

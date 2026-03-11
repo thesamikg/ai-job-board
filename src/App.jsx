@@ -164,7 +164,7 @@ export default function App() {
   const [savedJobs, setSavedJobs] = useState([]);
   const [toast, setToast] = useState({ message: "", visible: false });
   const [search, setSearch] = useState({ title: "", location: "" });
-  const [filters, setFilters] = useState({ remote: false, skills: [], exp: "", sort: "newest" });
+  const [filters, setFilters] = useState({ category: "", remote: false, skills: [], exp: "", sort: "newest" });
   const [emailInput, setEmailInput] = useState("");
   const [subscribed, setSubscribed] = useState(false);
   const [user, setUser] = useState(loadCurrentUser);
@@ -319,6 +319,11 @@ export default function App() {
   const showToast = (msg) => {
     setToast({ message: msg, visible: true });
     setTimeout(() => setToast(t => ({ ...t, visible: false })), 3000);
+  };
+
+  const handleCategorySelect = (category) => {
+    setFilters((prev) => ({ ...prev, category: category || "" }));
+    setPage("jobs");
   };
 
   const handleSave = (jobId) => {
@@ -576,6 +581,7 @@ export default function App() {
         onSignOut={handleSignOut}
         isAdmin={isAdmin}
         canPostJobs={canPostJobs}
+        onSelectCategory={handleCategorySelect}
       />
     );
   }
@@ -603,6 +609,7 @@ export default function App() {
         onSignOut={handleSignOut}
         isAdmin={isAdmin}
         canPostJobs={canPostJobs}
+        onSelectCategory={handleCategorySelect}
       />
     );
   }
@@ -628,6 +635,7 @@ export default function App() {
         onSignOut={handleSignOut}
         isAdmin={isAdmin}
         canPostJobs={canPostJobs}
+        onSelectCategory={handleCategorySelect}
       />
     );
   }
@@ -668,6 +676,7 @@ export default function App() {
         onReject={(id) => handleModerateJob(id, "rejected")}
         onDelete={handleDeleteJob}
         isLoading={adminLoading}
+        onSelectCategory={handleCategorySelect}
       />
     );
   }
@@ -706,6 +715,7 @@ export default function App() {
         onSignOut={handleSignOut}
         isAdmin={isAdmin}
         canPostJobs={canPostJobs}
+        onSelectCategory={handleCategorySelect}
       />
     );
   }

@@ -1,18 +1,18 @@
 import { JobCard, JobDetail, EmailModal } from "../components/job";
 import Navbar from "../components/layout/Navbar";
 import { Toast } from "../components/ui";
-import { ALL_SKILLS } from "../data/jobs";
+import { ALL_SKILLS, CATEGORIES } from "../data/jobs";
 
 export default function JobsPage({
   jobsLoading, page, setPage, search, setSearch, filters, setFilters, filteredJobs,
   savedJobs, handleSave, selectedJob, setSelectedJob, applyJob, setApplyJob,
-  handleApplySubmit, toast, user, onSignOut, isAdmin, canPostJobs
+  handleApplySubmit, toast, user, onSignOut, isAdmin, canPostJobs, onSelectCategory
 }) {
   const bg = { background: "#f8fafc", minHeight: "100vh", fontFamily: "'Source Sans 3', sans-serif", color: "#475569" };
 
   return (
     <div style={bg}>
-      <Navbar page={page} setPage={setPage} user={user} onSignOut={onSignOut} isAdmin={isAdmin} canPostJobs={canPostJobs} />
+      <Navbar page={page} setPage={setPage} user={user} onSignOut={onSignOut} isAdmin={isAdmin} canPostJobs={canPostJobs} onSelectCategory={onSelectCategory} />
       <div style={{ paddingTop: 80 }} className="page-content">
         <div style={{ background: "#f8fafc", backdropFilter: "blur(20px)", borderBottom: "1px solid rgba(148,163,184,0.3)" }}>
           <div className="jobs-toolbar" style={{ maxWidth: 1100, margin: "0 auto", padding: "16px 20px 14px", display: "flex", gap: 10, flexWrap: "wrap" }}>
@@ -39,6 +39,24 @@ export default function JobsPage({
         <div className="jobs-layout" style={{ display: "flex", maxWidth: 1100, margin: "0 auto", padding: "24px 20px", gap: 24 }}>
           <div className="jobs-sidebar" style={{ width: 220, flexShrink: 0 }}>
             <div className="jobs-sidebar-inner" style={{ position: "sticky", top: 120 }}>
+              <div style={{ marginBottom: 24 }}>
+                <h4 style={{ fontSize: 11, color: "#64748b", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", marginBottom: 12 }}>Categories</h4>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {CATEGORIES.filter((category) => category.name !== "Remote" && category.name !== "Global").map((category) => (
+                    <label key={category.name} style={{ display: "flex", gap: 10, alignItems: "center", cursor: "pointer" }}>
+                      <input
+                        type="radio"
+                        name="category"
+                        checked={filters.category === category.name}
+                        onChange={() => setFilters((f) => ({ ...f, category: category.name }))}
+                        style={{ accentColor: "#2563eb" }}
+                      />
+                      <span style={{ fontSize: 13, color: "#475569" }}>{category.icon} {category.name}</span>
+                    </label>
+                  ))}
+                </div>
+                {filters.category && <button onClick={() => setFilters((f) => ({ ...f, category: "" }))} style={{ fontSize: 11, color: "#2563eb", background: "transparent", border: "none", cursor: "pointer", marginTop: 8 }}>Clear</button>}
+              </div>
               <div style={{ marginBottom: 24 }}>
                 <h4 style={{ fontSize: 11, color: "#64748b", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", marginBottom: 12 }}>Work Mode</h4>
                 <label style={{ display: "flex", gap: 10, alignItems: "center", cursor: "pointer" }}>
@@ -74,6 +92,23 @@ export default function JobsPage({
           <div style={{ flex: 1, minWidth: 0 }}>
             <div className="jobs-results-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
               <span style={{ fontSize: 13, color: "#64748b" }}><span style={{ color: "#1e293b", fontWeight: 700 }}>{filteredJobs.length}</span> jobs found</span>
+              {filters.category ? (
+                <button
+                  onClick={() => setFilters((f) => ({ ...f, category: "" }))}
+                  style={{
+                    background: "rgba(37,99,235,0.08)",
+                    border: "1px solid rgba(37,99,235,0.25)",
+                    borderRadius: 999,
+                    padding: "7px 12px",
+                    color: "#1d4ed8",
+                    fontSize: 12,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                  }}
+                >
+                  {filters.category} ×
+                </button>
+              ) : null}
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {jobsLoading ? (

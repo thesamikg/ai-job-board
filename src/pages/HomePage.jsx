@@ -5,13 +5,13 @@ import Navbar from "../components/layout/Navbar";
 export default function HomePage({
   jobs, jobsLoading, setPage, search, setSearch, savedJobs, handleSave, showToast,
   selectedJob, setSelectedJob, applyJob, setApplyJob, handleApplySubmit,
-  emailInput, setEmailInput, subscribed, setSubscribed, toast, user, onSignOut, isAdmin, canPostJobs
+  emailInput, setEmailInput, subscribed, setSubscribed, toast, user, onSignOut, isAdmin, canPostJobs, onSelectCategory
 }) {
   const bg = { background: "#ffffff", minHeight: "100vh", fontFamily: "'Source Sans 3', sans-serif", color: "#334155" };
 
   return (
     <div style={bg}>
-      <Navbar page="home" setPage={setPage} user={user} onSignOut={onSignOut} isAdmin={isAdmin} canPostJobs={canPostJobs} />
+      <Navbar page="home" setPage={setPage} user={user} onSignOut={onSignOut} isAdmin={isAdmin} canPostJobs={canPostJobs} onSelectCategory={onSelectCategory} />
       {/* Hero */}
       <div className="hero-padding" style={{ position: "relative", overflow: "hidden", paddingTop: 92, paddingBottom: 24, background: "#eaf3ff" }}>
         <div className="home-hero-shell" style={{ position: "relative", maxWidth: 900, margin: "0 auto", padding: "0 24px", animation: "fadeIn 0.8s ease forwards" }}>

@@ -4,7 +4,8 @@ import { Toast } from "../components/ui";
 
 export default function DashboardPage({
   jobsLoading, page, setPage, jobs = [], savedJobs, handleSave, selectedJob, setSelectedJob,
-  applyJob, setApplyJob, handleApplySubmit, toast, user, userRole = "job_seeker", applications = [], onSignOut, isAdmin, canPostJobs
+  applyJob, setApplyJob, handleApplySubmit, toast, user, userRole = "job_seeker", applications = [], onSignOut, isAdmin, canPostJobs,
+  onSelectCategory
 }) {
   const bg = { background: "#f8fafc", minHeight: "100vh", fontFamily: "'Source Sans 3', sans-serif", color: "#475569" };
   const isEmployerLike = userRole === "employer";
@@ -27,7 +28,7 @@ export default function DashboardPage({
 
   return (
     <div style={bg}>
-      <Navbar page={page} setPage={setPage} user={user} onSignOut={onSignOut} isAdmin={isAdmin} canPostJobs={canPostJobs} />
+      <Navbar page={page} setPage={setPage} user={user} onSignOut={onSignOut} isAdmin={isAdmin} canPostJobs={canPostJobs} onSelectCategory={onSelectCategory} />
       <div className="page-content" style={{ maxWidth: 800, margin: "0 auto", padding: "100px 24px 60px" }}>
         <h1 style={{ fontFamily: "'Merriweather', serif", fontSize: 28, fontWeight: 800, color: "#0f172a", marginBottom: 8 }}>Dashboard</h1>
         <p style={{ fontSize: 14, color: "#64748b", marginBottom: 40 }}>

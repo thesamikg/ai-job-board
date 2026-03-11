@@ -1,6 +1,7 @@
 export function filterAndSortJobs(jobs, search, filters) {
   return jobs
     .filter(j => {
+      if (filters.category && j.category !== filters.category) return false;
       if (search.title && !j.title.toLowerCase().includes(search.title.toLowerCase()) && !j.company.toLowerCase().includes(search.title.toLowerCase())) return false;
       if (search.location && !j.location.toLowerCase().includes(search.location.toLowerCase())) return false;
       if (filters.remote && !j.remote) return false;

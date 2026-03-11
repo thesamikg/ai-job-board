@@ -28,6 +28,7 @@ export default function AdminPage({
   onReject,
   onDelete,
   isLoading,
+  onSelectCategory,
 }) {
   const [tab, setTab] = useState("jobs");
 
@@ -35,7 +36,7 @@ export default function AdminPage({
 
   return (
     <div style={{ background: "#f8fafc", minHeight: "100vh", color: "#475569", fontFamily: "'Source Sans 3', sans-serif" }}>
-      <Navbar page={page} setPage={setPage} user={user} onSignOut={onSignOut} isAdmin canPostJobs />
+      <Navbar page={page} setPage={setPage} user={user} onSignOut={onSignOut} isAdmin canPostJobs onSelectCategory={onSelectCategory} />
       <div className="page-content" style={{ maxWidth: 1050, margin: "0 auto", padding: "100px 24px 60px" }}>
         <h1 style={{ margin: 0, color: "#0f172a", fontFamily: "'Merriweather', serif" }}>Admin Dashboard</h1>
         <p style={{ marginTop: 10, marginBottom: 24 }}>Moderate jobs, remove spam, and review platform activity.</p>

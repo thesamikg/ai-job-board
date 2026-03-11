@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Logo } from "../ui";
+import { CATEGORIES } from "../../data/jobs";
 
 const navBtn = (page, p) => ({
   background: page === p ? "rgba(37,99,235,0.1)" : "transparent",
@@ -8,9 +9,40 @@ const navBtn = (page, p) => ({
   cursor: "pointer", fontSize: 13, fontWeight: 600, transition: "all 0.15s", fontFamily: "inherit"
 });
 
-export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false, canPostJobs = false }) {
+const categoryBtn = (page, open = false) => ({
+  background: open || page === "jobs" ? "rgba(37,99,235,0.08)" : "#ffffff",
+  border: `1px solid ${open || page === "jobs" ? "rgba(37,99,235,0.35)" : "rgba(148,163,184,0.35)"}`,
+  borderRadius: 8,
+  padding: "7px 16px",
+  color: open || page === "jobs" ? "#1d4ed8" : "#334155",
+  cursor: "pointer",
+  fontSize: 13,
+  fontWeight: 700,
+  fontFamily: "'Source Sans 3', sans-serif",
+});
+
+const postJobBtn = {
+  background: "linear-gradient(135deg, #1d4ed8, #2563eb)",
+  border: "1px solid rgba(29,78,216,0.7)",
+  borderRadius: 8,
+  padding: "7px 16px",
+  color: "#ffffff",
+  cursor: "pointer",
+  fontSize: 13,
+  fontWeight: 700,
+  fontFamily: "'Source Sans 3', sans-serif",
+};
+
+const CATEGORY_OPTIONS = CATEGORIES.filter((category) => (
+  ["AI Engineering", "Computer Vision", "Robotics", "Research"].includes(category.name)
+));
+
+export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false, canPostJobs = false, onSelectCategory }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [categoryOpen, setCategoryOpen] = useState(false);
+  const [mobileCategoryOpen, setMobileCategoryOpen] = useState(false);
+  const categoryRef = useRef(null);
   const isSignedIn = Boolean(user?.id || user?.email);
   const isEmployerLike = Boolean(canPostJobs);
   const displayName = String(user?.name || user?.email?.split("@")[0] || "User");
@@ -21,7 +53,32 @@ export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false
     setPage(p);
     setMenuOpen(false);
     setProfileOpen(false);
+    setCategoryOpen(false);
+    setMobileCategoryOpen(false);
   };
+
+  const handleCategoryPick = (category) => {
+    if (typeof onSelectCategory === "function") {
+      onSelectCategory(category);
+    } else {
+      setPage("jobs");
+    }
+    setMenuOpen(false);
+    setProfileOpen(false);
+    setCategoryOpen(false);
+    setMobileCategoryOpen(false);
+  };
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (!categoryRef.current?.contains(event.target)) {
+        setCategoryOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <>
@@ -35,25 +92,73 @@ export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false
 
       {/* Desktop nav - hidden on mobile */}
       <div className="nav-desktop" style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <div ref={categoryRef} style={{ position: "relative" }}>
+          <button
+            onClick={() => {
+              setCategoryOpen((v) => !v);
+              setProfileOpen(false);
+            }}
+            style={{ ...categoryBtn(page, categoryOpen), display: "inline-flex", alignItems: "center", gap: 8 }}
+          >
+            Browse by Category
+            <span style={{ fontSize: 11, transform: categoryOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.15s ease" }}>▼</span>
+          </button>
+          {categoryOpen && (
+            <div style={{
+              position: "absolute",
+              top: "calc(100% + 8px)",
+              left: 0,
+              minWidth: 220,
+              background: "#ffffff",
+              border: "1px solid rgba(148,163,184,0.28)",
+              borderRadius: 14,
+              padding: 8,
+              boxShadow: "0 16px 36px rgba(15,23,42,0.16)",
+              zIndex: 130,
+            }}>
+              {CATEGORY_OPTIONS.map((category) => (
+                <button
+                  key={category.name}
+                  onClick={() => handleCategoryPick(category.name)}
+                  style={{
+                    width: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    background: "#ffffff",
+                    border: "none",
+                    borderRadius: 10,
+                    padding: "10px 12px",
+                    color: "#334155",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    textAlign: "left",
+                  }}
+                >
+                  <span>{category.icon}</span>
+                  <span>{category.name}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
         {!isSignedIn && (
-          <button onClick={() => setPage("addJob")} style={{
-            background: "transparent", border: "1px solid rgba(37,99,235,0.45)", borderRadius: 8, padding: "7px 16px", color: "#1d4ed8",
-            cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "'Source Sans 3', sans-serif"
-          }}>Post a Job</button>
+          <button onClick={() => goTo("addJob")} style={postJobBtn}>Post a Job</button>
         )}
         {isSignedIn && isEmployerLike && (
-          <button onClick={() => setPage("addJob")} style={{
-            background: "transparent", border: "1px solid rgba(37,99,235,0.45)", borderRadius: 8, padding: "7px 16px", color: "#1d4ed8",
-            cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "'Source Sans 3', sans-serif"
-          }}>Post a Job</button>
+          <button onClick={() => goTo("addJob")} style={postJobBtn}>Post a Job</button>
         )}
         {isSignedIn ? (
           <>
-            <button onClick={() => setPage("jobs")} style={navBtn(page, "jobs")}>Jobs</button>
-            <button onClick={() => setPage("dashboard")} style={navBtn(page, "dashboard")}>Dashboard</button>
+            <button onClick={() => goTo("jobs")} style={navBtn(page, "jobs")}>Jobs</button>
+            <button onClick={() => goTo("dashboard")} style={navBtn(page, "dashboard")}>Dashboard</button>
             <div style={{ position: "relative", marginLeft: 4 }}>
               <button
-                onClick={() => setProfileOpen((v) => !v)}
+                onClick={() => {
+                  setProfileOpen((v) => !v);
+                  setCategoryOpen(false);
+                }}
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
@@ -158,29 +263,60 @@ export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false
     {menuOpen && (
       <div className="nav-mobile-menu" onClick={() => setMenuOpen(false)}>
         <div className="nav-mobile-links" onClick={e => e.stopPropagation()}>
+          <button onClick={() => setMobileCategoryOpen((v) => !v)} style={{
+            ...categoryBtn(page, mobileCategoryOpen),
+            width: "100%",
+            borderRadius: 10,
+            padding: "12px 20px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}>
+            <span>Browse by Category</span>
+            <span style={{ fontSize: 11, transform: mobileCategoryOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.15s ease" }}>▼</span>
+          </button>
+          {mobileCategoryOpen && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 4px 4px" }}>
+              {CATEGORY_OPTIONS.map((category) => (
+                <button
+                  key={category.name}
+                  onClick={() => handleCategoryPick(category.name)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    width: "100%",
+                    background: "#ffffff",
+                    border: "1px solid rgba(148,163,184,0.22)",
+                    borderRadius: 10,
+                    padding: "11px 14px",
+                    color: "#334155",
+                    fontSize: 14,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                  }}
+                >
+                  <span>{category.icon}</span>
+                  <span>{category.name}</span>
+                </button>
+              ))}
+            </div>
+          )}
           {!isSignedIn && (
             <button onClick={() => goTo("addJob")} style={{
-              background: "transparent",
-              border: "1px solid rgba(37,99,235,0.45)",
+              ...postJobBtn,
               borderRadius: 10,
               padding: "12px 20px",
-              color: "#1d4ed8",
               fontSize: 14,
-              fontWeight: 700,
-              cursor: "pointer",
               width: "100%",
             }}>Post a Job</button>
           )}
           {isSignedIn && isEmployerLike && (
             <button onClick={() => goTo("addJob")} style={{
-              background: "transparent",
-              border: "1px solid rgba(37,99,235,0.45)",
+              ...postJobBtn,
               borderRadius: 10,
               padding: "12px 20px",
-              color: "#1d4ed8",
               fontSize: 14,
-              fontWeight: 700,
-              cursor: "pointer",
               width: "100%",
             }}>Post a Job</button>
           )}
@@ -189,7 +325,10 @@ export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false
               <button onClick={() => goTo("jobs")} style={{ ...navBtn(page, "jobs"), marginTop: 8, width: "100%", padding: "12px 20px" }}>Jobs</button>
               <button onClick={() => goTo("dashboard")} style={{ ...navBtn(page, "dashboard"), marginTop: 8, width: "100%", padding: "12px 20px" }}>Dashboard</button>
               <button
-                onClick={() => setProfileOpen((v) => !v)}
+                onClick={() => {
+                  setProfileOpen((v) => !v);
+                  setMobileCategoryOpen(false);
+                }}
                 style={{
                   display: "flex",
                   alignItems: "center",
