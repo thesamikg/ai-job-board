@@ -10,25 +10,26 @@ const navBtn = (page, p) => ({
 });
 
 const categoryBtn = (page, open = false) => ({
-  background: open || page === "jobs" ? "rgba(37,99,235,0.08)" : "#ffffff",
-  border: `1px solid ${open || page === "jobs" ? "rgba(37,99,235,0.35)" : "rgba(148,163,184,0.35)"}`,
-  borderRadius: 8,
-  padding: "7px 16px",
-  color: open || page === "jobs" ? "#1d4ed8" : "#334155",
+  background: open || page === "jobs" ? "rgba(37,99,235,0.06)" : "#ffffff",
+  border: `1px solid ${open || page === "jobs" ? "#2563eb" : "rgba(37,99,235,0.55)"}`,
+  borderRadius: 14,
+  padding: "10px 18px",
+  color: "#2563eb",
   cursor: "pointer",
-  fontSize: 13,
+  fontSize: 14,
   fontWeight: 700,
   fontFamily: "'Source Sans 3', sans-serif",
+  boxShadow: open ? "0 10px 24px rgba(37,99,235,0.12)" : "none",
 });
 
 const postJobBtn = {
   background: "linear-gradient(135deg, #1d4ed8, #2563eb)",
   border: "1px solid rgba(29,78,216,0.7)",
-  borderRadius: 8,
-  padding: "7px 16px",
+  borderRadius: 14,
+  padding: "10px 18px",
   color: "#ffffff",
   cursor: "pointer",
-  fontSize: 13,
+  fontSize: 14,
   fontWeight: 700,
   fontFamily: "'Source Sans 3', sans-serif",
 };
@@ -101,7 +102,16 @@ export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false
             style={{ ...categoryBtn(page, categoryOpen), display: "inline-flex", alignItems: "center", gap: 8 }}
           >
             Browse by Category
-            <span style={{ fontSize: 11, transform: categoryOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.15s ease" }}>▼</span>
+            <span style={{
+              width: 8,
+              height: 8,
+              borderRight: "2px solid #2563eb",
+              borderBottom: "2px solid #2563eb",
+              transform: categoryOpen ? "rotate(-135deg)" : "rotate(45deg)",
+              transition: "transform 0.15s ease",
+              marginLeft: 4,
+              marginTop: categoryOpen ? 4 : -2,
+            }} />
           </button>
           {categoryOpen && (
             <div style={{
@@ -273,7 +283,15 @@ export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false
             justifyContent: "space-between",
           }}>
             <span>Browse by Category</span>
-            <span style={{ fontSize: 11, transform: mobileCategoryOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.15s ease" }}>▼</span>
+            <span style={{
+              width: 8,
+              height: 8,
+              borderRight: "2px solid #2563eb",
+              borderBottom: "2px solid #2563eb",
+              transform: mobileCategoryOpen ? "rotate(-135deg)" : "rotate(45deg)",
+              transition: "transform 0.15s ease",
+              marginTop: mobileCategoryOpen ? 4 : -2,
+            }} />
           </button>
           {mobileCategoryOpen && (
             <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 4px 4px" }}>
