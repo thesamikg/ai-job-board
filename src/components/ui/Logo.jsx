@@ -1,22 +1,23 @@
 export default function Logo() {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 12, cursor: "pointer" }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
       <div style={{
-        width: 36, height: 36, borderRadius: 12,
-        background: "linear-gradient(135deg, #0f172a, #2563eb)",
+        width: 42, height: 42, borderRadius: 999,
+        background: "#1F52DC",
+        border: "1px solid #1F52DC",
         display: "flex", alignItems: "center", justifyContent: "center",
-        fontSize: 13, fontWeight: 900, color: "#fff", letterSpacing: -0.4,
-        boxShadow: "0 12px 28px rgba(37,99,235,0.22)"
+        fontSize: 15, fontWeight: 900, color: "#ffffff", letterSpacing: -0.5,
+        boxShadow: "0 10px 24px rgba(31,82,220,0.22)"
       }}>AR</div>
       <span className="logo-text" style={{
         fontFamily: "'Source Sans 3', sans-serif",
         fontWeight: 800,
         fontSize: 20,
-        color: "#0f172a",
-        letterSpacing: -0.6,
+        color: "#1F52DC",
+        letterSpacing: -0.5,
         textTransform: "none",
       }}>
-        AIRoboticsjob
+        AI Robotics Job.com
       </span>
     </div>
   );

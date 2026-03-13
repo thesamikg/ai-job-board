@@ -86,8 +86,8 @@ export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false
     <nav style={{
       position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
       background: "rgba(255,255,255,0.96)", backdropFilter: "blur(20px)",
-      borderBottom: "1px solid rgba(148,163,184,0.3)", padding: "0 16px 0 20px",
-      display: "flex", alignItems: "center", justifyContent: "space-between", height: 60,
+      borderBottom: "1px solid rgba(148,163,184,0.3)", padding: "4px 16px 4px 20px",
+      display: "flex", alignItems: "center", justifyContent: "space-between", minHeight: 60,
     }}>
       <div onClick={() => goTo("home")} style={{ cursor: "pointer" }}><Logo /></div>
 
