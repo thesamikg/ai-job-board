@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Badge, SkillTag } from "../ui";
-import { timeSince, isNew, isHot, formatSalary, isCompanyLogoImage, getCompanyInitials } from "../../utils/jobHelpers";
+import { timeSince, isNew, isHot, formatSalary, hasSalaryRange, isCompanyLogoImage, getCompanyInitials } from "../../utils/jobHelpers";
 
 export default function JobCard({ job, onClick, onApply }) {
   const [hovered, setHovered] = useState(false);
@@ -8,6 +8,7 @@ export default function JobCard({ job, onClick, onApply }) {
   const companyLogo = String(job?.companyLogo || "").trim();
   const useLogoImage = isCompanyLogoImage(companyLogo) && !logoFailed;
   const companyInitials = getCompanyInitials(job?.company, companyLogo);
+  const showSalary = hasSalaryRange(job);
 
   return (
     <div
@@ -66,7 +67,7 @@ export default function JobCard({ job, onClick, onApply }) {
         </div>
         <div className="job-card-side" style={{ textAlign: "right", flexShrink: 0, minWidth: 140 }}>
           <div className="job-card-pay" style={{ marginBottom: 8 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: "#1d4ed8", marginBottom: 4 }}>{formatSalary(job)}</div>
+            {showSalary && <div style={{ fontSize: 13, fontWeight: 700, color: "#1d4ed8", marginBottom: 4 }}>{formatSalary(job)}</div>}
             <div style={{ fontSize: 11, color: "#64748b" }}>{timeSince(job.posted_at)}</div>
           </div>
           <button

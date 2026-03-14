@@ -52,10 +52,12 @@ function validateForm(form) {
   if (!title) errors.title = "Please enter a job title.";
   if (!company) errors.company = "Please enter a company name.";
   if (!companyLogo || !/^data:image\/[a-zA-Z]+;base64,/i.test(companyLogo)) errors.company_logo = "Company logo image is required.";
-  if (!minRaw || !maxRaw) {
-    errors.salary = "Please enter both min and max salary.";
-  } else if (isNaN(min) || min < 0 || isNaN(max) || max < 0 || min > max) {
-    errors.salary = "Please enter a valid salary range.";
+  if (minRaw || maxRaw) {
+    if (!minRaw || !maxRaw) {
+      errors.salary = "Please enter both min and max salary, or leave both blank.";
+    } else if (isNaN(min) || min < 0 || isNaN(max) || max < 0 || min > max) {
+      errors.salary = "Please enter a valid salary range.";
+    }
   }
   if (!description) errors.description = "Please add a job description.";
   if (!url) {
@@ -328,8 +330,10 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
     e.preventDefault();
     if (isSubmitting) return;
     const urlCandidate = form.apply_url.trim();
-    const min = Number(form.salary_min);
-    const max = Number(form.salary_max);
+    const minRaw = String(form.salary_min ?? "").trim();
+    const maxRaw = String(form.salary_max ?? "").trim();
+    const min = minRaw ? Number(form.salary_min) : null;
+    const max = maxRaw ? Number(form.salary_max) : null;
     const nextErrors = validateForm(form);
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
@@ -442,13 +446,16 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
 
           <div className="add-job-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
             <div>
-              <label style={labelStyle}>MIN SALARY *</label>
-              <input ref={fieldRefs.salary_min} type="number" value={form.salary_min} onChange={e => update("salary_min", e.target.value)} placeholder="80000" style={{ ...inputStyle, borderColor: errors.salary ? "rgba(239,68,68,0.7)" : defaultInputBorderColor }} min={0} required />
+              <label style={labelStyle}>MIN SALARY</label>
+              <input ref={fieldRefs.salary_min} type="number" value={form.salary_min} onChange={e => update("salary_min", e.target.value)} placeholder="80000" style={{ ...inputStyle, borderColor: errors.salary ? "rgba(239,68,68,0.7)" : defaultInputBorderColor }} min={0} />
             </div>
             <div>
-              <label style={labelStyle}>MAX SALARY *</label>
-              <input type="number" value={form.salary_max} onChange={e => update("salary_max", e.target.value)} placeholder="150000" style={{ ...inputStyle, borderColor: errors.salary ? "rgba(239,68,68,0.7)" : defaultInputBorderColor }} min={0} required />
+              <label style={labelStyle}>MAX SALARY</label>
+              <input type="number" value={form.salary_max} onChange={e => update("salary_max", e.target.value)} placeholder="150000" style={{ ...inputStyle, borderColor: errors.salary ? "rgba(239,68,68,0.7)" : defaultInputBorderColor }} min={0} />
             </div>
+          </div>
+          <div style={{ marginTop: -12, marginBottom: 16, fontSize: 11, color: "#64748b" }}>
+            Salary is optional. Leave both fields blank to hide it from the listing.
           </div>
           {errors.salary && <div style={{ marginTop: -12, marginBottom: 16, fontSize: 12, color: "#dc2626" }}>{errors.salary}</div>}
           <div style={{ marginBottom: 20 }}>

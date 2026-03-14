@@ -10,17 +10,27 @@ export function isNew(date) {
   return Date.now() - date < 48 * 60 * 60 * 1000;
 }
 
+export function hasSalaryRange(job) {
+  const min = Number(job?.salary_min);
+  const max = Number(job?.salary_max);
+  return Number.isFinite(min) && Number.isFinite(max) && min > 0 && max > 0 && min <= max;
+}
+
 export function isHot(job) {
-  return job.salary_min > 150000;
+  return hasSalaryRange(job) && Number(job.salary_min) > 150000;
 }
 
 export function formatSalary(job) {
+  if (!hasSalaryRange(job)) return "";
+
+  const min = Number(job.salary_min);
+  const max = Number(job.salary_max);
   const symbols = { USD: "$", EUR: "€", GBP: "£", INR: "₹" };
   const symbol = symbols[job.currency] || "";
   if (!job.currency || job.currency === "USD") {
-    return `$${(job.salary_min / 1000).toFixed(0)}K–$${(job.salary_max / 1000).toFixed(0)}K`;
+    return `$${(min / 1000).toFixed(0)}K–$${(max / 1000).toFixed(0)}K`;
   }
-  return `${symbol}${job.salary_min.toLocaleString()}–${symbol}${job.salary_max.toLocaleString()} ${job.currency}`;
+  return `${symbol}${min.toLocaleString()}–${symbol}${max.toLocaleString()} ${job.currency}`;
 }
 
 export function isCompanyLogoImage(logoValue) {

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Badge, SkillTag } from "../ui";
-import { timeSince, isNew, isHot, formatSalary, isCompanyLogoImage, getCompanyInitials } from "../../utils/jobHelpers";
+import { timeSince, isNew, isHot, formatSalary, hasSalaryRange, isCompanyLogoImage, getCompanyInitials } from "../../utils/jobHelpers";
 import { formatRichTextForDisplay } from "../../utils/richText";
 
 export default function JobDetail({ job, onClose, onApply, saved, onSave }) {
@@ -9,6 +9,15 @@ export default function JobDetail({ job, onClose, onApply, saved, onSave }) {
   const companyLogo = String(job?.companyLogo || "").trim();
   const useLogoImage = isCompanyLogoImage(companyLogo) && !logoFailed;
   const companyInitials = getCompanyInitials(job?.company, companyLogo);
+  const detailItems = [
+    ["📅 Posted", timeSince(job.posted_at)],
+    ["🏢 Company", job.company],
+    ["🎯 Type", job.job_type],
+  ];
+
+  if (hasSalaryRange(job)) {
+    detailItems.unshift(["💰 Salary", formatSalary(job)]);
+  }
 
   return (
     <div style={{
@@ -95,7 +104,7 @@ export default function JobDetail({ job, onClose, onApply, saved, onSave }) {
         </div>
         <div style={{ padding: "24px 20px" }}>
           <div className="job-detail-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 28 }}>
-            {[["💰 Salary", formatSalary(job)], ["📅 Posted", timeSince(job.posted_at)], ["🏢 Company", job.company], ["🎯 Type", job.job_type]].map(([label, val]) => (
+            {detailItems.map(([label, val]) => (
               <div key={label} style={{ background: "#f8fafc", border: "1px solid rgba(148,163,184,0.26)", borderRadius: 10, padding: "14px 18px" }}>
                 <div style={{ fontSize: 11, color: "#64748b", marginBottom: 4, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase" }}>{label}</div>
                 <div style={{ fontSize: 14, color: "#1e293b", fontWeight: 600 }}>{val}</div>

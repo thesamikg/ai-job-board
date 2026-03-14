@@ -11,7 +11,7 @@ export function filterAndSortJobs(jobs, search, filters) {
     })
     .sort((a, b) => {
       if (filters.sort === "newest") return b.posted_at - a.posted_at;
-      if (filters.sort === "salary") return b.salary_max - a.salary_max;
+      if (filters.sort === "salary") return (Number(b.salary_max) || 0) - (Number(a.salary_max) || 0);
       if (filters.sort === "remote") return (b.remote ? 1 : 0) - (a.remote ? 1 : 0);
       return 0;
     });
