@@ -5,7 +5,7 @@ import Navbar from "../components/layout/Navbar";
 export default function HomePage({
   jobs, jobsLoading, setPage, search, setSearch, savedJobs, handleSave, showToast,
   selectedJob, setSelectedJob, applyJob, setApplyJob, handleApplySubmit,
-  emailInput, setEmailInput, subscribed, setSubscribed, toast, user, onSignOut, isAdmin, canPostJobs, onSelectCategory
+  emailInput, setEmailInput, subscribed, setSubscribed, subscribeLoading, onSubscribe, toast, user, onSignOut, isAdmin, canPostJobs, onSelectCategory
 }) {
   const bg = { background: "#ffffff", minHeight: "100vh", fontFamily: "'Source Sans 3', sans-serif", color: "#334155" };
 
@@ -106,17 +106,32 @@ export default function HomePage({
         <h2 style={{ fontFamily: "'Merriweather', serif", fontSize: 22, fontWeight: 700, color: "#0f172a", marginBottom: 12 }}>Stay ahead of the curve</h2>
         <p style={{ fontSize: 14, color: "#475569", marginBottom: 24, lineHeight: 1.7 }}>Get weekly AI job alerts, salary reports, and hiring trends delivered to your inbox.</p>
         {!subscribed ? (
-          <div className="search-stack" style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <form
+            name="newsletter"
+            method="POST"
+            data-netlify="true"
+            onSubmit={(e) => {
+              e.preventDefault();
+              onSubscribe();
+            }}
+            className="search-stack"
+            style={{ display: "flex", gap: 8, flexWrap: "wrap" }}
+          >
+            <input type="hidden" name="form-name" value="newsletter" />
             <input value={emailInput} onChange={e => setEmailInput(e.target.value)}
+              type="email"
+              name="email"
+              required
               placeholder="your@email.com" style={{
                 flex: 1, padding: "12px 16px", background: "#fff",
                 border: "1px solid rgba(148,163,184,0.4)", borderRadius: 10, color: "#0f172a", fontSize: 14, outline: "none"
               }} />
-            <button onClick={() => { if (emailInput.includes("@")) { setSubscribed(true); showToast("✓ You're subscribed!"); } }} style={{
+            <button type="submit" disabled={subscribeLoading} style={{
               padding: "12px 20px", background: "linear-gradient(135deg, #1d4ed8, #2563eb)",
-              border: "1px solid rgba(29,78,216,0.7)", borderRadius: 10, color: "#ffffff", fontSize: 14, fontWeight: 700, cursor: "pointer"
-            }}>Subscribe</button>
-          </div>
+              border: "1px solid rgba(29,78,216,0.7)", borderRadius: 10, color: "#ffffff", fontSize: 14, fontWeight: 700, cursor: subscribeLoading ? "not-allowed" : "pointer",
+              opacity: subscribeLoading ? 0.75 : 1
+            }}>{subscribeLoading ? "Saving..." : "Subscribe"}</button>
+          </form>
         ) : (
           <div style={{ fontSize: 14, color: "#22c55e", fontWeight: 600 }}>✓ You're on the list!</div>
         )}

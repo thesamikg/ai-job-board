@@ -30,6 +30,62 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+.rich-editor-surface[contenteditable][data-placeholder]:empty::before {
+  content: attr(data-placeholder);
+  color: #94a3b8;
+}
+
+.rich-editor-shell button:hover {
+  background: rgba(37,99,235,0.08) !important;
+  color: #0f172a !important;
+}
+
+.job-description-rich {
+  display: grid;
+  gap: 12px;
+}
+
+.job-description-rich p,
+.job-description-rich ul,
+.job-description-rich ol,
+.job-description-rich blockquote {
+  margin: 0;
+}
+
+.job-description-rich ul,
+.job-description-rich ol {
+  padding-left: 22px;
+}
+
+.job-description-rich li + li {
+  margin-top: 6px;
+}
+
+.job-description-rich h2,
+.job-description-rich h3 {
+  margin: 8px 0 0;
+  color: #0f172a;
+  line-height: 1.35;
+}
+
+.job-description-rich h2 {
+  font-size: 20px;
+}
+
+.job-description-rich h3 {
+  font-size: 17px;
+}
+
+.job-description-rich blockquote {
+  padding-left: 14px;
+  border-left: 3px solid rgba(37,99,235,0.3);
+  color: #334155;
+}
+
+.job-description-rich a {
+  color: #2563eb;
+}
+
 /* Responsive breakpoints: 1024 tablet, 768 mobile landscape, 480 mobile portrait */
 @media (max-width: 768px) {
   .nav-desktop { display: none !important; }

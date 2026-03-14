@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { HomePage, JobsPage, DashboardPage, LoginPage, AddJobPage, AdminPage } from "./pages";
 import { filterAndSortJobs } from "./utils/filterJobs";
 import { fetchJobs, addJob, updateJobStatus, deleteJob } from "./services/jobsService";
+import { subscribeEmail } from "./services/newsletterService";
 import { signInWithPassword, signUpWithPassword, signInWithGoogle, getSession, onAuthStateChange, signOut, isEmailRegistered } from "./services/authService";
 import { isAdminUser, ensureUserProfile, fetchUsersForAdmin, addApplication, fetchApplicationsForAdmin, fetchApplicationsForUser, fetchUserRole } from "./services/adminService";
 import "./styles/global.css";
@@ -155,6 +156,23 @@ async function withTimeout(promise, timeoutMs, message) {
   ]);
 }
 
+async function submitNewsletterToNetlify(email) {
+  const body = new URLSearchParams({
+    "form-name": "newsletter",
+    email,
+  }).toString();
+
+  const response = await fetch("/", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body,
+  });
+
+  if (!response.ok) {
+    throw new Error("Could not submit newsletter form");
+  }
+}
+
 export default function App() {
   const [jobs, setJobs] = useState([]);
   const [jobsLoading, setJobsLoading] = useState(true);
@@ -167,6 +185,7 @@ export default function App() {
   const [filters, setFilters] = useState({ category: "", remote: false, skills: [], exp: "", sort: "newest" });
   const [emailInput, setEmailInput] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+  const [subscribeLoading, setSubscribeLoading] = useState(false);
   const [user, setUser] = useState(loadCurrentUser);
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -324,6 +343,45 @@ export default function App() {
   const handleCategorySelect = (category) => {
     setFilters((prev) => ({ ...prev, category: category || "" }));
     setPage("jobs");
+  };
+
+  const handleNewsletterSubscribe = async () => {
+    const normalizedEmail = String(emailInput || "").trim().toLowerCase();
+    if (!normalizedEmail || !normalizedEmail.includes("@")) {
+      showToast("Please enter a valid email");
+      return;
+    }
+
+    if (subscribeLoading) return;
+
+    try {
+      setSubscribeLoading(true);
+      const [dbResult, netlifyResult] = await Promise.allSettled([
+        subscribeEmail(normalizedEmail, "homepage"),
+        submitNewsletterToNetlify(normalizedEmail),
+      ]);
+
+      if (dbResult.status === "rejected") {
+        throw dbResult.reason;
+      }
+
+      if (netlifyResult.status === "rejected") {
+        console.warn("Could not submit newsletter form to Netlify:", netlifyResult.reason);
+      }
+
+      setSubscribed(true);
+      setEmailInput("");
+      showToast("✓ You're subscribed!");
+    } catch (err) {
+      const message = String(err?.message || "");
+      if (message.toLowerCase().includes("relation")) {
+        showToast("Subscribers table missing. Run the new Supabase migration.");
+      } else {
+        showToast(message || "Could not save your email right now.");
+      }
+    } finally {
+      setSubscribeLoading(false);
+    }
   };
 
   const handleSave = (jobId) => {
@@ -576,6 +634,8 @@ export default function App() {
         setEmailInput={setEmailInput}
         subscribed={subscribed}
         setSubscribed={setSubscribed}
+        subscribeLoading={subscribeLoading}
+        onSubscribe={handleNewsletterSubscribe}
         toast={toast}
         user={user}
         onSignOut={handleSignOut}

@@ -15,6 +15,10 @@
   </head>
   <body>
     <div id="root"></div>
+    <form name="newsletter" method="POST" data-netlify="true" hidden>
+      <input type="hidden" name="form-name" value="newsletter" />
+      <input type="email" name="email" />
+    </form>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

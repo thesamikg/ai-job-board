@@ -1,13 +1,11 @@
 import { useState } from "react";
 import { Badge, SkillTag } from "../ui";
 import { timeSince, isNew, isHot, formatSalary, isCompanyLogoImage, getCompanyInitials } from "../../utils/jobHelpers";
+import { formatRichTextForDisplay } from "../../utils/richText";
 
 export default function JobDetail({ job, onClose, onApply, saved, onSave }) {
   const [logoFailed, setLogoFailed] = useState(false);
-  const descriptionParts = String(job?.description || "")
-    .split(/\n+/)
-    .map((part) => part.trim())
-    .filter(Boolean);
+  const descriptionHtml = formatRichTextForDisplay(job?.description || "");
   const companyLogo = String(job?.companyLogo || "").trim();
   const useLogoImage = isCompanyLogoImage(companyLogo) && !logoFailed;
   const companyInitials = getCompanyInitials(job?.company, companyLogo);
@@ -112,11 +110,11 @@ export default function JobDetail({ job, onClose, onApply, saved, onSave }) {
           </div>
           <div style={{ marginBottom: 32 }}>
             <h4 style={{ fontSize: 12, color: "#64748b", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", marginBottom: 12 }}>About This Role</h4>
-            <div style={{ fontSize: 14, color: "#475569", lineHeight: 1.8, textAlign: "left", display: "grid", gap: 10 }}>
-              {(descriptionParts.length ? descriptionParts : [job.description]).map((part, idx) => (
-                <p key={idx} style={{ margin: 0 }}>{part}</p>
-              ))}
-            </div>
+            <div
+              className="job-description-rich"
+              style={{ fontSize: 14, color: "#475569", lineHeight: 1.8, textAlign: "left" }}
+              dangerouslySetInnerHTML={{ __html: descriptionHtml }}
+            />
           </div>
           <div className="job-detail-actions" style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
             <button onClick={() => onApply(job)} style={{

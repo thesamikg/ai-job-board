@@ -1,8 +1,9 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Navbar from "../components/layout/Navbar";
 import { Toast } from "../components/ui";
 import { CATEGORIES, ALL_SKILLS } from "../data/jobs";
 import { getCompanyInitials } from "../utils/jobHelpers";
+import { extractPlainText, sanitizeRichText } from "../utils/richText";
 
 const inputStyle = {
   width: "100%",
@@ -40,7 +41,7 @@ function validateForm(form) {
   const errors = {};
   const title = form.title.trim();
   const company = form.company.trim();
-  const description = form.description.trim();
+  const description = extractPlainText(form.description);
   const url = form.apply_url.trim();
   const companyLogo = String(form.company_logo || "").trim();
   const minRaw = String(form.salary_min ?? "").trim();
@@ -64,6 +65,167 @@ function validateForm(form) {
   }
 
   return errors;
+}
+
+function RichTextEditor({ value, onChange, placeholder, inputRef, hasError }) {
+  const editorRef = useRef(null);
+  const selectionRef = useRef(null);
+
+  useEffect(() => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    if (editor.innerHTML !== value) {
+      editor.innerHTML = value || "";
+    }
+    if (inputRef && typeof inputRef === "object") {
+      inputRef.current = editor;
+    }
+  }, [inputRef, value]);
+
+  const syncValue = () => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    onChange(editor.innerHTML);
+  };
+
+  const saveSelection = () => {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
+    selectionRef.current = selection.getRangeAt(0);
+  };
+
+  const restoreSelection = () => {
+    const selection = window.getSelection();
+    if (!selection || !selectionRef.current) return;
+    selection.removeAllRanges();
+    selection.addRange(selectionRef.current);
+  };
+
+  const runCommand = (command, commandValue = null) => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    editor.focus();
+    restoreSelection();
+    document.execCommand(command, false, commandValue);
+    saveSelection();
+    syncValue();
+  };
+
+  const addLink = () => {
+    const url = window.prompt("Enter a URL", "https://");
+    if (!url) return;
+    runCommand("createLink", url);
+  };
+
+  const toolbarBtn = (key, label, onPress, extraStyle = {}) => (
+    <button
+      key={key}
+      type="button"
+      onMouseDown={(e) => {
+        e.preventDefault();
+        onPress();
+      }}
+      title={typeof label === "string" ? label : undefined}
+      style={{
+        minWidth: 44,
+        height: 42,
+        padding: "8px 10px",
+        background: "transparent",
+        border: "none",
+        borderRadius: 10,
+        color: "#1d4ed8",
+        fontSize: 16,
+        fontWeight: 700,
+        cursor: "pointer",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        transition: "background 0.15s ease, color 0.15s ease",
+        ...extraStyle,
+      }}
+    >
+      {label}
+    </button>
+  );
+
+  const divider = (key) => (
+    <span
+      key={key}
+      aria-hidden="true"
+      style={{
+        width: 1,
+        alignSelf: "stretch",
+        background: "rgba(37,99,235,0.16)",
+        margin: "0 6px",
+      }}
+    />
+  );
+
+  const linkIcon = (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M10.4 13.6L13.6 10.4" stroke="#0f172a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M8.2 15.8L6.8 17.2a3.1 3.1 0 1 1-4.4-4.4l3-3a3.1 3.1 0 0 1 4.4 0" stroke="#0f172a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M15.8 8.2L17.2 6.8a3.1 3.1 0 1 1 4.4 4.4l-3 3a3.1 3.1 0 0 1-4.4 0" stroke="#0f172a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+
+  return (
+    <div className="rich-editor-shell" style={{
+      border: `1px solid ${hasError ? "rgba(239,68,68,0.7)" : "rgba(37,99,235,0.24)"}`,
+      borderRadius: 16,
+      overflow: "hidden",
+      background: "#ffffff",
+      boxShadow: hasError ? "0 0 0 1px rgba(239,68,68,0.15)" : "0 10px 24px rgba(37,99,235,0.08)",
+    }}>
+      <div style={{
+        display: "flex",
+        flexWrap: "wrap",
+        gap: 4,
+        padding: 12,
+        borderBottom: "1px solid rgba(37,99,235,0.14)",
+        background: "#f8fbff",
+      }}>
+        {toolbarBtn("undo", "↺", () => runCommand("undo"), { color: "#0f172a" })}
+        {toolbarBtn("redo", "↻", () => runCommand("redo"), { color: "#0f172a" })}
+        {divider("divider-1")}
+        {toolbarBtn("bold", "B", () => runCommand("bold"), { fontSize: 18, color: "#0f172a" })}
+        {toolbarBtn("italic", <span style={{ fontStyle: "italic", fontFamily: "'Merriweather', serif", color: "#0f172a" }}>I</span>, () => runCommand("italic"), { color: "#0f172a" })}
+        {divider("divider-2")}
+        {toolbarBtn("h1", "H1", () => runCommand("formatBlock", "<h2>"), { fontSize: 14, letterSpacing: 0.2, color: "#0f172a" })}
+        {toolbarBtn("h2", "H2", () => runCommand("formatBlock", "<h3>"), { fontSize: 14, letterSpacing: 0.2, color: "#0f172a" })}
+        {divider("divider-3")}
+        {toolbarBtn("unordered", "≣", () => runCommand("insertUnorderedList"), { fontSize: 18, color: "#0f172a" })}
+        {toolbarBtn("ordered", "≡", () => runCommand("insertOrderedList"), { fontSize: 18, color: "#0f172a" })}
+        {divider("divider-4")}
+        {toolbarBtn("strike", "S", () => runCommand("strikeThrough"), { fontSize: 16, textDecoration: "line-through", color: "#0f172a" })}
+        {divider("divider-5")}
+        {toolbarBtn("link", linkIcon, addLink, { color: "#0f172a" })}
+      </div>
+      <div
+        ref={editorRef}
+        className="rich-editor-surface"
+        contentEditable
+        suppressContentEditableWarning
+        onInput={syncValue}
+        onBlur={() => {
+          saveSelection();
+          syncValue();
+        }}
+        onKeyUp={saveSelection}
+        onMouseUp={saveSelection}
+        data-placeholder={placeholder}
+        style={{
+          minHeight: 340,
+          padding: "22px 18px",
+          color: "#0f172a",
+          fontSize: 15,
+          lineHeight: 1.75,
+          outline: "none",
+          whiteSpace: "pre-wrap",
+        }}
+      />
+    </div>
+  );
 }
 
 export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, user, onSignOut, isAdmin, canPostJobs, onSelectCategory }) {
@@ -185,6 +347,7 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
     try {
       setIsSubmitting(true);
       setSubmitError("");
+      const description = sanitizeRichText(form.description);
       const job = {
         id: Date.now(),
         title: form.title.trim(),
@@ -198,7 +361,7 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
         experience_level: form.experience_level,
         remote: form.remote,
         skills: form.skills.length ? form.skills : ["Python", "AI"],
-        description: form.description.trim(),
+        description,
         apply_url: urlCandidate.startsWith("http") ? urlCandidate : `https://${urlCandidate}`,
         category: form.category,
         posted_at: new Date(),
@@ -367,7 +530,16 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
 
           <div style={{ marginBottom: 20 }}>
             <label style={labelStyle}>DESCRIPTION *</label>
-            <textarea ref={fieldRefs.description} value={form.description} onChange={e => update("description", e.target.value)} placeholder="Describe the role, responsibilities, and what you're looking for..." rows={5} style={{ ...inputStyle, resize: "vertical", minHeight: 120, borderColor: errors.description ? "rgba(239,68,68,0.7)" : defaultInputBorderColor }} required />
+            <RichTextEditor
+              inputRef={fieldRefs.description}
+              value={form.description}
+              onChange={(nextValue) => update("description", nextValue)}
+              placeholder="Describe the role, responsibilities, requirements, benefits, and what success looks like..."
+              hasError={Boolean(errors.description)}
+            />
+            <div style={{ marginTop: 8, fontSize: 11, color: "#64748b" }}>
+              Recommended: overview, responsibilities, requirements, preferred skills, compensation details, and benefits.
+            </div>
             {errors.description && <div style={{ marginTop: 6, fontSize: 12, color: "#dc2626" }}>{errors.description}</div>}
           </div>
           <div style={{ marginBottom: 24 }}>
