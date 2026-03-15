@@ -369,9 +369,10 @@ export default function App() {
         console.warn("Could not submit newsletter form to Netlify:", netlifyResult.reason);
       }
 
+      const alreadySubscribed = Boolean(dbResult.value?.alreadySubscribed);
       setSubscribed(true);
       setEmailInput("");
-      showToast("✓ You're subscribed!");
+      showToast(alreadySubscribed ? "✓ You're already subscribed!" : "✓ You're subscribed!");
     } catch (err) {
       const message = String(err?.message || "");
       if (message.toLowerCase().includes("relation")) {
