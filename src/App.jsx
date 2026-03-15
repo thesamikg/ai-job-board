@@ -377,6 +377,8 @@ export default function App() {
       const message = String(err?.message || "");
       if (message.toLowerCase().includes("relation")) {
         showToast("Subscribers table missing. Run the new Supabase migration.");
+      } else if (message.toLowerCase().includes("row-level security")) {
+        showToast("Subscribers RLS policy is blocking inserts. Run the latest Supabase migration.");
       } else {
         showToast(message || "Could not save your email right now.");
       }
