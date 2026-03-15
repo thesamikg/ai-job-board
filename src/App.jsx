@@ -397,14 +397,20 @@ export default function App() {
     showToast(isSaving ? "✓ Job saved to your dashboard" : "Job removed from saved");
   };
 
-  const handleApplySubmit = (email, job) => {
-    addApplication({ id: Date.now(), userId: user?.id || null, email, jobId: job.id }).catch((err) => {
+  const handleApplySubmit = (email, job, shouldSubscribe = true) => {
+    const normalizedEmail = String(email || "").trim().toLowerCase();
+    addApplication({ id: Date.now(), userId: user?.id || null, email: normalizedEmail, jobId: job.id }).catch((err) => {
       console.warn("Could not save application:", err);
     });
+    if (shouldSubscribe) {
+      subscribeEmail(normalizedEmail, "application page").catch((err) => {
+        console.warn("Could not save application-page subscriber:", err);
+      });
+    }
     setApplications((prev) => [{
       id: Date.now(),
       applicant_id: user?.id || null,
-      applicant_email: email,
+      applicant_email: normalizedEmail,
       job_id: job.id,
       submitted_at: new Date().toISOString(),
     }, ...prev]);

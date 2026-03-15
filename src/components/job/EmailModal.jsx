@@ -8,7 +8,7 @@ export default function EmailModal({ job, onClose, onSubmit }) {
   const handleSubmit = () => {
     if (!email.includes("@")) return;
     setSubmitted(true);
-    setTimeout(() => { onSubmit(email, job); }, 1200);
+    setTimeout(() => { onSubmit(email, job, subscribe); }, 1200);
   };
 
   return (
