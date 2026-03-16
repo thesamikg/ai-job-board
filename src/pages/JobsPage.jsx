@@ -1,11 +1,11 @@
-import { JobCard, JobDetail, EmailModal } from "../components/job";
+import { JobCard, EmailModal } from "../components/job";
 import Navbar from "../components/layout/Navbar";
 import { Toast } from "../components/ui";
 import { ALL_SKILLS, CATEGORIES } from "../data/jobs";
 
 export default function JobsPage({
   jobsLoading, page, setPage, search, setSearch, filters, setFilters, filteredJobs,
-  savedJobs, handleSave, selectedJob, setSelectedJob, applyJob, setApplyJob,
+  savedJobs, handleSave, openJobDetail, applyJob, setApplyJob,
   handleApplySubmit, toast, user, onSignOut, isAdmin, canPostJobs, onSelectCategory
 }) {
   const bg = { background: "#f8fafc", minHeight: "100vh", fontFamily: "'Source Sans 3', sans-serif", color: "#475569" };
@@ -118,17 +118,16 @@ export default function JobsPage({
                 </div>
               ) : filteredJobs.length === 0 ? (
                 <div style={{ textAlign: "center", padding: "60px 20px", color: "#94a3b8" }}>
-                  <div style={{ fontSize: 40, marginBottom: 16 }}>🔍</div>
-                  <div style={{ fontSize: 16, color: "#64748b" }}>No jobs match your filters</div>
-                </div>
-              ) : filteredJobs.map(job => (
-                <JobCard key={job.id} job={job} onClick={j => setSelectedJob(j)} onApply={j => setApplyJob(j)} />
+                <div style={{ fontSize: 40, marginBottom: 16 }}>🔍</div>
+                <div style={{ fontSize: 16, color: "#64748b" }}>No jobs match your filters</div>
+              </div>
+            ) : filteredJobs.map(job => (
+                <JobCard key={job.id} job={job} onClick={j => openJobDetail(j, "jobs")} onApply={j => setApplyJob(j)} />
               ))}
             </div>
           </div>
         </div>
       </div>
-      {selectedJob && <JobDetail job={selectedJob} onClose={() => setSelectedJob(null)} onApply={j => { setApplyJob(j); setSelectedJob(null); }} saved={savedJobs.includes(selectedJob.id)} onSave={handleSave} />}
       {applyJob && <EmailModal job={applyJob} onClose={() => setApplyJob(null)} onSubmit={handleApplySubmit} />}
       <Toast message={toast.message} visible={toast.visible} />
     </div>

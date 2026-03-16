@@ -1,10 +1,10 @@
 import { Logo, Toast } from "../components/ui";
-import { JobCard, JobDetail, EmailModal } from "../components/job";
+import { JobCard, EmailModal } from "../components/job";
 import Navbar from "../components/layout/Navbar";
 
 export default function HomePage({
   jobs, jobsLoading, setPage, search, setSearch, savedJobs, handleSave, showToast,
-  selectedJob, setSelectedJob, applyJob, setApplyJob, handleApplySubmit,
+  openJobDetail, applyJob, setApplyJob, handleApplySubmit,
   emailInput, setEmailInput, subscribed, setSubscribed, subscribeLoading, onSubscribe, toast, user, onSignOut, isAdmin, canPostJobs, onSelectCategory
 }) {
   const bg = { background: "#ffffff", minHeight: "100vh", fontFamily: "'Source Sans 3', sans-serif", color: "#334155" };
@@ -58,7 +58,7 @@ export default function HomePage({
           </div>
           <div className="home-jobs-preview" style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 900, margin: "0 auto" }}>
             {(jobs || []).slice(0, 2).map(job => (
-              <JobCard key={job.id} job={job} onClick={j => setSelectedJob(j)} onApply={j => setApplyJob(j)} />
+              <JobCard key={job.id} job={job} onClick={j => openJobDetail(j, "home")} onApply={j => setApplyJob(j)} />
             ))}
           </div>
             </div>
@@ -76,7 +76,7 @@ export default function HomePage({
             <div style={{ textAlign: "center", padding: 40, color: "#64748b", fontSize: 14 }}>Loading jobs…</div>
           ) : (
             (jobs || []).slice(2, 8).map(job => (
-              <JobCard key={job.id} job={job} onClick={j => setSelectedJob(j)} onApply={j => setApplyJob(j)} />
+              <JobCard key={job.id} job={job} onClick={j => openJobDetail(j, "home")} onApply={j => setApplyJob(j)} />
             ))
           )}
         </div>
@@ -148,7 +148,6 @@ export default function HomePage({
         </div>
       </div>
 
-      {selectedJob && <JobDetail job={selectedJob} onClose={() => setSelectedJob(null)} onApply={j => { setApplyJob(j); setSelectedJob(null); }} saved={savedJobs.includes(selectedJob.id)} onSave={handleSave} />}
       {applyJob && <EmailModal job={applyJob} onClose={() => setApplyJob(null)} onSubmit={handleApplySubmit} />}
       <Toast message={toast.message} visible={toast.visible} />
     </div>

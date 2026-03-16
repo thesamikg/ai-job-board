@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { HomePage, JobsPage, DashboardPage, LoginPage, AddJobPage, AdminPage } from "./pages";
+import { HomePage, JobsPage, DashboardPage, LoginPage, AddJobPage, AdminPage, JobDetailPage } from "./pages";
 import { filterAndSortJobs } from "./utils/filterJobs";
 import { fetchJobs, addJob, updateJobStatus, deleteJob } from "./services/jobsService";
 import { subscribeEmail } from "./services/newsletterService";
@@ -178,6 +178,7 @@ export default function App() {
   const [jobsLoading, setJobsLoading] = useState(true);
   const [page, setPage] = useState(loadCurrentPage);
   const [selectedJob, setSelectedJob] = useState(null);
+  const [jobDetailReturnPage, setJobDetailReturnPage] = useState("jobs");
   const [applyJob, setApplyJob] = useState(null);
   const [savedJobs, setSavedJobs] = useState([]);
   const [toast, setToast] = useState({ message: "", visible: false });
@@ -271,8 +272,14 @@ export default function App() {
   }, [isAdmin, page]);
 
   useEffect(() => {
-    saveCurrentPage(page);
-  }, [page]);
+    saveCurrentPage(page === "jobDetail" ? jobDetailReturnPage : page);
+  }, [jobDetailReturnPage, page]);
+
+  useEffect(() => {
+    if (page === "jobDetail" && !selectedJob) {
+      setPage(jobDetailReturnPage || "jobs");
+    }
+  }, [jobDetailReturnPage, page, selectedJob]);
 
   useEffect(() => {
     getSession().then(async ({ data: { session } }) => {
@@ -343,6 +350,19 @@ export default function App() {
   const handleCategorySelect = (category) => {
     setFilters((prev) => ({ ...prev, category: category || "" }));
     setPage("jobs");
+  };
+
+  const openJobDetail = (job, originPage = page) => {
+    if (!job) return;
+    setSelectedJob(job);
+    setJobDetailReturnPage(originPage === "jobDetail" ? jobDetailReturnPage : originPage || "jobs");
+    setPage("jobDetail");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const closeJobDetailPage = () => {
+    setPage(jobDetailReturnPage || "jobs");
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleNewsletterSubscribe = async () => {
@@ -563,6 +583,8 @@ export default function App() {
     saveCurrentUser(null);
     setSavedJobs([]);
     setApplications([]);
+    setSelectedJob(null);
+    setApplyJob(null);
     setPage("home");
     try {
       await signOut();
@@ -634,8 +656,7 @@ export default function App() {
         savedJobs={savedJobs}
         handleSave={handleSave}
         showToast={showToast}
-        selectedJob={selectedJob}
-        setSelectedJob={setSelectedJob}
+        openJobDetail={openJobDetail}
         applyJob={applyJob}
         setApplyJob={setApplyJob}
         handleApplySubmit={handleApplySubmit}
@@ -668,8 +689,7 @@ export default function App() {
         filteredJobs={filteredJobs}
         savedJobs={savedJobs}
         handleSave={handleSave}
-        selectedJob={selectedJob}
-        setSelectedJob={setSelectedJob}
+        openJobDetail={openJobDetail}
         applyJob={applyJob}
         setApplyJob={setApplyJob}
         handleApplySubmit={handleApplySubmit}
@@ -693,14 +713,39 @@ export default function App() {
         savedJobs={savedJobs}
         applications={applications}
         handleSave={handleSave}
-        selectedJob={selectedJob}
-        setSelectedJob={setSelectedJob}
+        openJobDetail={openJobDetail}
         applyJob={applyJob}
         setApplyJob={setApplyJob}
         handleApplySubmit={handleApplySubmit}
         toast={toast}
         user={user}
         userRole={userRole}
+        onSignOut={handleSignOut}
+        isAdmin={isAdmin}
+        canPostJobs={canPostJobs}
+        onSelectCategory={handleCategorySelect}
+      />
+    );
+  }
+
+  if (page === "jobDetail" && selectedJob) {
+    return (
+      <JobDetailPage
+        page={jobDetailReturnPage}
+        setPage={setPage}
+        job={selectedJob}
+        returnPage={jobDetailReturnPage}
+        onBack={closeJobDetailPage}
+        applyJob={applyJob}
+        setApplyJob={setApplyJob}
+        handleApplySubmit={handleApplySubmit}
+        emailInput={emailInput}
+        setEmailInput={setEmailInput}
+        subscribed={subscribed}
+        subscribeLoading={subscribeLoading}
+        onSubscribe={handleNewsletterSubscribe}
+        toast={toast}
+        user={user}
         onSignOut={handleSignOut}
         isAdmin={isAdmin}
         canPostJobs={canPostJobs}

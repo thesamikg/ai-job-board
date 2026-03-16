@@ -86,6 +86,33 @@
   color: #2563eb;
 }
 
+@media (max-width: 960px) {
+  .job-detail-hero {
+    height: auto !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .job-detail-top {
+    width: 100% !important;
+  }
+
+  .job-detail-hero-bottom {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .job-detail-cta {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .job-detail-layout {
+    grid-template-columns: 1fr !important;
+    gap: 28px !important;
+  }
+}
+
 /* Responsive breakpoints: 1024 tablet, 768 mobile landscape, 480 mobile portrait */
 @media (max-width: 768px) {
   .nav-desktop { display: none !important; }
@@ -218,6 +245,26 @@
     padding: 8px 14px !important;
   }
   .job-card-meta { margin-top: 12px !important; padding-top: 12px !important; }
+  .job-detail-brand {
+    width: 100% !important;
+    gap: 14px !important;
+  }
+  .job-detail-brand h2 {
+    font-size: 22px !important;
+  }
+  .job-detail-meta-row {
+    gap: 10px !important;
+  }
+  .job-detail-meta-row span {
+    font-size: 14px !important;
+  }
+  .job-detail-sidebar {
+    padding: 20px 18px !important;
+    border-radius: 18px !important;
+  }
+  .job-description-rich {
+    gap: 10px !important;
+  }
   .footer-responsive { flex-direction: column !important; align-items: flex-start !important; padding: 24px 16px !important; text-align: left !important; }
 }
 
@@ -273,9 +320,13 @@
   .add-job-grid { grid-template-columns: 1fr !important; }
 }
 
-/* Job detail modal responsive */
+/* Job detail page responsive */
 @media (max-width: 600px) {
-  .job-detail-grid { grid-template-columns: 1fr !important; }
-  .job-detail-header { flex-direction: column !important; align-items: flex-start !important; gap: 16px !important; }
-  .job-detail-actions { flex-direction: column !important; }
+  .job-detail-brand {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+  .job-detail-cta button {
+    width: 100% !important;
+  }
 }

@@ -1,9 +1,9 @@
-import { JobCard, JobDetail, EmailModal } from "../components/job";
+import { JobCard, EmailModal } from "../components/job";
 import Navbar from "../components/layout/Navbar";
 import { Toast } from "../components/ui";
 
 export default function DashboardPage({
-  jobsLoading, page, setPage, jobs = [], savedJobs, handleSave, selectedJob, setSelectedJob,
+  jobsLoading, page, setPage, jobs = [], savedJobs, handleSave, openJobDetail,
   applyJob, setApplyJob, handleApplySubmit, toast, user, userRole = "job_seeker", applications = [], onSignOut, isAdmin, canPostJobs,
   onSelectCategory
 }) {
@@ -59,7 +59,7 @@ export default function DashboardPage({
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {postedJobs.map((job) => (
-                  <JobCard key={job.id} job={job} onClick={(j) => setSelectedJob(j)} onApply={(j) => setApplyJob(j)} />
+                  <JobCard key={job.id} job={job} onClick={(j) => openJobDetail(j, "dashboard")} onApply={(j) => setApplyJob(j)} />
                 ))}
               </div>
             )}
@@ -76,7 +76,7 @@ export default function DashboardPage({
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
                 {appliedJobs.map((job) => (
-                  <JobCard key={`applied-${job.id}`} job={job} onClick={(j) => setSelectedJob(j)} onApply={(j) => setApplyJob(j)} />
+                  <JobCard key={`applied-${job.id}`} job={job} onClick={(j) => openJobDetail(j, "dashboard")} onApply={(j) => setApplyJob(j)} />
                 ))}
               </div>
             )}
@@ -93,7 +93,7 @@ export default function DashboardPage({
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {jobs.filter(j => savedJobs.includes(j.id)).map(job => (
-                  <JobCard key={job.id} job={job} onClick={j => setSelectedJob(j)} onApply={j => setApplyJob(j)} />
+                  <JobCard key={job.id} job={job} onClick={j => openJobDetail(j, "dashboard")} onApply={j => setApplyJob(j)} />
                 ))}
               </div>
             )}
@@ -104,14 +104,13 @@ export default function DashboardPage({
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {(jobs || []).slice(0, 5).map(job => (
-                  <JobCard key={job.id} job={job} onClick={j => setSelectedJob(j)} onApply={j => setApplyJob(j)} />
+                  <JobCard key={job.id} job={job} onClick={j => openJobDetail(j, "dashboard")} onApply={j => setApplyJob(j)} />
                 ))}
               </div>
             )}
           </>
         )}
       </div>
-      {selectedJob && <JobDetail job={selectedJob} onClose={() => setSelectedJob(null)} onApply={j => { setApplyJob(j); setSelectedJob(null); }} saved={savedJobs.includes(selectedJob.id)} onSave={handleSave} />}
       {applyJob && <EmailModal job={applyJob} onClose={() => setApplyJob(null)} onSubmit={handleApplySubmit} />}
       <Toast message={toast.message} visible={toast.visible} />
     </div>
