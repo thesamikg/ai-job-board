@@ -112,12 +112,16 @@ export default function JobDetailPage({
         )}
       </div>
 
-      <div className="footer-responsive" style={{ borderTop: "1px solid rgba(148,163,184,0.3)", padding: "32px 32px", display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 16, background: "#ffffff" }}>
-        <Logo />
-        <div style={{ fontSize: 12, color: "#64748b" }}>© 2026 AIRoboticsjob · Built for AI and robotics hiring</div>
-        <div style={{ display: "flex", gap: 24 }}>
+      <div className="footer-responsive" style={{ borderTop: "1px solid rgba(148,163,184,0.3)", padding: "16px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, background: "#ffffff" }}>
+        <div style={{ flex: "1 1 0", minWidth: 0 }}>
+          <Logo />
+        </div>
+        <div style={{ flex: "1 1 0", minWidth: 0, fontSize: 12, color: "#64748b", textAlign: "center" }}>
+          © 2026 AIRoboticsjob · Built for AI and robotics hiring
+        </div>
+        <div style={{ flex: "1 1 0", minWidth: 0, display: "flex", justifyContent: "flex-end", gap: 24 }}>
           {["Privacy", "Terms", "Contact"].map((label) => (
-            <span key={label} style={{ fontSize: 12, color: "#64748b", cursor: "pointer" }}>{label}</span>
+            <span key={label} style={{ fontSize: 12, color: "#64748b", cursor: "pointer", whiteSpace: "nowrap" }}>{label}</span>
           ))}
         </div>
       </div>
