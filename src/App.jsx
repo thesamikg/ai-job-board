@@ -245,26 +245,26 @@ function findJobForRoute(jobs, route) {
 
 function buildDocumentTitle(page, job) {
   if (page === "jobDetail" && job) {
-    const parts = [job.title, job.category, "NeuralHire"].filter(Boolean);
+    const parts = [job.title, job.category, "AIRobotics Job"].filter(Boolean);
     return parts.join(" | ");
   }
 
   switch (page) {
     case "jobs":
-      return "Jobs | NeuralHire";
+      return "Jobs | AIRobotics Job";
     case "dashboard":
-      return "Dashboard | NeuralHire";
+      return "Dashboard | AIRobotics Job";
     case "login":
-      return "Sign In | NeuralHire";
+      return "Sign In | AIRobotics Job";
     case "signup":
-      return "Sign Up | NeuralHire";
+      return "Sign Up | AIRobotics Job";
     case "addJob":
-      return "Post a Job | NeuralHire";
+      return "Post a Job | AIRobotics Job";
     case "admin":
-      return "Admin | NeuralHire";
+      return "Admin | AIRobotics Job";
     case "home":
     default:
-      return "NeuralHire | AI & Robotics Jobs";
+      return "AIRobotics Job | AI & Robotics Jobs";
   }
 }
 
