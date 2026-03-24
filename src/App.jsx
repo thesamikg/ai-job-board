@@ -53,6 +53,12 @@ function getEmailDomain(email) {
 
 function loadCurrentPage() {
   try {
+    if (typeof window !== "undefined") {
+      const pathname = String(window.location.pathname || "");
+      if (pathname && pathname !== "/") {
+        return pathname;
+      }
+    }
     const page = localStorage.getItem(LOCAL_PAGE_KEY);
     return page || "home";
   } catch {
@@ -173,10 +179,99 @@ async function submitNewsletterToNetlify(email) {
   }
 }
 
+function slugifySegment(value) {
+  return String(value || "")
+    .toLowerCase()
+    .trim()
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "role";
+}
+
+function getPagePath(page) {
+  switch (page) {
+    case "jobs":
+      return "/jobs";
+    case "dashboard":
+      return "/dashboard";
+    case "login":
+      return "/login";
+    case "signup":
+      return "/signup";
+    case "addJob":
+      return "/post-a-job";
+    case "admin":
+      return "/admin";
+    case "home":
+    default:
+      return "/";
+  }
+}
+
+function buildJobPath(job) {
+  const category = slugifySegment(job?.category || "jobs");
+  const title = slugifySegment(job?.title || "role");
+  const id = encodeURIComponent(String(job?.id || ""));
+  return `/job/${category}/${title}/${id}`;
+}
+
+function parseAppRoute(pathname) {
+  const path = String(pathname || "/").replace(/\/+$/, "") || "/";
+  if (path === "/") return { page: "home" };
+  if (path === "/jobs") return { page: "jobs" };
+  if (path === "/dashboard") return { page: "dashboard" };
+  if (path === "/login") return { page: "login" };
+  if (path === "/signup") return { page: "signup" };
+  if (path === "/post-a-job") return { page: "addJob" };
+  if (path === "/admin") return { page: "admin" };
+
+  const parts = path.split("/").filter(Boolean);
+  if (parts.length >= 4 && parts[0] === "job") {
+    return {
+      page: "jobDetail",
+      categorySlug: decodeURIComponent(parts[1] || ""),
+      titleSlug: decodeURIComponent(parts[2] || ""),
+      jobId: decodeURIComponent(parts.slice(3).join("/")),
+    };
+  }
+
+  return { page: "home" };
+}
+
+function findJobForRoute(jobs, route) {
+  if (route?.page !== "jobDetail" || !route?.jobId) return null;
+  return (jobs || []).find((job) => String(job?.id || "") === String(route.jobId || "")) || null;
+}
+
+function buildDocumentTitle(page, job) {
+  if (page === "jobDetail" && job) {
+    const parts = [job.title, job.category, "NeuralHire"].filter(Boolean);
+    return parts.join(" | ");
+  }
+
+  switch (page) {
+    case "jobs":
+      return "Jobs | NeuralHire";
+    case "dashboard":
+      return "Dashboard | NeuralHire";
+    case "login":
+      return "Sign In | NeuralHire";
+    case "signup":
+      return "Sign Up | NeuralHire";
+    case "addJob":
+      return "Post a Job | NeuralHire";
+    case "admin":
+      return "Admin | NeuralHire";
+    case "home":
+    default:
+      return "NeuralHire | AI & Robotics Jobs";
+  }
+}
+
 export default function App() {
   const [jobs, setJobs] = useState([]);
   const [jobsLoading, setJobsLoading] = useState(true);
-  const [page, setPage] = useState(loadCurrentPage);
+  const [page, setPageState] = useState(() => parseAppRoute(loadCurrentPage()).page);
   const [selectedJob, setSelectedJob] = useState(null);
   const [jobDetailReturnPage, setJobDetailReturnPage] = useState("jobs");
   const [applyJob, setApplyJob] = useState(null);
@@ -229,6 +324,23 @@ export default function App() {
     return role;
   };
 
+  const navigateToPage = (nextPage, options = {}) => {
+    const { replace = false, preserveScroll = false } = options;
+    const targetPath = getPagePath(nextPage);
+    const nextTitle = buildDocumentTitle(nextPage);
+    const historyMethod = replace ? "replaceState" : "pushState";
+
+    window.history[historyMethod]({ page: nextPage }, "", targetPath);
+    document.title = nextTitle;
+    if (nextPage !== "jobDetail") {
+      setSelectedJob(null);
+    }
+    setPageState(nextPage);
+    if (!preserveScroll) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   useEffect(() => {
     async function loadJobs() {
       clearLegacyLocalJobCache();
@@ -272,14 +384,46 @@ export default function App() {
   }, [isAdmin, page]);
 
   useEffect(() => {
-    saveCurrentPage(page === "jobDetail" ? jobDetailReturnPage : page);
-  }, [jobDetailReturnPage, page]);
+    saveCurrentPage(window.location.pathname || getPagePath(page));
+  }, [page, selectedJob]);
 
   useEffect(() => {
-    if (page === "jobDetail" && !selectedJob) {
-      setPage(jobDetailReturnPage || "jobs");
+    document.title = buildDocumentTitle(page, selectedJob);
+  }, [page, selectedJob]);
+
+  useEffect(() => {
+    const route = parseAppRoute(window.location.pathname);
+    if (page === "jobDetail" && !selectedJob && !jobsLoading && route.page !== "jobDetail") {
+      navigateToPage(jobDetailReturnPage || "jobs", { replace: true, preserveScroll: true });
     }
-  }, [jobDetailReturnPage, page, selectedJob]);
+  }, [jobDetailReturnPage, jobsLoading, page, selectedJob]);
+
+  useEffect(() => {
+    const route = parseAppRoute(window.location.pathname);
+    if (route.page !== "jobDetail") {
+      if (selectedJob) {
+        setSelectedJob(null);
+      }
+      if (page !== route.page) {
+        setPageState(route.page);
+      }
+      return;
+    }
+
+    if (jobsLoading) return;
+
+    const matchedJob = findJobForRoute(jobs, route);
+    if (matchedJob) {
+      setSelectedJob((prev) => (String(prev?.id || "") === String(matchedJob.id) ? prev : matchedJob));
+      setJobDetailReturnPage(window.history.state?.returnPage || "jobs");
+      if (page !== "jobDetail") {
+        setPageState("jobDetail");
+      }
+      return;
+    }
+
+    navigateToPage("jobs", { replace: true, preserveScroll: true });
+  }, [jobs, jobsLoading, page, selectedJob]);
 
   useEffect(() => {
     getSession().then(async ({ data: { session } }) => {
@@ -291,7 +435,7 @@ export default function App() {
       if (session?.user) {
         await applySessionUser(session.user);
         if (event === "SIGNED_IN") {
-          setPage("dashboard");
+          navigateToPage("dashboard", { replace: true, preserveScroll: true });
         }
       } else {
         setUser(null);
@@ -300,6 +444,33 @@ export default function App() {
     });
     return unsubscribe;
   }, []);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const route = parseAppRoute(window.location.pathname);
+      if (route.page !== "jobDetail") {
+        setSelectedJob(null);
+        setPageState(route.page);
+        return;
+      }
+
+      const matchedJob = findJobForRoute(jobs, route);
+      if (matchedJob) {
+        setSelectedJob(matchedJob);
+        setJobDetailReturnPage(window.history.state?.returnPage || "jobs");
+        setPageState("jobDetail");
+        return;
+      }
+
+      if (!jobsLoading) {
+        setSelectedJob(null);
+        setPageState("jobs");
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [jobs, jobsLoading]);
 
   useEffect(() => {
     async function loadAdminData() {
@@ -349,20 +520,21 @@ export default function App() {
 
   const handleCategorySelect = (category) => {
     setFilters((prev) => ({ ...prev, category: category || "" }));
-    setPage("jobs");
+    navigateToPage("jobs");
   };
 
   const openJobDetail = (job, originPage = page) => {
     if (!job) return;
+    const returnPage = originPage === "jobDetail" ? jobDetailReturnPage : originPage || "jobs";
+    window.history.pushState({ page: "jobDetail", jobId: job.id, returnPage }, "", buildJobPath(job));
     setSelectedJob(job);
-    setJobDetailReturnPage(originPage === "jobDetail" ? jobDetailReturnPage : originPage || "jobs");
-    setPage("jobDetail");
+    setJobDetailReturnPage(returnPage);
+    setPageState("jobDetail");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const closeJobDetailPage = () => {
-    setPage(jobDetailReturnPage || "jobs");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    navigateToPage(jobDetailReturnPage || "jobs");
   };
 
   const handleNewsletterSubscribe = async () => {
@@ -459,7 +631,7 @@ export default function App() {
       ).catch(() => null);
       if (registrationKnown === false) {
         showToast("Email is not registered, continue to sign up.");
-        setPage("signup");
+        navigateToPage("signup");
         return;
       }
       const data = await withTimeout(
@@ -470,7 +642,7 @@ export default function App() {
       if (data?.session?.user) {
         await applySessionUser(data.session.user);
         showToast("✓ Welcome back!");
-        setPage("dashboard");
+        navigateToPage("dashboard");
         setLoginPassword("");
         return;
       }
@@ -482,7 +654,7 @@ export default function App() {
       if (session?.user) {
         await applySessionUser(session.user);
         showToast("✓ Welcome back!");
-        setPage("dashboard");
+        navigateToPage("dashboard");
         setLoginPassword("");
         return;
       }
@@ -494,7 +666,7 @@ export default function App() {
         showToast("Please confirm your email before signing in.");
       } else if (msg.toLowerCase().includes("invalid login credentials") && registrationKnown !== true) {
         showToast("Email is not registered, continue to sign up.");
-        setPage("signup");
+        navigateToPage("signup");
       } else {
         showToast(msg);
       }
@@ -535,7 +707,7 @@ export default function App() {
       if (data?.session?.user) {
         await applySessionUser(data.session.user, signupRole);
         showToast("✓ Account created and signed in!");
-        setPage("dashboard");
+        navigateToPage("dashboard");
       } else {
         showToast("✓ Account created! Check your email to confirm, then sign in.");
       }
@@ -585,7 +757,7 @@ export default function App() {
     setApplications([]);
     setSelectedJob(null);
     setApplyJob(null);
-    setPage("home");
+    navigateToPage("home", { replace: true, preserveScroll: true });
     try {
       await signOut();
       showToast("Signed out");
@@ -650,7 +822,7 @@ export default function App() {
       <HomePage
         jobs={visibleJobs}
         jobsLoading={jobsLoading}
-        setPage={setPage}
+        setPage={navigateToPage}
         search={search}
         setSearch={setSearch}
         savedJobs={savedJobs}
@@ -681,7 +853,7 @@ export default function App() {
       <JobsPage
         jobsLoading={jobsLoading}
         page={page}
-        setPage={setPage}
+        setPage={navigateToPage}
         search={search}
         setSearch={setSearch}
         filters={filters}
@@ -708,7 +880,7 @@ export default function App() {
       <DashboardPage
         jobsLoading={jobsLoading}
         page={page}
-        setPage={setPage}
+        setPage={navigateToPage}
         jobs={visibleJobs}
         savedJobs={savedJobs}
         applications={applications}
@@ -731,8 +903,8 @@ export default function App() {
   if (page === "jobDetail" && selectedJob) {
     return (
       <JobDetailPage
-        page={jobDetailReturnPage}
-        setPage={setPage}
+        page="jobDetail"
+        setPage={navigateToPage}
         job={selectedJob}
         returnPage={jobDetailReturnPage}
         onBack={closeJobDetailPage}
@@ -754,11 +926,19 @@ export default function App() {
     );
   }
 
+  if (page === "jobDetail" && !selectedJob) {
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f8fafc", color: "#475569", fontFamily: "'Source Sans 3', sans-serif" }}>
+        Loading job details...
+      </div>
+    );
+  }
+
   if (page === "admin") {
     if (!isAdmin) {
       return (
         <LoginPage
-          setPage={setPage}
+          setPage={navigateToPage}
           loginEmail={loginEmail}
           setLoginEmail={setLoginEmail}
           loginPassword={loginPassword}
@@ -779,7 +959,7 @@ export default function App() {
     return (
       <AdminPage
         page={page}
-        setPage={setPage}
+        setPage={navigateToPage}
         user={user}
         onSignOut={handleSignOut}
         toast={toast}
@@ -798,7 +978,7 @@ export default function App() {
   if (page === "login" || page === "signup") {
     return (
       <LoginPage
-        setPage={setPage}
+        setPage={navigateToPage}
         loginEmail={loginEmail}
         setLoginEmail={setLoginEmail}
         loginPassword={loginPassword}
@@ -821,7 +1001,7 @@ export default function App() {
     return (
       <AddJobPage
         page={page}
-        setPage={setPage}
+        setPage={navigateToPage}
         onAddJob={handleAddJob}
         showToast={showToast}
         toast={toast}
