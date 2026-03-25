@@ -188,6 +188,17 @@ function slugifySegment(value) {
     .replace(/^-+|-+$/g, "") || "role";
 }
 
+function getJobUrlNumber(job) {
+  const source = String(job?.id || job?.posted_at || job?.title || "1");
+  let hash = 0;
+
+  for (let index = 0; index < source.length; index += 1) {
+    hash = (hash * 31 + source.charCodeAt(index)) % 900000;
+  }
+
+  return String(hash + 100000);
+}
+
 function getPagePath(page) {
   switch (page) {
     case "jobs":
@@ -210,7 +221,7 @@ function getPagePath(page) {
 
 function buildJobPath(job) {
   const category = slugifySegment(job?.category || "jobs");
-  const title = slugifySegment(job?.title || "role");
+  const title = `${slugifySegment(job?.title || "role")}-${getJobUrlNumber(job)}`;
   const id = encodeURIComponent(String(job?.id || ""));
   return `/job/${category}/${title}/${id}`;
 }
