@@ -51,3 +51,19 @@ export function getCompanyInitials(companyName, logoValue = "") {
   if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
   return "CO";
 }
+
+export function getWorkModeLabel(job) {
+  if (job?.remote) return "Remote";
+  if (job?.hybrid) return "Hybrid";
+  return "On-site";
+}
+
+export function formatExperienceLevel(experienceLevel) {
+  const value = String(experienceLevel || "").trim();
+  if (!value) return "";
+  if (/year|entry level/i.test(value)) return value;
+  if (/^\d+\+$/.test(value) || /^\d+\s*-\s*\d+$/.test(value)) {
+    return `${value} years`;
+  }
+  return value;
+}

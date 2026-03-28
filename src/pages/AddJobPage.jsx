@@ -1,7 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import Navbar from "../components/layout/Navbar";
 import { Toast } from "../components/ui";
-import { CATEGORIES, ALL_SKILLS } from "../data/jobs";
+import {
+  ALL_SKILLS,
+  CATEGORY_OPTIONS,
+  DEFAULT_CATEGORY,
+  DEFAULT_EXPERIENCE_LEVEL,
+  EXPERIENCE_LEVEL_SUGGESTIONS,
+  JOB_TYPE_OPTIONS,
+} from "../data/jobs";
 import { getCompanyInitials } from "../utils/jobHelpers";
 import { extractPlainText, sanitizeRichText } from "../utils/richText";
 
@@ -72,6 +79,8 @@ function validateForm(form) {
 function RichTextEditor({ value, onChange, placeholder, inputRef, hasError }) {
   const editorRef = useRef(null);
   const selectionRef = useRef(null);
+  const [isFocused, setIsFocused] = useState(false);
+  const [hoveredTool, setHoveredTool] = useState(null);
 
   useEffect(() => {
     const editor = editorRef.current;
@@ -119,6 +128,24 @@ function RichTextEditor({ value, onChange, placeholder, inputRef, hasError }) {
     runCommand("createLink", url);
   };
 
+  const toolButtonStyle = (key, activeColor = "#2563eb") => ({
+    minWidth: 34,
+    height: 34,
+    padding: "6px 8px",
+    background: hoveredTool === key ? "rgba(37,99,235,0.08)" : "transparent",
+    border: "none",
+    borderRadius: 8,
+    color: hoveredTool === key ? activeColor : "#64748b",
+    fontSize: 14,
+    fontWeight: 700,
+    cursor: "pointer",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    transition: "background 0.18s ease, color 0.18s ease",
+    fontFamily: "'Source Sans 3', sans-serif",
+  });
+
   const toolbarBtn = (key, label, onPress, extraStyle = {}) => (
     <button
       key={key}
@@ -127,81 +154,64 @@ function RichTextEditor({ value, onChange, placeholder, inputRef, hasError }) {
         e.preventDefault();
         onPress();
       }}
+      onMouseEnter={() => setHoveredTool(key)}
+      onMouseLeave={() => setHoveredTool(null)}
       title={typeof label === "string" ? label : undefined}
-      style={{
-        minWidth: 44,
-        height: 42,
-        padding: "8px 10px",
-        background: "transparent",
-        border: "none",
-        borderRadius: 10,
-        color: "#1d4ed8",
-        fontSize: 16,
-        fontWeight: 700,
-        cursor: "pointer",
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        transition: "background 0.15s ease, color 0.15s ease",
-        ...extraStyle,
-      }}
+      style={{ ...toolButtonStyle(key), ...extraStyle }}
     >
       {label}
     </button>
   );
 
-  const divider = (key) => (
-    <span
-      key={key}
-      aria-hidden="true"
-      style={{
-        width: 1,
-        alignSelf: "stretch",
-        background: "rgba(37,99,235,0.16)",
-        margin: "0 6px",
-      }}
-    />
-  );
-
   const linkIcon = (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M10.4 13.6L13.6 10.4" stroke="#0f172a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M8.2 15.8L6.8 17.2a3.1 3.1 0 1 1-4.4-4.4l3-3a3.1 3.1 0 0 1 4.4 0" stroke="#0f172a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M15.8 8.2L17.2 6.8a3.1 3.1 0 1 1 4.4 4.4l-3 3a3.1 3.1 0 0 1-4.4 0" stroke="#0f172a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M10.4 13.6L13.6 10.4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M8.2 15.8L6.8 17.2a3.1 3.1 0 1 1-4.4-4.4l3-3a3.1 3.1 0 0 1 4.4 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M15.8 8.2L17.2 6.8a3.1 3.1 0 1 1 4.4 4.4l-3 3a3.1 3.1 0 0 1-4.4 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 
   return (
     <div className="rich-editor-shell" style={{
-      border: `1px solid ${hasError ? "rgba(239,68,68,0.7)" : "rgba(37,99,235,0.24)"}`,
-      borderRadius: 16,
+      width: "100%",
+      border: `1px solid ${hasError ? "rgba(239,68,68,0.7)" : isFocused ? "rgba(37,99,235,0.65)" : "rgba(148,163,184,0.45)"}`,
+      borderRadius: 10,
       overflow: "hidden",
       background: "#ffffff",
-      boxShadow: hasError ? "0 0 0 1px rgba(239,68,68,0.15)" : "0 10px 24px rgba(37,99,235,0.08)",
+      boxShadow: hasError
+        ? "0 0 0 3px rgba(239,68,68,0.08)"
+        : isFocused
+          ? "0 0 0 3px rgba(37,99,235,0.08)"
+          : "none",
+      transition: "border-color 0.18s ease, box-shadow 0.18s ease",
     }}>
       <div style={{
         display: "flex",
         flexWrap: "wrap",
-        gap: 4,
-        padding: 12,
-        borderBottom: "1px solid rgba(37,99,235,0.14)",
-        background: "#f8fbff",
+        alignItems: "center",
+        gap: 12,
+        padding: "10px 12px",
+        borderBottom: "1px solid rgba(148,163,184,0.18)",
+        background: "#f8fafc",
       }}>
-        {toolbarBtn("undo", "↺", () => runCommand("undo"), { color: "#0f172a" })}
-        {toolbarBtn("redo", "↻", () => runCommand("redo"), { color: "#0f172a" })}
-        {divider("divider-1")}
-        {toolbarBtn("bold", "B", () => runCommand("bold"), { fontSize: 18, color: "#0f172a" })}
-        {toolbarBtn("italic", <span style={{ fontStyle: "italic", fontFamily: "'Merriweather', serif", color: "#0f172a" }}>I</span>, () => runCommand("italic"), { color: "#0f172a" })}
-        {divider("divider-2")}
-        {toolbarBtn("h1", "H1", () => runCommand("formatBlock", "<h2>"), { fontSize: 14, letterSpacing: 0.2, color: "#0f172a" })}
-        {toolbarBtn("h2", "H2", () => runCommand("formatBlock", "<h3>"), { fontSize: 14, letterSpacing: 0.2, color: "#0f172a" })}
-        {divider("divider-3")}
-        {toolbarBtn("unordered", "≣", () => runCommand("insertUnorderedList"), { fontSize: 18, color: "#0f172a" })}
-        {toolbarBtn("ordered", "≡", () => runCommand("insertOrderedList"), { fontSize: 18, color: "#0f172a" })}
-        {divider("divider-4")}
-        {toolbarBtn("strike", "S", () => runCommand("strikeThrough"), { fontSize: 16, textDecoration: "line-through", color: "#0f172a" })}
-        {divider("divider-5")}
-        {toolbarBtn("link", linkIcon, addLink, { color: "#0f172a" })}
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          {toolbarBtn("bold", "B", () => runCommand("bold"), { fontSize: 15, color: hoveredTool === "bold" ? "#0f172a" : "#475569" })}
+          {toolbarBtn("italic", <span style={{ fontStyle: "italic", fontSize: 15 }}>I</span>, () => runCommand("italic"), { color: hoveredTool === "italic" ? "#0f172a" : "#475569" })}
+        </div>
+        <div style={{ width: 1, height: 18, background: "rgba(148,163,184,0.28)" }} />
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          {toolbarBtn("h1", "H1", () => runCommand("formatBlock", "<h2>"), { fontSize: 12, letterSpacing: 0.2 })}
+          {toolbarBtn("h2", "H2", () => runCommand("formatBlock", "<h3>"), { fontSize: 12, letterSpacing: 0.2 })}
+        </div>
+        <div style={{ width: 1, height: 18, background: "rgba(148,163,184,0.28)" }} />
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          {toolbarBtn("unordered", "• List", () => runCommand("insertUnorderedList"), { fontSize: 12, fontWeight: 600 })}
+          {toolbarBtn("ordered", "1. List", () => runCommand("insertOrderedList"), { fontSize: 12, fontWeight: 600 })}
+        </div>
+        <div style={{ width: 1, height: 18, background: "rgba(148,163,184,0.28)" }} />
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          {toolbarBtn("link", linkIcon, addLink)}
+        </div>
       </div>
       <div
         ref={editorRef}
@@ -209,7 +219,9 @@ function RichTextEditor({ value, onChange, placeholder, inputRef, hasError }) {
         contentEditable
         suppressContentEditableWarning
         onInput={syncValue}
+        onFocus={() => setIsFocused(true)}
         onBlur={() => {
+          setIsFocused(false);
           saveSelection();
           syncValue();
         }}
@@ -217,13 +229,16 @@ function RichTextEditor({ value, onChange, placeholder, inputRef, hasError }) {
         onMouseUp={saveSelection}
         data-placeholder={placeholder}
         style={{
-          minHeight: 340,
-          padding: "22px 18px",
+          minHeight: 260,
+          padding: "16px 16px 18px",
           color: "#0f172a",
           fontSize: 15,
-          lineHeight: 1.75,
+          lineHeight: 1.7,
           outline: "none",
           whiteSpace: "pre-wrap",
+          fontFamily: "'Source Sans 3', sans-serif",
+          caretColor: "#2563eb",
+          transition: "color 0.18s ease",
         }}
       />
     </div>
@@ -241,12 +256,13 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
     salary_max: "",
     currency: "USD",
     job_type: "Full-time",
-    experience_level: "2-5",
+    experience_level: DEFAULT_EXPERIENCE_LEVEL,
     remote: false,
+    hybrid: false,
     skills: [],
     description: "",
     apply_url: "",
-    category: "AI Engineering",
+    category: DEFAULT_CATEGORY,
   });
   const [skillInput, setSkillInput] = useState("");
   const [errors, setErrors] = useState({});
@@ -280,6 +296,16 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
       if (key === "salary_min" || key === "salary_max") delete next.salary;
       return next;
     });
+  };
+
+  const updateWorkMode = (key, checked) => {
+    setForm((prev) => ({
+      ...prev,
+      [key]: checked,
+      ...(key === "remote" && checked ? { hybrid: false } : {}),
+      ...(key === "hybrid" && checked ? { remote: false } : {}),
+    }));
+    setSubmitError("");
   };
 
   const addSkill = () => {
@@ -352,18 +378,20 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
       setIsSubmitting(true);
       setSubmitError("");
       const description = sanitizeRichText(form.description);
+      const location = form.location.trim() || (form.remote ? "Remote" : form.hybrid ? "Hybrid" : "On-site");
       const job = {
         id: Date.now(),
         title: form.title.trim(),
         company: form.company.trim(),
         companyLogo: form.company_logo || getCompanyInitials(form.company),
-        location: form.location.trim() || "Remote",
+        location,
         salary_min: min,
         salary_max: max,
         currency: form.currency,
         job_type: form.job_type,
-        experience_level: form.experience_level,
+        experience_level: form.experience_level.trim() || DEFAULT_EXPERIENCE_LEVEL,
         remote: form.remote,
+        hybrid: form.hybrid,
         skills: form.skills.length ? form.skills : ["Python", "AI"],
         description,
         apply_url: urlCandidate.startsWith("http") ? urlCandidate : `https://${urlCandidate}`,
@@ -472,34 +500,79 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
             <div>
               <label style={labelStyle}>JOB TYPE</label>
               <select value={form.job_type} onChange={e => update("job_type", e.target.value)} style={{ ...inputStyle, cursor: "pointer" }}>
-                <option value="Full-time">Full-time</option>
-                <option value="Part-time">Part-time</option>
-                <option value="Contract">Contract</option>
-                <option value="Internship">Internship</option>
+                {JOB_TYPE_OPTIONS.map((jobType) => (
+                  <option key={jobType} value={jobType}>{jobType}</option>
+                ))}
               </select>
             </div>
             <div>
               <label style={labelStyle}>EXPERIENCE LEVEL</label>
-              <select value={form.experience_level} onChange={e => update("experience_level", e.target.value)} style={{ ...inputStyle, cursor: "pointer" }}>
-                <option value="0-2">0–2 yrs</option>
-                <option value="2-5">2–5 yrs</option>
-                <option value="5+">5+ yrs</option>
-              </select>
+              <input
+                list="experience-level-suggestions"
+                value={form.experience_level}
+                onChange={e => update("experience_level", e.target.value)}
+                placeholder="e.g. Entry level (0-2 years), 5+ years"
+                style={inputStyle}
+              />
+              <datalist id="experience-level-suggestions">
+                {EXPERIENCE_LEVEL_SUGGESTIONS.map((experienceLevel) => (
+                  <option key={experienceLevel} value={experienceLevel} />
+                ))}
+              </datalist>
             </div>
           </div>
 
           <div style={{ marginBottom: 20 }}>
-            <label style={{ ...labelStyle, display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
-              <input type="checkbox" checked={form.remote} onChange={e => update("remote", e.target.checked)} style={{ accentColor: "#7c3aed" }} />
-              Remote position
-            </label>
+            <div style={{ ...labelStyle, marginBottom: 10 }}>WORK MODE</div>
+            <div style={{ display: "flex", gap: 18, flexWrap: "wrap" }}>
+              <label style={{ ...labelStyle, display: "flex", alignItems: "center", gap: 10, cursor: "pointer", marginBottom: 0 }}>
+                <input type="checkbox" checked={form.remote} onChange={e => updateWorkMode("remote", e.target.checked)} style={{ accentColor: "#7c3aed" }} />
+                Remote position
+              </label>
+              <label style={{ ...labelStyle, display: "flex", alignItems: "center", gap: 10, cursor: "pointer", marginBottom: 0 }}>
+                <input type="checkbox" checked={form.hybrid} onChange={e => updateWorkMode("hybrid", e.target.checked)} style={{ accentColor: "#2563eb" }} />
+                Hybrid position
+              </label>
+            </div>
+            <div style={{ marginTop: 6, fontSize: 11, color: "#64748b" }}>
+              Choose one work mode or leave both unchecked for on-site roles.
+            </div>
           </div>
 
           <div style={{ marginBottom: 20 }}>
             <label style={labelStyle}>CATEGORY</label>
-            <select value={form.category} onChange={e => update("category", e.target.value)} style={{ ...inputStyle, cursor: "pointer" }}>
-              {CATEGORIES.map(c => <option key={c.name} value={c.name}>{c.icon} {c.name}</option>)}
-            </select>
+            <div className="categories-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 10 }}>
+              {CATEGORY_OPTIONS.map((category) => {
+                const selected = form.category === category.name;
+                return (
+                  <button
+                    key={category.name}
+                    type="button"
+                    onClick={() => update("category", category.name)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                      width: "100%",
+                      padding: "12px 14px",
+                      borderRadius: 12,
+                      border: selected ? `1px solid ${category.color}` : "1px solid rgba(148,163,184,0.35)",
+                      background: selected ? "rgba(37,99,235,0.08)" : "#ffffff",
+                      color: selected ? "#0f172a" : "#475569",
+                      boxShadow: selected ? "0 8px 24px rgba(37,99,235,0.12)" : "none",
+                      cursor: "pointer",
+                      textAlign: "left",
+                      transition: "all 0.15s ease",
+                      fontSize: 13,
+                      fontWeight: selected ? 700 : 600,
+                    }}
+                  >
+                    <span style={{ fontSize: 16 }}>{category.icon}</span>
+                    <span>{category.name}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           <div style={{ marginBottom: 20 }}>
@@ -541,11 +614,18 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
               inputRef={fieldRefs.description}
               value={form.description}
               onChange={(nextValue) => update("description", nextValue)}
-              placeholder="Describe the role, responsibilities, requirements, benefits, and what success looks like..."
+              placeholder={`Write a clear and structured job description...
+
+• Overview of the role
+• Key responsibilities
+• Required skills and experience
+• Preferred qualifications (optional)
+• Salary, benefits, and perks
+• What success looks like in this role`}
               hasError={Boolean(errors.description)}
             />
             <div style={{ marginTop: 8, fontSize: 11, color: "#64748b" }}>
-              Recommended: overview, responsibilities, requirements, preferred skills, compensation details, and benefits.
+              Tip: Well-structured job descriptions attract better candidates.
             </div>
             {errors.description && <div style={{ marginTop: 6, fontSize: 12, color: "#dc2626" }}>{errors.description}</div>}
           </div>

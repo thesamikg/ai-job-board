@@ -1,4 +1,10 @@
 import { supabase, isSupabaseConfigured } from "../lib/supabase";
+import {
+  DEFAULT_CATEGORY,
+  DEFAULT_EXPERIENCE_LEVEL,
+  normalizeExperienceLevel,
+  normalizeJobCategory,
+} from "../data/jobs";
 
 /**
  * Convert DB row (snake_case) to app format (camelCase)
@@ -15,14 +21,15 @@ function toJob(row) {
     salary_max: row.salary_max ?? null,
     currency: row.currency || "USD",
     job_type: row.job_type || "Full-time",
-    experience_level: row.experience_level || "2-5",
+    experience_level: normalizeExperienceLevel(row.experience_level) || DEFAULT_EXPERIENCE_LEVEL,
     remote: Boolean(row.remote),
+    hybrid: Boolean(row.hybrid),
     skills: Array.isArray(row.skills) ? row.skills : (row.skills ? JSON.parse(row.skills || "[]") : []),
     description: row.description || "",
     apply_url: row.apply_url || "",
     posted_at: row.posted_at ? new Date(row.posted_at) : new Date(),
     featured: Boolean(row.featured),
-    category: row.category || "AI Engineering",
+    category: normalizeJobCategory(row.category) || DEFAULT_CATEGORY,
     status: row.status || "approved",
     posted_by: row.posted_by || null,
   };
@@ -41,13 +48,14 @@ function toRow(job) {
     salary_max: job.salary_max ?? null,
     currency: job.currency || "USD",
     job_type: job.job_type || "Full-time",
-    experience_level: job.experience_level || "2-5",
+    experience_level: normalizeExperienceLevel(job.experience_level) || DEFAULT_EXPERIENCE_LEVEL,
     remote: Boolean(job.remote),
+    hybrid: Boolean(job.hybrid),
     skills: Array.isArray(job.skills) ? job.skills : [],
     description: job.description || "",
     apply_url: job.apply_url || "",
     featured: Boolean(job.featured),
-    category: job.category || "AI Engineering",
+    category: normalizeJobCategory(job.category) || DEFAULT_CATEGORY,
     status: job.status || "pending",
     posted_by: job.posted_by || null,
   };
@@ -92,6 +100,17 @@ export async function addJob(job) {
   }
 
   let { data, error } = await supabase.from("jobs").insert(row).select("id").single();
+
+  if (error && String(error.message || "").toLowerCase().includes("hybrid")) {
+    if (row.hybrid) {
+      throw new Error("Hybrid jobs require the latest Supabase migration. Run the new jobs taxonomy migration and try again.");
+    }
+    const fallbackRow = { ...row };
+    delete fallbackRow.hybrid;
+    const retry = await supabase.from("jobs").insert(fallbackRow).select("id").single();
+    data = retry.data;
+    error = retry.error;
+  }
 
   // Backward compatibility: some existing DB schemas may not have posted_by yet.
   if (error && String(error.message || "").toLowerCase().includes("posted_by")) {
