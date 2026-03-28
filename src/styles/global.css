@@ -311,8 +311,7 @@
 @media (max-width: 900px) {
   .jobs-layout { flex-direction: column !important; }
   .jobs-sidebar { width: 100% !important; max-width: 100% !important; }
-  .jobs-sidebar-inner { position: static !important; display: flex !important; flex-wrap: wrap !important; gap: 20px 24px !important; }
-  .jobs-sidebar-inner > div { min-width: 140px !important; }
+  .jobs-sidebar-inner { position: static !important; }
 }
 
 /* Jobs page toolbar responsive */
