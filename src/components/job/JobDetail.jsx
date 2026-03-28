@@ -1,6 +1,16 @@
 import { useState } from "react";
 import { Badge, SkillTag } from "../ui";
-import { timeSince, isNew, isHot, formatSalary, hasSalaryRange, isCompanyLogoImage, getCompanyInitials } from "../../utils/jobHelpers";
+import {
+  timeSince,
+  isNew,
+  isHot,
+  formatExperienceLevel,
+  formatSalary,
+  getCompanyInitials,
+  getWorkModeLabel,
+  hasSalaryRange,
+  isCompanyLogoImage,
+} from "../../utils/jobHelpers";
 import { formatRichTextForDisplay } from "../../utils/richText";
 
 export default function JobDetail({ job, onBack, backLabel = "Back", onApply }) {
@@ -10,14 +20,17 @@ export default function JobDetail({ job, onBack, backLabel = "Back", onApply }) 
   const useLogoImage = isCompanyLogoImage(companyLogo) && !logoFailed;
   const companyInitials = getCompanyInitials(job?.company, companyLogo);
   const metaItems = [
-    job.remote ? "Remote" : "On-site",
+    getWorkModeLabel(job),
     job.job_type,
-    `${job.experience_level} yrs exp`,
+    formatExperienceLevel(job.experience_level),
   ];
   const summaryItems = [
     ["📅 Posted", timeSince(job.posted_at)],
     ["🏢 Company", job.company],
+    ["🗂 Category", job.category],
     ["🎯 Type", job.job_type],
+    ["🧭 Work mode", getWorkModeLabel(job)],
+    ["📈 Experience", formatExperienceLevel(job.experience_level)],
   ];
 
   if (hasSalaryRange(job)) {

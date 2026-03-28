@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Logo } from "../ui";
-import { CATEGORIES } from "../../data/jobs";
+import { CATEGORY_OPTIONS } from "../../data/jobs";
 
 const navBtn = (page, p) => ({
   background: page === p ? "rgba(37,99,235,0.1)" : "transparent",
@@ -34,8 +34,8 @@ const postJobBtn = {
   fontFamily: "'Source Sans 3', sans-serif",
 };
 
-const CATEGORY_OPTIONS = CATEGORIES.filter((category) => (
-  ["AI Engineering", "Computer Vision", "Robotics", "Research"].includes(category.name)
+const FEATURED_CATEGORY_OPTIONS = CATEGORY_OPTIONS.filter((category) => (
+  ["AI Engineering", "Machine Learning", "Robotics Engineering", "AI Research"].includes(category.name)
 ));
 
 export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false, canPostJobs = false, onSelectCategory }) {
@@ -126,7 +126,7 @@ export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false
               boxShadow: "0 16px 36px rgba(15,23,42,0.16)",
               zIndex: 130,
             }}>
-              {CATEGORY_OPTIONS.map((category) => (
+              {FEATURED_CATEGORY_OPTIONS.map((category) => (
                 <button
                   key={category.name}
                   onClick={() => handleCategoryPick(category.name)}
@@ -295,7 +295,7 @@ export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false
           </button>
           {mobileCategoryOpen && (
             <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 4px 4px" }}>
-              {CATEGORY_OPTIONS.map((category) => (
+              {FEATURED_CATEGORY_OPTIONS.map((category) => (
                 <button
                   key={category.name}
                   onClick={() => handleCategoryPick(category.name)}

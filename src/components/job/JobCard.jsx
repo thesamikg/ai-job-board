@@ -1,6 +1,16 @@
 import { useState } from "react";
 import { Badge, SkillTag } from "../ui";
-import { timeSince, isNew, isHot, formatSalary, hasSalaryRange, isCompanyLogoImage, getCompanyInitials } from "../../utils/jobHelpers";
+import {
+  timeSince,
+  isNew,
+  isHot,
+  formatExperienceLevel,
+  formatSalary,
+  getCompanyInitials,
+  getWorkModeLabel,
+  hasSalaryRange,
+  isCompanyLogoImage,
+} from "../../utils/jobHelpers";
 
 export default function JobCard({ job, onClick, onApply }) {
   const [hovered, setHovered] = useState(false);
@@ -56,6 +66,7 @@ export default function JobCard({ job, onClick, onApply }) {
               {isNew(job.posted_at) && <Badge color="#22c55e">New</Badge>}
               {isHot(job) && <Badge color="#f97316">Hot</Badge>}
               {job.featured && <Badge color="#1d4ed8">Featured</Badge>}
+              {job.category && <Badge color="#475569">{job.category}</Badge>}
             </div>
             <div style={{ fontSize: 13, color: "#475569", marginBottom: 10, textAlign: "left" }}>
               {job.company} · {job.location}
@@ -88,12 +99,12 @@ export default function JobCard({ job, onClick, onApply }) {
       </div>
       <div className="job-card-meta" style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 14, paddingTop: 14, borderTop: "1px solid rgba(148,163,184,0.3)", flexWrap: "wrap" }}>
         <span style={{ fontSize: 11, color: "#64748b", display: "flex", alignItems: "center", gap: 6, lineHeight: 1 }}>
-          <span>📍</span>{job.remote ? "Remote" : "On-site"}
+          <span>📍</span>{getWorkModeLabel(job)}
         </span>
         <span style={{ color: "#94a3b8", lineHeight: 1 }}>·</span>
         <span style={{ fontSize: 11, color: "#64748b", lineHeight: 1 }}>{job.job_type}</span>
         <span style={{ color: "#94a3b8", lineHeight: 1 }}>·</span>
-        <span style={{ fontSize: 11, color: "#64748b", lineHeight: 1 }}>{job.experience_level} yrs</span>
+        <span style={{ fontSize: 11, color: "#64748b", lineHeight: 1 }}>{formatExperienceLevel(job.experience_level)}</span>
       </div>
     </div>
   );

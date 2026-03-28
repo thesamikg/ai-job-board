@@ -1,7 +1,7 @@
 import { JobCard, EmailModal } from "../components/job";
 import Navbar from "../components/layout/Navbar";
 import { Toast } from "../components/ui";
-import { ALL_SKILLS, CATEGORIES } from "../data/jobs";
+import { ALL_SKILLS, CATEGORY_OPTIONS, EXPERIENCE_LEVEL_SUGGESTIONS } from "../data/jobs";
 
 export default function JobsPage({
   jobsLoading, page, setPage, search, setSearch, filters, setFilters, filteredJobs,
@@ -42,7 +42,7 @@ export default function JobsPage({
               <div style={{ marginBottom: 24 }}>
                 <h4 style={{ fontSize: 11, color: "#64748b", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", marginBottom: 12 }}>Categories</h4>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  {CATEGORIES.filter((category) => category.name !== "Remote" && category.name !== "Global").map((category) => (
+                  {CATEGORY_OPTIONS.map((category) => (
                     <label key={category.name} style={{ display: "flex", gap: 10, alignItems: "center", cursor: "pointer" }}>
                       <input
                         type="radio"
@@ -66,10 +66,10 @@ export default function JobsPage({
               </div>
               <div style={{ marginBottom: 24 }}>
                 <h4 style={{ fontSize: 11, color: "#64748b", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", marginBottom: 12 }}>Experience</h4>
-                {[["0-2", "0–2 yrs"], ["2-5", "2–5 yrs"], ["5+", "5+ yrs"]].map(([val, label]) => (
-                  <label key={val} style={{ display: "flex", gap: 10, alignItems: "center", cursor: "pointer", marginBottom: 8 }}>
-                    <input type="radio" name="exp" checked={filters.exp === val} onChange={() => setFilters(f => ({ ...f, exp: val }))} style={{ accentColor: "#7c3aed" }} />
-                    <span style={{ fontSize: 13, color: "#475569" }}>{label}</span>
+                {EXPERIENCE_LEVEL_SUGGESTIONS.map((experienceLevel) => (
+                  <label key={experienceLevel} style={{ display: "flex", gap: 10, alignItems: "center", cursor: "pointer", marginBottom: 8 }}>
+                    <input type="radio" name="exp" checked={filters.exp === experienceLevel} onChange={() => setFilters(f => ({ ...f, exp: experienceLevel }))} style={{ accentColor: "#7c3aed" }} />
+                    <span style={{ fontSize: 13, color: "#475569" }}>{experienceLevel}</span>
                   </label>
                 ))}
                 {filters.exp && <button onClick={() => setFilters(f => ({ ...f, exp: "" }))} style={{ fontSize: 11, color: "#7c3aed", background: "transparent", border: "none", cursor: "pointer", marginTop: 4 }}>Clear</button>}
