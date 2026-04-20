@@ -34,6 +34,7 @@ const labelStyle = {
 
 const defaultInputBorderColor = "rgba(148,163,184,0.6)";
 const MAX_LOGO_SIZE_BYTES = 2 * 1024 * 1024;
+const SPONSORED_JOB_CHECKOUT_URL = "https://checkout.dodopayments.com/buy/pdt_0Nd5ugJMgvqp2vu79KUUC?quantity=1";
 
 function readFileAsDataUrl(file) {
   return new Promise((resolve, reject) => {
@@ -638,6 +639,15 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
             <button type="submit" disabled={isSubmitting} style={{ padding: "14px 32px", background: "linear-gradient(135deg, #7c3aed, #2563eb)", border: "none", borderRadius: 10, color: "#ffffff", fontSize: 14, fontWeight: 700, cursor: isSubmitting ? "not-allowed" : "pointer", opacity: isSubmitting ? 0.75 : 1, fontFamily: "'Merriweather', serif" }}>
               {isSubmitting ? "Posting..." : "Post Job"}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                window.location.href = SPONSORED_JOB_CHECKOUT_URL;
+              }}
+              style={{ padding: "14px 24px", background: "#ffffff", border: "1px solid rgba(37,99,235,0.28)", borderRadius: 10, color: "#2563eb", fontSize: 14, fontWeight: 600, cursor: "pointer" }}
+            >
+              Post a Sponsored Job
             </button>
             <button type="button" onClick={() => setPage("jobs")} style={{ padding: "14px 24px", background: "transparent", border: "1px solid rgba(148,163,184,0.5)", borderRadius: 10, color: "#64748b", fontSize: 13, cursor: "pointer" }}>
               Cancel
