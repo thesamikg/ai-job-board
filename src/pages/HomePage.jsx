@@ -56,6 +56,9 @@ export default function HomePage({
           <div className="home-popular-links" style={{ fontSize: 12, color: "#64748b", marginBottom: 12 }}>
             Popular: <span style={{ color: "#1d4ed8", cursor: "pointer" }}>LLM Engineer</span> · <span style={{ color: "#1d4ed8", cursor: "pointer" }}>ML Research</span> · <span style={{ color: "#1d4ed8", cursor: "pointer" }}>Computer Vision</span> · <span style={{ color: "#1d4ed8", cursor: "pointer" }}>Robotics</span>
           </div>
+          <a href="https://www.uneed.best/tool/airobotics-job" target="_blank" rel="noopener noreferrer" style={{ display: "inline-block", marginBottom: 12 }}>
+            <img src="https://www.uneed.best/POTD2A.png" style={{ display: "block", width: 250, maxWidth: "100%", height: "auto" }} alt="Uneed POTD2 Badge" />
+          </a>
           <div className="home-jobs-preview" style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 900, margin: "0 auto" }}>
             {(jobs || []).slice(0, 2).map(job => (
               <JobCard key={job.id} job={job} onClick={j => openJobDetail(j, "home")} onApply={j => setApplyJob(j)} />
