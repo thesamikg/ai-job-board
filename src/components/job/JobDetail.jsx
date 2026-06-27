@@ -49,7 +49,7 @@ export default function JobDetail({ job, onBack, backLabel = "Back", onApply }) 
             marginBottom: 20,
             padding: "8px 12px",
             background: "#ffffff",
-            border: "1px solid rgba(148,163,184,0.35)",
+            border: "1px solid rgba(148,163,184,0.28)",
             borderRadius: 999,
             color: "#475569",
             cursor: "pointer",
@@ -63,13 +63,13 @@ export default function JobDetail({ job, onBack, backLabel = "Back", onApply }) 
       )}
 
       <div className="job-detail-hero" style={{
-        border: "1px solid rgba(148,163,184,0.28)",
+        border: "1px solid rgba(148,163,184,0.22)",
         borderRadius: 24,
-        padding: "18px 20px",
-        background: "rgba(255,255,255,0.78)",
-        boxShadow: "0 18px 36px rgba(15,23,42,0.06)",
+        padding: "22px 24px",
+        background: "linear-gradient(135deg, rgba(255,255,255,0.96), rgba(248,251,255,0.9))",
+        boxShadow: "0 22px 52px rgba(15,23,42,0.09)",
         marginBottom: 30,
-        height: 166,
+        minHeight: 166,
         boxSizing: "border-box",
         display: "flex",
         alignItems: "center",
@@ -79,11 +79,12 @@ export default function JobDetail({ job, onBack, backLabel = "Back", onApply }) 
         <div className="job-detail-top" style={{ flex: "1 1 auto", minWidth: 0 }}>
           <div className="job-detail-brand" style={{ display: "flex", gap: 18, alignItems: "center", flex: "1 1 620px", minWidth: 0 }}>
             <div style={{
-              width: 72, height: 72, borderRadius: 14, flexShrink: 0,
-              background: "linear-gradient(135deg, rgba(124,58,237,0.16), rgba(37,99,235,0.14))",
-              border: "1px solid rgba(148,163,184,0.28)",
+              width: 76, height: 76, borderRadius: 18, flexShrink: 0,
+              background: "linear-gradient(135deg, rgba(37,99,235,0.16), rgba(124,58,237,0.12))",
+              border: "1px solid rgba(37,99,235,0.18)",
               display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 18, fontWeight: 800, color: "#1d4ed8", overflow: "hidden",
+              fontSize: 18, fontWeight: 900, color: "#1d4ed8", overflow: "hidden",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.72)",
             }}>
               {useLogoImage ? (
                 <img
@@ -98,10 +99,10 @@ export default function JobDetail({ job, onBack, backLabel = "Back", onApply }) 
             </div>
 
             <div style={{ minWidth: 0 }}>
-              <h2 style={{ fontFamily: "'Merriweather', serif", fontSize: 22, fontWeight: 800, lineHeight: 1.2, color: "#0f172a", marginBottom: 6 }}>
+              <h2 style={{ fontFamily: "'Merriweather', serif", fontSize: "clamp(22px, 3vw, 32px)", fontWeight: 800, lineHeight: 1.2, color: "#0f172a", marginBottom: 8 }}>
                 {job.title}
               </h2>
-              <div style={{ fontSize: 16, color: "#475569", lineHeight: 1.5, marginBottom: 18 }}>
+              <div style={{ fontSize: 16, color: "#475569", lineHeight: 1.5, marginBottom: 18, fontWeight: 600 }}>
                 {job.company} · {job.location}
               </div>
               <div className="job-detail-meta-row" style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12 }}>
@@ -125,14 +126,15 @@ export default function JobDetail({ job, onBack, backLabel = "Back", onApply }) 
             style={{
               width: "100%",
               padding: "12px 20px",
-              background: "#2563eb",
-              border: "1px solid #1d4ed8",
-              borderRadius: 12,
+              background: "linear-gradient(135deg, #1d4ed8, #2563eb)",
+              border: "1px solid rgba(29,78,216,0.85)",
+              borderRadius: 14,
               color: "#ffffff",
               fontSize: 16,
               fontWeight: 700,
               cursor: "pointer",
               fontFamily: "'Source Sans 3', sans-serif",
+              boxShadow: "0 14px 28px rgba(37,99,235,0.24)",
             }}
           >
             Apply Now
@@ -158,14 +160,15 @@ export default function JobDetail({ job, onBack, backLabel = "Back", onApply }) 
               style={{
                 minWidth: 220,
                 padding: "15px 24px",
-                background: "#2563eb",
-                border: "1px solid #1d4ed8",
+                background: "linear-gradient(135deg, #1d4ed8, #2563eb)",
+                border: "1px solid rgba(29,78,216,0.85)",
                 borderRadius: 14,
                 color: "#ffffff",
                 fontSize: 17,
                 fontWeight: 700,
                 cursor: "pointer",
                 fontFamily: "'Source Sans 3', sans-serif",
+                boxShadow: "0 14px 28px rgba(37,99,235,0.22)",
               }}
             >
               Apply Now
@@ -173,7 +176,7 @@ export default function JobDetail({ job, onBack, backLabel = "Back", onApply }) 
           </div>
         </div>
 
-        <aside className="job-detail-sidebar" style={{ background: "rgba(255,255,255,0.72)", borderRadius: 24, padding: "24px 22px", boxShadow: "0 18px 40px rgba(15,23,42,0.07)" }}>
+        <aside className="job-detail-sidebar" style={{ background: "rgba(255,255,255,0.9)", border: "1px solid rgba(148,163,184,0.22)", borderRadius: 22, padding: "24px 22px", boxShadow: "0 18px 42px rgba(15,23,42,0.08)" }}>
           <h4 style={{ fontSize: 12, color: "#64748b", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", marginBottom: 18 }}>
             Quick Details
           </h4>
