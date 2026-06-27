@@ -3,10 +3,10 @@ import { Logo, Toast } from "../components/ui";
 
 const inputStyle = {
   width: "100%",
-  padding: "12px 16px",
+  padding: "13px 16px",
   background: "#ffffff",
-  border: "1px solid rgba(148,163,184,0.6)",
-  borderRadius: 10,
+  border: "1px solid rgba(148,163,184,0.36)",
+  borderRadius: 12,
   color: "#0f172a",
   fontSize: 14,
   outline: "none",
@@ -42,45 +42,26 @@ export default function LoginPage({
   };
 
   const bg = {
-    background: "#f8fafc",
+    background: "linear-gradient(180deg, #eef5ff 0%, #f8fafc 48%, #ffffff 100%)",
     minHeight: "100vh",
     fontFamily: "'Source Sans 3', sans-serif",
     color: "#475569",
   };
 
   return (
-    <div style={{ ...bg, display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh" }}>
-      {[
-        ["#7c3aed", "-10%", "20%"],
-        ["#2563eb", "60%", "-5%"],
-      ].map(([c, l, t], i) => (
-        <div
-          key={i}
-          style={{
-            position: "fixed",
-            width: 500,
-            height: 500,
-            borderRadius: "50%",
-            background: `radial-gradient(circle, ${c}15, transparent 70%)`,
-            left: l,
-            top: t,
-            animation: `blob ${5 + i}s ease-in-out infinite`,
-            filter: "blur(40px)",
-            animationDelay: `${i * 1.5}s`,
-          }}
-        />
-      ))}
+    <div style={{ ...bg, display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", padding: "32px 0" }}>
       <div style={{ position: "relative", maxWidth: 420, width: "100%", padding: "24px 16px" }}>
-        <div style={{ textAlign: "center", marginBottom: 40, cursor: "pointer" }} onClick={() => setPage("home")}>
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 30, cursor: "pointer" }} onClick={() => setPage("home")}>
           <Logo />
         </div>
         <div
           style={{
             background: "#ffffff",
-            border: "1px solid rgba(148,163,184,0.55)",
-            borderRadius: 20,
-            padding: "32px 24px",
+            border: "1px solid rgba(148,163,184,0.24)",
+            borderRadius: 24,
+            padding: "34px 26px",
             backdropFilter: "blur(20px)",
+            boxShadow: "0 24px 60px rgba(15,23,42,0.1)",
           }}
         >
           <h2 style={{ fontFamily: "'Merriweather', serif", fontSize: 22, fontWeight: 800, color: "#0f172a", marginBottom: 8 }}>
@@ -97,10 +78,10 @@ export default function LoginPage({
               display: "flex",
               gap: 8,
               marginBottom: 24,
-              background: "#ffffff",
-              border: "1px solid rgba(148,163,184,0.35)",
+              background: "#f8fafc",
+              border: "1px solid rgba(148,163,184,0.24)",
               padding: 4,
-              borderRadius: 10,
+              borderRadius: 12,
             }}
           >
             <button
@@ -109,8 +90,8 @@ export default function LoginPage({
               style={{
                 flex: 1,
                 padding: "10px 16px",
-                borderRadius: 8,
-                border: mode === "signin" ? "1px solid rgba(37,99,235,0.45)" : "1px solid rgba(148,163,184,0.35)",
+                borderRadius: 10,
+                border: mode === "signin" ? "1px solid rgba(37,99,235,0.45)" : "1px solid transparent",
                 cursor: "pointer",
                 fontSize: 13,
                 fontWeight: 600,
@@ -126,8 +107,8 @@ export default function LoginPage({
               style={{
                 flex: 1,
                 padding: "10px 16px",
-                borderRadius: 8,
-                border: mode === "signup" ? "1px solid rgba(37,99,235,0.45)" : "1px solid rgba(148,163,184,0.35)",
+                borderRadius: 10,
+                border: mode === "signup" ? "1px solid rgba(37,99,235,0.45)" : "1px solid transparent",
                 cursor: "pointer",
                 fontSize: 13,
                 fontWeight: 600,
@@ -202,13 +183,14 @@ export default function LoginPage({
                 padding: "13px 24px",
                 background: "linear-gradient(135deg, #1d4ed8, #2563eb)",
                 border: "none",
-                borderRadius: 10,
+                borderRadius: 12,
                 color: "#ffffff",
                 fontSize: 14,
                 fontWeight: 700,
                 cursor: authLoading ? "not-allowed" : "pointer",
                 fontFamily: "'Merriweather', serif",
                 opacity: authLoading ? 0.7 : 1,
+                boxShadow: "0 14px 28px rgba(37,99,235,0.23)",
               }}
             >
               {authLoading ? "Please wait…" : mode === "signin" ? "Sign In" : "Sign Up"}
@@ -216,9 +198,9 @@ export default function LoginPage({
           </form>
 
           <div style={{ display: "flex", alignItems: "center", gap: 16, margin: "24px 0" }}>
-            <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.1)" }} />
+            <div style={{ flex: 1, height: 1, background: "rgba(148,163,184,0.22)" }} />
             <span style={{ fontSize: 12, color: "#64748b" }}>or</span>
-            <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.1)" }} />
+            <div style={{ flex: 1, height: 1, background: "rgba(148,163,184,0.22)" }} />
           </div>
 
           <button
@@ -230,7 +212,7 @@ export default function LoginPage({
               padding: "12px 24px",
               background: "#ffffff",
               border: "1px solid rgba(148,163,184,0.5)",
-              borderRadius: 10,
+              borderRadius: 12,
               color: "#0f172a",
               fontSize: 14,
               fontWeight: 600,
@@ -239,6 +221,7 @@ export default function LoginPage({
               alignItems: "center",
               justifyContent: "center",
               gap: 10,
+              boxShadow: "0 8px 22px rgba(15,23,42,0.05)",
             }}
           >
             <svg width="20" height="20" viewBox="0 0 24 24">
@@ -270,8 +253,8 @@ export default function LoginPage({
               marginTop: 16,
               padding: "10px 24px",
               background: "transparent",
-              border: "1px solid rgba(255,255,255,0.08)",
-              borderRadius: 10,
+              border: "1px solid rgba(148,163,184,0.24)",
+              borderRadius: 12,
               color: "#64748b",
               fontSize: 13,
               cursor: "pointer",

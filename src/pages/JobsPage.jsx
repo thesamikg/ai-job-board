@@ -8,7 +8,7 @@ export default function JobsPage({
   savedJobs, handleSave, openJobDetail, applyJob, setApplyJob,
   handleApplySubmit, toast, user, onSignOut, isAdmin, canPostJobs, onSelectCategory
 }) {
-  const bg = { background: "#f8fafc", minHeight: "100vh", fontFamily: "'Source Sans 3', sans-serif", color: "#475569" };
+  const bg = { background: "linear-gradient(180deg, #eef5ff 0%, #f8fafc 260px, #f8fafc 100%)", minHeight: "100vh", fontFamily: "'Source Sans 3', sans-serif", color: "#475569" };
   const filterSectionTitleStyle = {
     fontSize: 11,
     color: "#64748b",
@@ -30,26 +30,35 @@ export default function JobsPage({
   return (
     <div style={bg}>
       <Navbar page={page} setPage={setPage} user={user} onSignOut={onSignOut} isAdmin={isAdmin} canPostJobs={canPostJobs} onSelectCategory={onSelectCategory} />
-      <div style={{ paddingTop: 80 }} className="page-content">
-        <div style={{ background: "#f8fafc", backdropFilter: "blur(20px)", borderBottom: "1px solid rgba(148,163,184,0.3)" }}>
-          <div className="jobs-toolbar" style={{ maxWidth: 1180, margin: "0 auto", padding: "16px 20px 14px", display: "flex", gap: 10, flexWrap: "wrap" }}>
+      <div style={{ paddingTop: 88 }} className="page-content">
+        <div style={{ maxWidth: 1180, margin: "0 auto", padding: "22px 20px 0" }}>
+          <div style={{ marginBottom: 18 }}>
+            <div style={{ fontSize: 12, color: "#2563eb", fontWeight: 800, letterSpacing: 1.1, textTransform: "uppercase", marginBottom: 8 }}>AI and robotics opportunities</div>
+            <h1 style={{ fontFamily: "'Merriweather', serif", fontSize: "clamp(28px, 4vw, 42px)", color: "#0f172a", marginBottom: 8 }}>Find your next technical role</h1>
+            <p style={{ maxWidth: 680, color: "#475569", fontSize: 15, lineHeight: 1.65 }}>Search curated AI, ML, robotics, computer vision, and LLM jobs from teams building serious technology.</p>
+          </div>
+        </div>
+        <div style={{ background: "rgba(255,255,255,0.72)", backdropFilter: "blur(20px)", borderTop: "1px solid rgba(148,163,184,0.18)", borderBottom: "1px solid rgba(148,163,184,0.24)" }}>
+          <div className="jobs-toolbar" style={{ maxWidth: 1180, margin: "0 auto", padding: "16px 20px", display: "flex", gap: 10, flexWrap: "wrap" }}>
             <input value={search.title} onChange={e => setSearch(s => ({ ...s, title: e.target.value }))}
               placeholder="Search roles, companies, skills…" style={{
-                flex: "2 1 200px", padding: "10px 16px", background: "#ffffff",
-                border: "1px solid rgba(148,163,184,0.45)", borderRadius: 10, color: "#0f172a", fontSize: 14, outline: "none"
+                flex: "2 1 240px", padding: "12px 16px", background: "#ffffff",
+                border: "1px solid rgba(148,163,184,0.32)", borderRadius: 12, color: "#0f172a", fontSize: 14, outline: "none",
+                boxShadow: "0 8px 22px rgba(15,23,42,0.05)",
               }} />
             <input value={search.location} onChange={e => setSearch(s => ({ ...s, location: e.target.value }))}
               placeholder="Location…" style={{
-                flex: "1 1 140px", padding: "10px 16px", background: "#ffffff",
-                border: "1px solid rgba(148,163,184,0.45)", borderRadius: 10, color: "#0f172a", fontSize: 14, outline: "none"
+                flex: "1 1 160px", padding: "12px 16px", background: "#ffffff",
+                border: "1px solid rgba(148,163,184,0.32)", borderRadius: 12, color: "#0f172a", fontSize: 14, outline: "none",
+                boxShadow: "0 8px 22px rgba(15,23,42,0.05)",
               }} />
             <div style={{ position: "relative", flex: "0 0 auto" }}>
               <select className="jobs-sort" value={filters.sort} onChange={e => setFilters(f => ({ ...f, sort: e.target.value }))} style={{
                 minWidth: 220,
-                padding: "10px 48px 10px 14px",
+                padding: "12px 48px 12px 14px",
                 background: "#ffffff",
-                border: "1px solid rgba(148,163,184,0.5)",
-                borderRadius: 10,
+                border: "1px solid rgba(148,163,184,0.34)",
+                borderRadius: 12,
                 color: "#475569",
                 fontSize: 13,
                 outline: "none",
@@ -57,6 +66,7 @@ export default function JobsPage({
                 appearance: "none",
                 WebkitAppearance: "none",
                 MozAppearance: "none",
+                boxShadow: "0 8px 22px rgba(15,23,42,0.05)",
               }}>
                 <option value="newest">Newest First</option>
                 <option value="salary">Salary: High to Low</option>
@@ -79,10 +89,10 @@ export default function JobsPage({
             </div>
           </div>
         </div>
-        <div className="jobs-layout" style={{ display: "flex", alignItems: "flex-start", maxWidth: 1180, margin: "0 auto", padding: "24px 20px", gap: 24 }}>
+        <div className="jobs-layout" style={{ display: "flex", alignItems: "flex-start", maxWidth: 1180, margin: "0 auto", padding: "28px 20px 72px", gap: 24 }}>
           <div className="jobs-results" style={{ flex: 1, minWidth: 0 }}>
             <div className="jobs-results-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", minHeight: 40, marginBottom: 16 }}>
-              <span style={{ fontSize: 13, color: "#64748b" }}><span style={{ color: "#1e293b", fontWeight: 700 }}>{filteredJobs.length}</span> jobs found</span>
+              <span style={{ fontSize: 14, color: "#64748b" }}><span style={{ color: "#1e293b", fontWeight: 800 }}>{filteredJobs.length}</span> jobs found</span>
               {filters.category ? (
                 <button
                   onClick={() => setFilters((f) => ({ ...f, category: "" }))}
@@ -90,7 +100,7 @@ export default function JobsPage({
                     background: "rgba(37,99,235,0.08)",
                     border: "1px solid rgba(37,99,235,0.25)",
                     borderRadius: 999,
-                    padding: "7px 12px",
+                    padding: "8px 13px",
                     color: "#1d4ed8",
                     fontSize: 12,
                     fontWeight: 700,
@@ -101,16 +111,15 @@ export default function JobsPage({
                 </button>
               ) : null}
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {jobsLoading ? (
                 <div style={{ textAlign: "center", padding: "60px 20px", color: "#94a3b8" }}>
-                  <div style={{ fontSize: 40, marginBottom: 16 }}>⏳</div>
-                  <div style={{ fontSize: 16, color: "#64748b" }}>Loading jobs…</div>
+                  <div style={{ fontSize: 16, color: "#64748b", fontWeight: 700 }}>Loading jobs…</div>
                 </div>
               ) : filteredJobs.length === 0 ? (
-                <div style={{ textAlign: "center", padding: "60px 20px", color: "#94a3b8" }}>
-                  <div style={{ fontSize: 40, marginBottom: 16 }}>🔍</div>
-                  <div style={{ fontSize: 16, color: "#64748b" }}>No jobs match your filters</div>
+                <div style={{ textAlign: "center", padding: "54px 20px", color: "#94a3b8", background: "#ffffff", border: "1px solid rgba(148,163,184,0.22)", borderRadius: 20, boxShadow: "0 12px 30px rgba(15,23,42,0.06)" }}>
+                  <div style={{ fontSize: 17, color: "#0f172a", fontWeight: 800, marginBottom: 6 }}>No jobs match your filters</div>
+                  <div style={{ fontSize: 14, color: "#64748b" }}>Try broadening the role, location, or skills filter.</div>
                 </div>
               ) : filteredJobs.map(job => (
                 <JobCard key={job.id} job={job} onClick={j => openJobDetail(j, "jobs")} onApply={j => setApplyJob(j)} />
@@ -125,9 +134,9 @@ export default function JobsPage({
                 top: 104,
                 background: "rgba(255,255,255,0.88)",
                 border: "1px solid rgba(148,163,184,0.28)",
-                borderRadius: 22,
+                borderRadius: 20,
                 padding: "18px 16px",
-                boxShadow: "0 18px 36px rgba(15,23,42,0.08)",
+                boxShadow: "0 18px 42px rgba(15,23,42,0.09)",
                 backdropFilter: "blur(20px)",
                 maxHeight: "calc(100vh - 124px)",
                 overflowY: "auto",
