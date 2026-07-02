@@ -805,9 +805,21 @@ export default function App() {
   };
 
   const handleAddJob = async (job) => {
+    if (!user?.id) {
+      const message = "Please sign in with an employer account before posting a job.";
+      showToast(message);
+      return { ok: false, error: message };
+    }
+    if (!canPostJobs && !isAdmin) {
+      const message = "Only employer accounts can post jobs.";
+      showToast(message);
+      return { ok: false, error: message };
+    }
+
     const enrichedJob = {
       ...job,
-      posted_by: user?.id || user?.email || null,
+      posted_by: user.id,
+      status: "pending",
     };
     try {
       const saved = await addJob(enrichedJob);
@@ -820,7 +832,13 @@ export default function App() {
     } catch (err) {
       const msg = err?.message || err?.error_description || String(err);
       console.error("Add job failed:", err);
-      showToast(msg.includes("relation") ? "Database table missing. Run the migration in Supabase." : `Could not save to DB: ${msg.slice(0, 50)}`);
+      const lowerMsg = msg.toLowerCase();
+      const friendlyMessage = lowerMsg.includes("row-level security")
+        ? "Could not save to DB: run the jobs insert RLS migration in Supabase."
+        : msg.includes("relation")
+          ? "Database table missing. Run the migration in Supabase."
+          : `Could not save to DB: ${msg.slice(0, 50)}`;
+      showToast(friendlyMessage);
       return { ok: false, error: msg };
     }
   };

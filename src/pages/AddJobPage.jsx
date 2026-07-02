@@ -399,7 +399,7 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
         category: form.category,
         posted_at: new Date(),
         featured: false,
-        status: "approved",
+        status: "pending",
       };
 
       const result = await onAddJob(job);
@@ -409,7 +409,7 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
         setSubmitError(message);
         return;
       }
-      showToast("✓ Job posted successfully! It will appear in the Jobs list.");
+      showToast("Job submitted successfully. It will appear after review.");
       setPage("jobs");
     } catch (err) {
       const message = err?.message || "Could not post job. Please try again.";
