@@ -47,28 +47,28 @@ export default function JobDetailPage({
         canPostJobs={canPostJobs}
         onSelectCategory={onSelectCategory}
       />
-      <div className="page-content" style={{ maxWidth: 1200, margin: "0 auto", padding: "110px 24px 84px" }}>
+      <div className="page-content" style={{ maxWidth: 1200, margin: "0 auto", padding: "112px 24px 84px" }}>
         <div style={{ marginBottom: 30, maxWidth: 760 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase", color: "#64748b", marginBottom: 8 }}>
+          <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: 1.2, textTransform: "uppercase", color: "#2563eb", marginBottom: 8 }}>
             Job Detail
           </div>
-          <h1 style={{ fontFamily: "'Merriweather', serif", fontSize: "clamp(20px, 2.2vw, 26px)", fontWeight: 600, color: "#0f172a", margin: 0 }}>
+          <h1 style={{ fontFamily: "'Merriweather', serif", fontSize: "clamp(28px, 4vw, 42px)", fontWeight: 700, color: "#0f172a", margin: 0 }}>
             Explore the role before you apply
           </h1>
         </div>
         <JobDetail job={job} onBack={onBack} backLabel={getBackLabel(returnPage)} onApply={j => setApplyJob(j)} />
       </div>
 
-      <div style={{ background: "rgba(37,99,235,0.05)", borderTop: "1px solid rgba(37,99,235,0.14)", borderBottom: "1px solid rgba(37,99,235,0.14)", padding: "64px 24px", marginBottom: 80 }}>
-        <div className="section-padding" style={{ maxWidth: 900, margin: "0 auto" }}>
-          <h2 style={{ fontFamily: "'Merriweather', serif", fontSize: 22, fontWeight: 700, color: "#0f172a", textAlign: "center", marginBottom: 48 }}>Why AIRoboticsjob?</h2>
-          <div className="grid-1-mobile" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 24 }}>
+      <div style={{ background: "linear-gradient(180deg, #ffffff, #eef5ff)", borderTop: "1px solid rgba(37,99,235,0.12)", borderBottom: "1px solid rgba(37,99,235,0.12)", padding: "74px 24px", marginBottom: 80 }}>
+        <div className="section-padding" style={{ maxWidth: 1040, margin: "0 auto" }}>
+          <h2 style={{ fontFamily: "'Merriweather', serif", fontSize: 26, fontWeight: 700, color: "#0f172a", textAlign: "center", marginBottom: 44 }}>Why AIRoboticsjob?</h2>
+          <div className="grid-1-mobile" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 18 }}>
             {[["⚡", "AI-First", "Built exclusively for AI, ML, and Robotics professionals. No noise."],
             ["🎯", "Curated Roles", "Every listing is reviewed for quality, accuracy, and salary transparency."],
             ["🔔", "Smart Alerts", "Get notified about roles matching your skills and preferences."],
             ["🌍", "Global Reach", "Discover high-quality AI roles across every region, including remote-first teams."]].map(([icon, title, desc]) => (
-              <div key={title} style={{ textAlign: "center" }}>
-                <div style={{ fontSize: 32, marginBottom: 12 }}>{icon}</div>
+              <div key={title} style={{ textAlign: "left", background: "rgba(255,255,255,0.86)", border: "1px solid rgba(148,163,184,0.22)", borderRadius: 18, padding: "22px 20px", boxShadow: "0 14px 34px rgba(15,23,42,0.07)" }}>
+                <div style={{ width: 42, height: 42, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 23, marginBottom: 16, background: "rgba(37,99,235,0.08)", border: "1px solid rgba(37,99,235,0.14)" }}>{icon}</div>
                 <div style={{ fontFamily: "'Merriweather', serif", fontSize: 15, fontWeight: 700, color: "#0f172a", marginBottom: 8 }}>{title}</div>
                 <div style={{ fontSize: 13, color: "#475569", lineHeight: 1.6 }}>{desc}</div>
               </div>
@@ -77,7 +77,8 @@ export default function JobDetailPage({
         </div>
       </div>
 
-      <div className="section-padding" style={{ maxWidth: 520, margin: "0 auto 80px", padding: "0 24px", textAlign: "center" }}>
+      <div className="section-padding" style={{ maxWidth: 600, margin: "0 auto 80px", padding: "0 24px", textAlign: "center" }}>
+        <div style={{ background: "#ffffff", border: "1px solid rgba(148,163,184,0.22)", borderRadius: 24, padding: "34px 28px", boxShadow: "0 18px 42px rgba(15,23,42,0.08)" }}>
         <h2 style={{ fontFamily: "'Merriweather', serif", fontSize: 22, fontWeight: 700, color: "#0f172a", marginBottom: 12 }}>Stay ahead of the curve</h2>
         <p style={{ fontSize: 14, color: "#475569", marginBottom: 24, lineHeight: 1.7 }}>Get weekly AI job alerts, salary reports, and hiring trends delivered to your inbox.</p>
         {!subscribed ? (
@@ -110,9 +111,10 @@ export default function JobDetailPage({
         ) : (
           <div style={{ fontSize: 14, color: "#22c55e", fontWeight: 600 }}>✓ You're on the list!</div>
         )}
+        </div>
       </div>
 
-      <div className="footer-responsive" style={{ borderTop: "1px solid rgba(148,163,184,0.3)", padding: "16px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, background: "#ffffff" }}>
+      <div className="footer-responsive" style={{ borderTop: "1px solid rgba(148,163,184,0.22)", padding: "20px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, background: "#ffffff" }}>
         <div style={{ flex: "1 1 0", minWidth: 0 }}>
           <Logo />
         </div>

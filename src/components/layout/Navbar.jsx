@@ -4,34 +4,35 @@ import { CATEGORY_OPTIONS } from "../../data/jobs";
 
 const navBtn = (page, p) => ({
   background: page === p ? "rgba(37,99,235,0.1)" : "transparent",
-  border: `1px solid ${page === p ? "rgba(37,99,235,0.35)" : "transparent"}`,
-  borderRadius: 8, padding: "6px 16px", color: page === p ? "#1d4ed8" : "#475569",
-  cursor: "pointer", fontSize: 13, fontWeight: 600, transition: "all 0.15s", fontFamily: "inherit"
+  border: `1px solid ${page === p ? "rgba(37,99,235,0.3)" : "transparent"}`,
+  borderRadius: 999, padding: "8px 15px", color: page === p ? "#1d4ed8" : "#475569",
+  cursor: "pointer", fontSize: 13, fontWeight: 700, transition: "all 0.18s ease", fontFamily: "inherit"
 });
 
 const categoryBtn = (page, open = false) => ({
-  background: open || page === "jobs" ? "rgba(37,99,235,0.06)" : "#ffffff",
-  border: `1px solid ${open || page === "jobs" ? "#2563eb" : "rgba(37,99,235,0.55)"}`,
-  borderRadius: 14,
+  background: open || page === "jobs" ? "rgba(37,99,235,0.08)" : "#ffffff",
+  border: `1px solid ${open || page === "jobs" ? "rgba(37,99,235,0.72)" : "rgba(37,99,235,0.36)"}`,
+  borderRadius: 999,
   padding: "10px 18px",
   color: "#2563eb",
   cursor: "pointer",
   fontSize: 14,
   fontWeight: 700,
   fontFamily: "'Source Sans 3', sans-serif",
-  boxShadow: open ? "0 10px 24px rgba(37,99,235,0.12)" : "none",
+  boxShadow: open ? "0 12px 26px rgba(37,99,235,0.14)" : "0 6px 18px rgba(37,99,235,0.08)",
 });
 
 const postJobBtn = {
   background: "linear-gradient(135deg, #1d4ed8, #2563eb)",
   border: "1px solid rgba(29,78,216,0.7)",
-  borderRadius: 14,
+  borderRadius: 999,
   padding: "10px 18px",
   color: "#ffffff",
   cursor: "pointer",
   fontSize: 14,
   fontWeight: 700,
   fontFamily: "'Source Sans 3', sans-serif",
+  boxShadow: "0 12px 24px rgba(37,99,235,0.22)",
 };
 
 const FEATURED_CATEGORY_OPTIONS = CATEGORY_OPTIONS.filter((category) => (
@@ -85,9 +86,10 @@ export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false
     <>
     <nav style={{
       position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
-      background: "rgba(255,255,255,0.96)", backdropFilter: "blur(20px)",
-      borderBottom: "1px solid rgba(148,163,184,0.3)", padding: "4px 16px 4px 20px",
+      background: "rgba(255,255,255,0.9)", backdropFilter: "blur(22px)",
+      borderBottom: "1px solid rgba(148,163,184,0.22)", padding: "6px 18px 6px 22px",
       display: "flex", alignItems: "center", justifyContent: "space-between", minHeight: 60,
+      boxShadow: "0 12px 30px rgba(15,23,42,0.07)",
     }}>
       <div onClick={() => goTo("home")} style={{ cursor: "pointer" }}><Logo /></div>
 
@@ -121,9 +123,9 @@ export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false
               minWidth: 220,
               background: "#ffffff",
               border: "1px solid rgba(148,163,184,0.28)",
-              borderRadius: 14,
+              borderRadius: 16,
               padding: 8,
-              boxShadow: "0 16px 36px rgba(15,23,42,0.16)",
+              boxShadow: "0 22px 44px rgba(15,23,42,0.16)",
               zIndex: 130,
             }}>
               {FEATURED_CATEGORY_OPTIONS.map((category) => (
@@ -137,8 +139,8 @@ export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false
                     gap: 10,
                     background: "#ffffff",
                     border: "none",
-                    borderRadius: 10,
-                    padding: "10px 12px",
+                    borderRadius: 12,
+                    padding: "11px 12px",
                     color: "#334155",
                     fontSize: 13,
                     fontWeight: 600,
@@ -176,8 +178,9 @@ export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false
                   background: "#ffffff",
                   border: "1px solid rgba(148,163,184,0.45)",
                   borderRadius: 999,
-                  padding: "4px 10px 4px 4px",
+                  padding: "5px 12px 5px 5px",
                   cursor: "pointer",
+                  boxShadow: "0 8px 20px rgba(15,23,42,0.06)",
                 }}
               >
                 <span style={{
@@ -203,16 +206,16 @@ export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false
                   minWidth: 240,
                   background: "#ffffff",
                   border: "1px solid rgba(148,163,184,0.35)",
-                  borderRadius: 12,
+                  borderRadius: 16,
                   padding: 12,
-                  boxShadow: "0 12px 28px rgba(15,23,42,0.18)",
+                  boxShadow: "0 22px 44px rgba(15,23,42,0.16)",
                   zIndex: 120,
                 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
                     <span style={{
                       width: 34,
                       height: 34,
-                      borderRadius: "50%",
+                      borderRadius: 12,
                       background: "linear-gradient(135deg, #1d4ed8, #2563eb)",
                       color: "#ffffff",
                       fontSize: 14,
@@ -259,8 +262,9 @@ export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false
         aria-label="Menu"
         style={{
           display: "none", flexDirection: "column", gap: 5, padding: 8,
-          background: "transparent", border: "1px solid rgba(148,163,184,0.4)",
-          borderRadius: 8, cursor: "pointer",
+          background: "#ffffff", border: "1px solid rgba(148,163,184,0.35)",
+          borderRadius: 10, cursor: "pointer",
+          boxShadow: "0 8px 18px rgba(15,23,42,0.08)",
         }}
       >
         <span style={{ width: 22, height: 2, background: "#475569", borderRadius: 1 }} />

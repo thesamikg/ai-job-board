@@ -7,9 +7,10 @@ export default function SkillTag({ skill }) {
   const color = SKILL_COLORS[skill] || "#94a3b8";
   return (
     <span style={{
-      background: color + "18", color: color + "dd",
-      border: `1px solid ${color}33`,
-      borderRadius: 6, padding: "3px 8px", fontSize: 11, fontWeight: 600,
+      background: color + "14", color: color + "ee",
+      border: `1px solid ${color}2e`,
+      borderRadius: 999, padding: "4px 9px", fontSize: 11, fontWeight: 700,
+      lineHeight: 1.1,
     }}>{skill}</span>
   );
 }

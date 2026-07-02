@@ -3,16 +3,23 @@ import Navbar from "../components/layout/Navbar";
 import { Toast, Badge } from "../components/ui";
 
 const panel = {
-  background: "rgba(255,255,255,0.02)",
-  border: "1px solid rgba(255,255,255,0.08)",
-  borderRadius: 14,
-  padding: 16,
+  background: "#ffffff",
+  border: "1px solid rgba(148,163,184,0.22)",
+  borderRadius: 16,
+  padding: 18,
+  boxShadow: "0 14px 34px rgba(15,23,42,0.07)",
 };
 
 function statusColor(status) {
-  if (status === "approved") return "#22c55e";
-  if (status === "rejected") return "#ef4444";
-  return "#f59e0b";
+  if (status === "approved") return "#16a34a";
+  if (status === "rejected") return "#dc2626";
+  return "#d97706";
+}
+
+function formatDate(value) {
+  if (!value) return "Not specified";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "Not specified" : date.toLocaleString();
 }
 
 export default function AdminPage({
@@ -33,59 +40,67 @@ export default function AdminPage({
   const [tab, setTab] = useState("jobs");
 
   const pendingJobs = useMemo(() => jobs.filter((j) => j.status === "pending"), [jobs]);
+  const approvedJobs = useMemo(() => jobs.filter((j) => j.status === "approved"), [jobs]);
 
   return (
-    <div style={{ background: "#f8fafc", minHeight: "100vh", color: "#475569", fontFamily: "'Source Sans 3', sans-serif" }}>
+    <div style={{ background: "linear-gradient(180deg, #eef5ff 0%, #f8fafc 260px, #f8fafc 100%)", minHeight: "100vh", color: "#475569", fontFamily: "'Source Sans 3', sans-serif" }}>
       <Navbar page={page} setPage={setPage} user={user} onSignOut={onSignOut} isAdmin canPostJobs onSelectCategory={onSelectCategory} />
-      <div className="page-content" style={{ maxWidth: 1050, margin: "0 auto", padding: "100px 24px 60px" }}>
-        <h1 style={{ margin: 0, color: "#0f172a", fontFamily: "'Merriweather', serif" }}>Admin Dashboard</h1>
-        <p style={{ marginTop: 10, marginBottom: 24 }}>Moderate jobs, remove spam, and review platform activity.</p>
+      <div className="page-content" style={{ maxWidth: 1180, margin: "0 auto", padding: "108px 24px 70px" }}>
+        <div style={{ fontSize: 12, color: "#2563eb", fontWeight: 800, letterSpacing: 1.1, textTransform: "uppercase", marginBottom: 8 }}>Operations</div>
+        <h1 style={{ margin: 0, color: "#0f172a", fontFamily: "'Merriweather', serif", fontSize: "clamp(30px, 4vw, 42px)" }}>Admin Dashboard</h1>
+        <p style={{ marginTop: 10, marginBottom: 28, maxWidth: 680, lineHeight: 1.65 }}>Moderate jobs, remove spam, and review platform activity.</p>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12, marginBottom: 20 }}>
-          <div style={panel}><div style={{ color: "#0f172a", fontSize: 24, fontWeight: 800 }}>{pendingJobs.length}</div><div>Pending Jobs</div></div>
-          <div style={panel}><div style={{ color: "#0f172a", fontSize: 24, fontWeight: 800 }}>{jobs.length}</div><div>Total Jobs</div></div>
-          <div style={panel}><div style={{ color: "#0f172a", fontSize: 24, fontWeight: 800 }}>{users.length}</div><div>Users</div></div>
-          <div style={panel}><div style={{ color: "#0f172a", fontSize: 24, fontWeight: 800 }}>{applications.length}</div><div>Applications</div></div>
+          <div style={panel}><div style={{ color: "#0f172a", fontSize: 26, fontWeight: 900 }}>{pendingJobs.length}</div><div style={{ fontSize: 13, color: "#64748b", fontWeight: 700 }}>Pending Jobs</div></div>
+          <div style={panel}><div style={{ color: "#0f172a", fontSize: 26, fontWeight: 900 }}>{approvedJobs.length}</div><div style={{ fontSize: 13, color: "#64748b", fontWeight: 700 }}>Approved Jobs</div></div>
+          <div style={panel}><div style={{ color: "#0f172a", fontSize: 26, fontWeight: 900 }}>{users.length}</div><div style={{ fontSize: 13, color: "#64748b", fontWeight: 700 }}>Users</div></div>
+          <div style={panel}><div style={{ color: "#0f172a", fontSize: 26, fontWeight: 900 }}>{applications.length}</div><div style={{ fontSize: 13, color: "#64748b", fontWeight: 700 }}>Applications</div></div>
         </div>
 
-        <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-          {["jobs", "users", "applications"].map((name) => (
+        <div style={{ display: "flex", gap: 8, marginBottom: 18, flexWrap: "wrap", background: "rgba(255,255,255,0.72)", border: "1px solid rgba(148,163,184,0.2)", borderRadius: 16, padding: 6, boxShadow: "0 10px 26px rgba(15,23,42,0.05)" }}>
+          {[
+            ["jobs", "Jobs"],
+            ["users", "Users"],
+            ["applications", "Applications"],
+          ].map(([key, name]) => (
             <button
-              key={name}
-              onClick={() => setTab(name)}
+              key={key}
+              onClick={() => setTab(key)}
               style={{
                 padding: "8px 14px",
-                borderRadius: 8,
-                border: "1px solid rgba(255,255,255,0.15)",
-                background: tab === name ? "rgba(124,58,237,0.24)" : "transparent",
-                color: tab === name ? "#a78bfa" : "#475569",
+                borderRadius: 12,
+                border: tab === key ? "1px solid rgba(37,99,235,0.45)" : "1px solid transparent",
+                background: tab === key ? "linear-gradient(135deg, #1d4ed8, #2563eb)" : "transparent",
+                color: tab === key ? "#ffffff" : "#475569",
                 cursor: "pointer",
+                fontWeight: 700,
               }}
             >
-              {name[0].toUpperCase() + name.slice(1)}
+              {name}
             </button>
           ))}
         </div>
 
-        {isLoading ? (
-          <div style={panel}>Loading admin data...</div>
-        ) : null}
+        {isLoading ? <div style={panel}>Loading admin data...</div> : null}
 
         {tab === "jobs" && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {jobs.map((job) => (
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {jobs.length === 0 ? <div style={panel}>No jobs available.</div> : jobs.map((job) => (
               <div key={job.id} style={panel}>
-                <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center" }}>
-                  <div>
-                    <div style={{ color: "#0f172a", fontWeight: 700 }}>{job.title}</div>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 16, alignItems: "flex-start", flexWrap: "wrap" }}>
+                  <div style={{ minWidth: 240, flex: 1 }}>
+                    <div style={{ color: "#0f172a", fontWeight: 900, fontSize: 18 }}>{job.title}</div>
                     <div style={{ fontSize: 13 }}>{job.company} · {job.location}</div>
+                    <div style={{ marginTop: 6, fontSize: 12, color: "#64748b" }}>
+                      {job.category || "Uncategorized"} · Posted {formatDate(job.posted_at)}
+                    </div>
                   </div>
                   <Badge color={statusColor(job.status)}>{job.status || "approved"}</Badge>
                 </div>
                 <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
-                  <button onClick={() => onApprove(job.id)} style={{ padding: "8px 12px", borderRadius: 8, border: "none", background: "#16a34a", color: "#0f172a", cursor: "pointer" }}>Approve</button>
-                  <button onClick={() => onReject(job.id)} style={{ padding: "8px 12px", borderRadius: 8, border: "none", background: "#dc2626", color: "#0f172a", cursor: "pointer" }}>Reject</button>
-                  <button onClick={() => onDelete(job.id)} style={{ padding: "8px 12px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.2)", background: "transparent", color: "#fca5a5", cursor: "pointer" }}>Delete Spam</button>
+                  <button onClick={() => onApprove(job.id)} style={{ padding: "9px 13px", borderRadius: 10, border: "none", background: "#16a34a", color: "#ffffff", cursor: "pointer", fontWeight: 800 }}>Approve</button>
+                  <button onClick={() => onReject(job.id)} style={{ padding: "9px 13px", borderRadius: 10, border: "none", background: "#dc2626", color: "#ffffff", cursor: "pointer", fontWeight: 800 }}>Reject</button>
+                  <button onClick={() => onDelete(job.id)} style={{ padding: "9px 13px", borderRadius: 10, border: "1px solid rgba(220,38,38,0.32)", background: "#ffffff", color: "#dc2626", cursor: "pointer", fontWeight: 800 }}>Delete Spam</button>
                 </div>
               </div>
             ))}
@@ -109,7 +124,7 @@ export default function AdminPage({
               <div key={a.id || idx} style={panel}>
                 <div style={{ color: "#0f172a", fontWeight: 700 }}>{a.applicant_email || a.email}</div>
                 <div style={{ fontSize: 13 }}>Job ID: {a.job_id || a.jobId}</div>
-                <div style={{ fontSize: 12 }}>Submitted: {new Date(a.submitted_at || a.at || Date.now()).toLocaleString()}</div>
+                <div style={{ fontSize: 12 }}>Submitted: {formatDate(a.submitted_at || a.at)}</div>
               </div>
             ))}
           </div>

@@ -14,10 +14,10 @@ import { extractPlainText, sanitizeRichText } from "../utils/richText";
 
 const inputStyle = {
   width: "100%",
-  padding: "12px 16px",
+  padding: "13px 16px",
   background: "#ffffff",
-  border: "1px solid rgba(148,163,184,0.6)",
-  borderRadius: 10,
+  border: "1px solid rgba(148,163,184,0.36)",
+  borderRadius: 12,
   color: "#0f172a",
   fontSize: 14,
   outline: "none",
@@ -32,7 +32,7 @@ const labelStyle = {
   letterSpacing: 0.5,
 };
 
-const defaultInputBorderColor = "rgba(148,163,184,0.6)";
+const defaultInputBorderColor = "rgba(148,163,184,0.36)";
 const MAX_LOGO_SIZE_BYTES = 2 * 1024 * 1024;
 const SPONSORED_JOB_CHECKOUT_URL = "https://checkout.dodopayments.com/buy/pdt_0Nd5ugJMgvqp2vu79KUUC?quantity=1";
 
@@ -176,7 +176,7 @@ function RichTextEditor({ value, onChange, placeholder, inputRef, hasError }) {
     <div className="rich-editor-shell" style={{
       width: "100%",
       border: `1px solid ${hasError ? "rgba(239,68,68,0.7)" : isFocused ? "rgba(37,99,235,0.65)" : "rgba(148,163,184,0.45)"}`,
-      borderRadius: 10,
+      borderRadius: 12,
       overflow: "hidden",
       background: "#ffffff",
       boxShadow: hasError
@@ -193,7 +193,7 @@ function RichTextEditor({ value, onChange, placeholder, inputRef, hasError }) {
         gap: 12,
         padding: "10px 12px",
         borderBottom: "1px solid rgba(148,163,184,0.18)",
-        background: "#f8fafc",
+        background: "linear-gradient(180deg, #f8fafc, #eef5ff)",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
           {toolbarBtn("bold", "B", () => runCommand("bold"), { fontSize: 15, color: hoveredTool === "bold" ? "#0f172a" : "#475569" })}
@@ -420,20 +420,21 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
     }
   };
 
-  const bg = { background: "#f8fafc", minHeight: "100vh", fontFamily: "'Source Sans 3', sans-serif", color: "#475569" };
+  const bg = { background: "linear-gradient(180deg, #eef5ff 0%, #f8fafc 260px, #f8fafc 100%)", minHeight: "100vh", fontFamily: "'Source Sans 3', sans-serif", color: "#475569" };
 
   return (
     <div style={bg}>
       <Navbar page={page} setPage={setPage} user={user} onSignOut={onSignOut} isAdmin={isAdmin} canPostJobs={canPostJobs} onSelectCategory={onSelectCategory} />
-      <div className="page-content" style={{ paddingTop: 80, maxWidth: 640, margin: "0 auto", padding: "80px 24px 48px" }}>
-        <h1 style={{ fontFamily: "'Merriweather', serif", fontSize: 28, fontWeight: 900, color: "#0f172a", marginBottom: 8 }}>
+      <div className="page-content" style={{ paddingTop: 80, maxWidth: 760, margin: "0 auto", padding: "108px 24px 64px" }}>
+        <div style={{ fontSize: 12, color: "#2563eb", fontWeight: 800, letterSpacing: 1.1, textTransform: "uppercase", marginBottom: 8 }}>Employer listing</div>
+        <h1 style={{ fontFamily: "'Merriweather', serif", fontSize: "clamp(30px, 4vw, 42px)", fontWeight: 900, color: "#0f172a", marginBottom: 8 }}>
           Post a New Job
         </h1>
-        <p style={{ fontSize: 14, color: "#64748b", marginBottom: 32, lineHeight: 1.6 }}>
+        <p style={{ fontSize: 15, color: "#64748b", marginBottom: 32, lineHeight: 1.65, maxWidth: 620 }}>
           Share your AI & robotics role with thousands of qualified candidates.
         </p>
 
-        <form noValidate onSubmit={handleSubmit} style={{ background: "#ffffff", border: "1px solid rgba(148,163,184,0.35)", borderRadius: 20, padding: "24px 20px", backdropFilter: "blur(20px)" }}>
+        <form noValidate onSubmit={handleSubmit} style={{ background: "#ffffff", border: "1px solid rgba(148,163,184,0.22)", borderRadius: 24, padding: "28px 24px", backdropFilter: "blur(20px)", boxShadow: "0 22px 54px rgba(15,23,42,0.09)" }}>
           {submitError && (
             <div style={{ marginBottom: 20, padding: "12px 14px", borderRadius: 12, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.22)", color: "#b91c1c", fontSize: 13, fontWeight: 600 }}>
               {submitError}
@@ -556,11 +557,11 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
                       gap: 10,
                       width: "100%",
                       padding: "12px 14px",
-                      borderRadius: 12,
+                      borderRadius: 14,
                       border: selected ? `1px solid ${category.color}` : "1px solid rgba(148,163,184,0.35)",
-                      background: selected ? "rgba(37,99,235,0.08)" : "#ffffff",
+                      background: selected ? "linear-gradient(135deg, rgba(37,99,235,0.1), rgba(124,58,237,0.08))" : "#ffffff",
                       color: selected ? "#0f172a" : "#475569",
-                      boxShadow: selected ? "0 8px 24px rgba(37,99,235,0.12)" : "none",
+                      boxShadow: selected ? "0 10px 24px rgba(37,99,235,0.13)" : "0 6px 18px rgba(15,23,42,0.04)",
                       cursor: "pointer",
                       textAlign: "left",
                       transition: "all 0.15s ease",
@@ -582,10 +583,11 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
               {ALL_SKILLS.slice(0, 6).map(skill => (
                 <button key={skill} type="button" onClick={() => form.skills.includes(skill) ? removeSkill(skill) : update("skills", [...form.skills, skill])}
                   style={{
-                    padding: "6px 12px", borderRadius: 8, fontSize: 12, cursor: "pointer",
-                    background: form.skills.includes(skill) ? "rgba(124,58,237,0.12)" : "#ffffff",
+                    padding: "7px 12px", borderRadius: 999, fontSize: 12, cursor: "pointer",
+                    background: form.skills.includes(skill) ? "rgba(37,99,235,0.1)" : "#ffffff",
                     border: form.skills.includes(skill) ? "1px solid rgba(124,58,237,0.5)" : "1px solid rgba(148,163,184,0.45)",
-                    color: form.skills.includes(skill) ? "#a78bfa" : "#475569",
+                    color: form.skills.includes(skill) ? "#1d4ed8" : "#475569",
+                    fontWeight: 700,
                   }}>
                   {skill}
                 </button>
@@ -594,14 +596,14 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
             <div style={{ display: "flex", gap: 8 }}>
               <input value={skillInput} onChange={e => setSkillInput(e.target.value)} onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addSkill())}
                 placeholder="Type skill and press Enter" style={{ ...inputStyle, flex: 1 }} />
-              <button type="button" onClick={addSkill} style={{ padding: "12px 20px", background: "#ffffff", border: "1px solid rgba(148,163,184,0.55)", borderRadius: 10, color: "#475569", fontSize: 13, cursor: "pointer" }}>
+              <button type="button" onClick={addSkill} style={{ padding: "12px 20px", background: "#ffffff", border: "1px solid rgba(148,163,184,0.34)", borderRadius: 12, color: "#475569", fontSize: 13, cursor: "pointer", fontWeight: 700 }}>
                 Add
               </button>
             </div>
             {form.skills.length > 0 && (
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10 }}>
                 {form.skills.map(s => (
-                  <span key={s} style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "4px 10px", background: "rgba(124,58,237,0.15)", borderRadius: 8, fontSize: 12, color: "#a78bfa" }}>
+                  <span key={s} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 10px", background: "rgba(37,99,235,0.1)", border: "1px solid rgba(37,99,235,0.18)", borderRadius: 999, fontSize: 12, color: "#1d4ed8", fontWeight: 700 }}>
                     {s} <button type="button" onClick={() => removeSkill(s)} style={{ background: "none", border: "none", color: "#475569", cursor: "pointer", padding: 0 }}>×</button>
                   </span>
                 ))}
@@ -637,7 +639,7 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
           </div>
 
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-            <button type="submit" disabled={isSubmitting} style={{ padding: "14px 32px", background: "linear-gradient(135deg, #7c3aed, #2563eb)", border: "none", borderRadius: 10, color: "#ffffff", fontSize: 14, fontWeight: 700, cursor: isSubmitting ? "not-allowed" : "pointer", opacity: isSubmitting ? 0.75 : 1, fontFamily: "'Merriweather', serif" }}>
+            <button type="submit" disabled={isSubmitting} style={{ padding: "14px 32px", background: "linear-gradient(135deg, #1d4ed8, #2563eb)", border: "none", borderRadius: 12, color: "#ffffff", fontSize: 14, fontWeight: 800, cursor: isSubmitting ? "not-allowed" : "pointer", opacity: isSubmitting ? 0.75 : 1, fontFamily: "'Source Sans 3', sans-serif", boxShadow: "0 14px 28px rgba(37,99,235,0.24)" }}>
               {isSubmitting ? "Posting..." : "Post Job"}
             </button>
             <button
@@ -645,11 +647,11 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
               onClick={() => {
                 window.location.href = SPONSORED_JOB_CHECKOUT_URL;
               }}
-              style={{ padding: "14px 24px", background: "#ffffff", border: "1px solid rgba(37,99,235,0.28)", borderRadius: 10, color: "#2563eb", fontSize: 14, fontWeight: 600, cursor: "pointer" }}
+              style={{ padding: "14px 24px", background: "#ffffff", border: "1px solid rgba(37,99,235,0.28)", borderRadius: 12, color: "#2563eb", fontSize: 14, fontWeight: 700, cursor: "pointer" }}
             >
               Post a Sponsored Job
             </button>
-            <button type="button" onClick={() => setPage("jobs")} style={{ padding: "14px 24px", background: "transparent", border: "1px solid rgba(148,163,184,0.5)", borderRadius: 10, color: "#64748b", fontSize: 13, cursor: "pointer" }}>
+            <button type="button" onClick={() => setPage("jobs")} style={{ padding: "14px 24px", background: "transparent", border: "1px solid rgba(148,163,184,0.34)", borderRadius: 12, color: "#64748b", fontSize: 13, cursor: "pointer", fontWeight: 700 }}>
               Cancel
             </button>
           </div>
