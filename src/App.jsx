@@ -356,7 +356,7 @@ export default function App() {
         setJobsLoading(true);
       }
       try {
-        const data = await fetchJobsWithTimeout({ includeAll: false }, 5000);
+        const data = await fetchJobsWithTimeout({ includeAll: true }, 5000);
         const nextJobs = Array.isArray(data) ? data : [];
         setJobs(nextJobs);
         saveJobsCache(nextJobs);
@@ -794,13 +794,13 @@ export default function App() {
     const enrichedJob = {
       ...job,
       posted_by: user?.id || null,
-      status: "approved",
+      status: "pending",
     };
     try {
       const saved = await addJob(enrichedJob);
       setJobs((prev) => {
         const nextJobs = [saved, ...prev.filter((item) => String(item.id) !== String(saved.id))];
-        saveJobsCache(nextJobs.filter((jobItem) => jobItem.status !== "rejected"));
+        saveJobsCache(nextJobs.filter((jobItem) => jobItem.status !== "pending" && jobItem.status !== "rejected"));
         return nextJobs;
       });
       return { ok: true, persisted: "supabase" };
@@ -809,7 +809,7 @@ export default function App() {
       console.error("Add job failed:", err);
       const lowerMsg = msg.toLowerCase();
       const friendlyMessage = lowerMsg.includes("row-level security")
-        ? "Could not save to DB: run the direct job posting migration in Supabase."
+        ? "Could not submit job. Server-side posting is not configured correctly."
         : msg.includes("relation")
           ? "Database table missing. Run the migration in Supabase."
           : `Could not save to DB: ${msg.slice(0, 50)}`;
@@ -818,13 +818,15 @@ export default function App() {
     }
   };
 
-  const visibleJobs = jobs.filter((job) => job.status !== "rejected");
+  const visibleJobs = jobs.filter((job) => job.status !== "pending" && job.status !== "rejected");
+  const heroJobs = jobs.filter((job) => job.status !== "rejected");
   const filteredJobs = filterAndSortJobs(visibleJobs, search, filters);
 
   if (page === "home") {
     return (
       <HomePage
         jobs={visibleJobs}
+        heroJobs={heroJobs}
         jobsLoading={jobsLoading}
         setPage={navigateToPage}
         search={search}

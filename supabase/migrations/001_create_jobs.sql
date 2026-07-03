@@ -28,8 +28,3 @@ alter table public.jobs enable row level security;
 create policy "Allow public read access on jobs"
   on public.jobs for select
   using (true);
-
--- Allow public insert (anyone can post a job - restrict in production if needed)
-create policy "Allow public insert on jobs"
-  on public.jobs for insert
-  with check (true);

@@ -56,7 +56,7 @@ function toRow(job) {
     apply_url: job.apply_url || "",
     featured: Boolean(job.featured),
     category: normalizeJobCategory(job.category) || DEFAULT_CATEGORY,
-    status: job.status || "approved",
+    status: job.status || "pending",
     posted_by: job.posted_by || null,
   };
 }
@@ -82,44 +82,33 @@ export async function fetchJobs(options = {}) {
 
   const jobs = (data || []).map(toJob);
   if (includeAll) return jobs;
-  return jobs.filter((job) => job.status !== "rejected");
+  return jobs.filter((job) => job.status !== "pending" && job.status !== "rejected");
 }
 
 /**
- * Insert a new job into Supabase
+ * Submit a new job through the server API.
  */
 export async function addJob(job) {
-  if (!isSupabaseConfigured || !supabase) {
-    throw new Error("Supabase is not configured");
-  }
-
   const row = toRow(job);
-  // posted_at is set by DB default; we can override with job.posted_at
   if (job.posted_at) {
     row.posted_at = job.posted_at.toISOString();
   }
 
-  let insertRow = { ...row };
-  let { data, error } = await supabase.from("jobs").insert(insertRow).select("id").single();
+  const response = await fetch("/api/jobs", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      ...row,
+      application_url: row.apply_url,
+    }),
+  });
 
-  const optionalColumns = ["status", "posted_by", "hybrid"];
-  for (const column of optionalColumns) {
-    if (!error || !String(error.message || "").toLowerCase().includes(column)) continue;
-    if (column === "hybrid" && insertRow.hybrid) {
-      throw new Error("Hybrid jobs require the latest Supabase migration. Run the new jobs taxonomy migration and try again.");
-    }
-    delete insertRow[column];
-    const retry = await supabase.from("jobs").insert(insertRow).select("id").single();
-    data = retry.data;
-    error = retry.error;
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || payload?.ok === false) {
+    throw new Error(payload?.error || "Could not submit job.");
   }
 
-  if (error) {
-    console.error("Error adding job:", error);
-    throw error;
-  }
-
-  return { ...job, id: data.id };
+  return { ...job, id: payload.job?.id, status: payload.job?.status || "pending" };
 }
 
 export async function updateJobStatus(jobId, status) {

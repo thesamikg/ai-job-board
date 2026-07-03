@@ -3,11 +3,12 @@ import { JobCard, EmailModal } from "../components/job";
 import Navbar from "../components/layout/Navbar";
 
 export default function HomePage({
-  jobs, jobsLoading, setPage, search, setSearch, savedJobs, handleSave, showToast,
+  jobs, heroJobs = jobs, jobsLoading, setPage, search, setSearch, savedJobs, handleSave, showToast,
   openJobDetail, applyJob, setApplyJob, handleApplySubmit,
   emailInput, setEmailInput, subscribed, setSubscribed, subscribeLoading, onSubscribe, toast, user, onSignOut, isAdmin, canPostJobs, onSelectCategory
 }) {
   const bg = { background: "#f8fafc", minHeight: "100vh", fontFamily: "'Source Sans 3', sans-serif", color: "#334155" };
+  const heroPreviewJobs = (heroJobs || []).length > 0 ? heroJobs : jobs;
 
   return (
     <div style={bg}>
@@ -35,7 +36,7 @@ export default function HomePage({
             borderRadius: 99, padding: "7px 16px", backdropFilter: "blur(14px)"
           }}>
             <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#60a5fa", display: "inline-block", boxShadow: "0 0 14px #60a5faaa" }} />
-            <span style={{ fontSize: 12, color: "#dbeafe", fontWeight: 800 }}>{(jobs || []).length} roles live now</span>
+            <span style={{ fontSize: 12, color: "#dbeafe", fontWeight: 800 }}>{(heroPreviewJobs || []).length} roles live now</span>
           </div>
           <h1 className="home-hero-title" style={{ fontFamily: "'Merriweather', serif", fontSize: "clamp(38px, 5.2vw, 60px)", fontWeight: 700, color: "#ffffff", lineHeight: 1.08, marginBottom: 16, textShadow: "0 18px 40px rgba(0,0,0,0.32)" }}>
             Find the Best<br />
@@ -89,7 +90,7 @@ export default function HomePage({
                 <span style={{ fontSize: 12, color: "#64748b", fontWeight: 700 }}>Updated live</span>
               </div>
               <div className="home-jobs-preview" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                {(jobs || []).slice(0, 2).map(job => (
+                {(heroPreviewJobs || []).slice(0, 2).map(job => (
                   <JobCard key={job.id} job={job} onClick={j => openJobDetail(j, "home")} onApply={j => setApplyJob(j)} />
                 ))}
               </div>
