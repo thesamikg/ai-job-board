@@ -34,7 +34,6 @@ const labelStyle = {
 
 const defaultInputBorderColor = "rgba(148,163,184,0.36)";
 const MAX_LOGO_SIZE_BYTES = 2 * 1024 * 1024;
-const SPONSORED_JOB_CHECKOUT_URL = "https://checkout.dodopayments.com/buy/pdt_0Nd5ugJMgvqp2vu79KUUC?quantity=1";
 
 function readFileAsDataUrl(file) {
   return new Promise((resolve, reject) => {
@@ -51,7 +50,6 @@ function validateForm(form) {
   const company = form.company.trim();
   const description = extractPlainText(form.description);
   const url = form.apply_url.trim();
-  const companyLogo = String(form.company_logo || "").trim();
   const minRaw = String(form.salary_min ?? "").trim();
   const maxRaw = String(form.salary_max ?? "").trim();
   const min = Number(form.salary_min);
@@ -59,7 +57,6 @@ function validateForm(form) {
 
   if (!title) errors.title = "Please enter a job title.";
   if (!company) errors.company = "Please enter a company name.";
-  if (!companyLogo || !/^data:image\/[a-zA-Z]+;base64,/i.test(companyLogo)) errors.company_logo = "Company logo image is required.";
   if (minRaw || maxRaw) {
     if (!minRaw || !maxRaw) {
       errors.salary = "Please enter both min and max salary, or leave both blank.";
@@ -399,7 +396,7 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
         category: form.category,
         posted_at: new Date(),
         featured: false,
-        status: "pending",
+        status: "approved",
       };
 
       const result = await onAddJob(job);
@@ -409,7 +406,7 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
         setSubmitError(message);
         return;
       }
-      showToast("Job submitted successfully. It will appear after review.");
+      showToast("Job posted successfully.");
       setPage("jobs");
     } catch (err) {
       const message = err?.message || "Could not post job. Please try again.";
@@ -426,7 +423,7 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
     <div style={bg}>
       <Navbar page={page} setPage={setPage} user={user} onSignOut={onSignOut} isAdmin={isAdmin} canPostJobs={canPostJobs} onSelectCategory={onSelectCategory} />
       <div className="page-content" style={{ paddingTop: 80, maxWidth: 760, margin: "0 auto", padding: "108px 24px 64px" }}>
-        <div style={{ fontSize: 12, color: "#2563eb", fontWeight: 800, letterSpacing: 1.1, textTransform: "uppercase", marginBottom: 8 }}>Employer listing</div>
+        <div style={{ fontSize: 12, color: "#2563eb", fontWeight: 800, letterSpacing: 1.1, textTransform: "uppercase", marginBottom: 8 }}>Job listing</div>
         <h1 style={{ fontFamily: "'Merriweather', serif", fontSize: "clamp(30px, 4vw, 42px)", fontWeight: 900, color: "#0f172a", marginBottom: 8 }}>
           Post a New Job
         </h1>
@@ -451,16 +448,15 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
             {errors.company && <div style={{ marginTop: 6, fontSize: 12, color: "#dc2626" }}>{errors.company}</div>}
           </div>
           <div style={{ marginBottom: 20 }}>
-            <label style={labelStyle}>COMPANY LOGO IMAGE *</label>
+            <label style={labelStyle}>COMPANY LOGO IMAGE</label>
             <input
               ref={fieldRefs.company_logo}
               type="file"
               accept="image/*"
               onChange={handleCompanyLogoUpload}
               style={{ ...inputStyle, padding: "10px 12px", borderColor: errors.company_logo ? "rgba(239,68,68,0.7)" : defaultInputBorderColor }}
-              required
             />
-            <div style={{ marginTop: 6, fontSize: 11, color: "#64748b" }}>Upload JPG, PNG, or WEBP (max 2MB).</div>
+            <div style={{ marginTop: 6, fontSize: 11, color: "#64748b" }}>Optional. Upload JPG, PNG, or WEBP (max 2MB).</div>
             {errors.company_logo && <div style={{ marginTop: 6, fontSize: 12, color: "#dc2626" }}>{errors.company_logo}</div>}
             {form.company_logo && (
               <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 10 }}>
@@ -641,15 +637,6 @@ export default function AddJobPage({ page, setPage, onAddJob, showToast, toast, 
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
             <button type="submit" disabled={isSubmitting} style={{ padding: "14px 32px", background: "linear-gradient(135deg, #1d4ed8, #2563eb)", border: "none", borderRadius: 12, color: "#ffffff", fontSize: 14, fontWeight: 800, cursor: isSubmitting ? "not-allowed" : "pointer", opacity: isSubmitting ? 0.75 : 1, fontFamily: "'Source Sans 3', sans-serif", boxShadow: "0 14px 28px rgba(37,99,235,0.24)" }}>
               {isSubmitting ? "Posting..." : "Post Job"}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                window.location.href = SPONSORED_JOB_CHECKOUT_URL;
-              }}
-              style={{ padding: "14px 24px", background: "#ffffff", border: "1px solid rgba(37,99,235,0.28)", borderRadius: 12, color: "#2563eb", fontSize: 14, fontWeight: 700, cursor: "pointer" }}
-            >
-              Post a Sponsored Job
             </button>
             <button type="button" onClick={() => setPage("jobs")} style={{ padding: "14px 24px", background: "transparent", border: "1px solid rgba(148,163,184,0.34)", borderRadius: 12, color: "#64748b", fontSize: 13, cursor: "pointer", fontWeight: 700 }}>
               Cancel

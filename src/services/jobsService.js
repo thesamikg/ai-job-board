@@ -56,7 +56,7 @@ function toRow(job) {
     apply_url: job.apply_url || "",
     featured: Boolean(job.featured),
     category: normalizeJobCategory(job.category) || DEFAULT_CATEGORY,
-    status: job.status || "pending",
+    status: job.status || "approved",
     posted_by: job.posted_by || null,
   };
 }
@@ -82,7 +82,7 @@ export async function fetchJobs(options = {}) {
 
   const jobs = (data || []).map(toJob);
   if (includeAll) return jobs;
-  return jobs.filter((job) => job.status !== "pending" && job.status !== "rejected");
+  return jobs.filter((job) => job.status !== "rejected");
 }
 
 /**
@@ -99,24 +99,17 @@ export async function addJob(job) {
     row.posted_at = job.posted_at.toISOString();
   }
 
-  let { data, error } = await supabase.from("jobs").insert(row).select("id").single();
+  let insertRow = { ...row };
+  let { data, error } = await supabase.from("jobs").insert(insertRow).select("id").single();
 
-  if (error && String(error.message || "").toLowerCase().includes("hybrid")) {
-    if (row.hybrid) {
+  const optionalColumns = ["status", "posted_by", "hybrid"];
+  for (const column of optionalColumns) {
+    if (!error || !String(error.message || "").toLowerCase().includes(column)) continue;
+    if (column === "hybrid" && insertRow.hybrid) {
       throw new Error("Hybrid jobs require the latest Supabase migration. Run the new jobs taxonomy migration and try again.");
     }
-    const fallbackRow = { ...row };
-    delete fallbackRow.hybrid;
-    const retry = await supabase.from("jobs").insert(fallbackRow).select("id").single();
-    data = retry.data;
-    error = retry.error;
-  }
-
-  // Backward compatibility: some existing DB schemas may not have posted_by yet.
-  if (error && String(error.message || "").toLowerCase().includes("posted_by")) {
-    const fallbackRow = { ...row };
-    delete fallbackRow.posted_by;
-    const retry = await supabase.from("jobs").insert(fallbackRow).select("id").single();
+    delete insertRow[column];
+    const retry = await supabase.from("jobs").insert(insertRow).select("id").single();
     data = retry.data;
     error = retry.error;
   }

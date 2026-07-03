@@ -124,7 +124,7 @@ export default function HomePage({
           <h2 style={{ fontFamily: "'Merriweather', serif", fontSize: 26, fontWeight: 700, color: "#0f172a", textAlign: "center", marginBottom: 44 }}>Why AIRoboticsjob?</h2>
           <div className="grid-1-mobile" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 18 }}>
             {[["⚡", "AI-First", "Built exclusively for AI, ML, and Robotics professionals. No noise."],
-            ["🎯", "Curated Roles", "Every listing is reviewed for quality, accuracy, and salary transparency."],
+            ["🎯", "Fresh Roles", "New listings go live immediately so candidates can find them right away."],
             ["🔔", "Smart Alerts", "Get notified about roles matching your skills and preferences."],
             ["🌍", "Global Reach", "Discover high-quality AI roles across every region, including remote-first teams."]].map(([icon, title, desc]) => (
               <div key={title} style={{ textAlign: "left", background: "rgba(255,255,255,0.86)", border: "1px solid rgba(148,163,184,0.22)", borderRadius: 18, padding: "22px 20px", boxShadow: "0 14px 34px rgba(15,23,42,0.07)" }}>

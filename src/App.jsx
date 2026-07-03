@@ -9,7 +9,6 @@ import "./styles/global.css";
 
 const PENDING_SIGNUP_ROLE_KEY = "ai_jobboard_pending_signup_role";
 const SAVED_JOBS_BY_USER_KEY = "ai_jobboard_saved_jobs_by_user";
-const BLOCKED_EMPLOYER_DOMAINS = new Set(["gmail.com", "yahoo.com", "outlook.com", "hotmail.com"]);
 const LOCAL_PAGE_KEY = "ai_jobboard_current_page";
 const LOCAL_USER_KEY = "ai_jobboard_current_user";
 const JOBS_CACHE_KEY = "ai_jobboard_jobs_cache_v1";
@@ -43,12 +42,6 @@ function saveSavedJobsForUser(user, savedJobs) {
   } catch {
     // Ignore storage errors.
   }
-}
-
-function getEmailDomain(email) {
-  const value = String(email || "").toLowerCase().trim();
-  const at = value.lastIndexOf("@");
-  return at === -1 ? "" : value.slice(at + 1);
 }
 
 function loadCurrentPage() {
@@ -304,7 +297,7 @@ export default function App() {
   const [adminLoading, setAdminLoading] = useState(false);
   const userRole = user?.role || "job_seeker";
   const isAdmin = userRole === "admin";
-  const canPostJobs = userRole === "employer";
+  const canPostJobs = true;
   
   const applySessionUser = async (sessionUser, preferredRole = "job_seeker") => {
     if (!sessionUser) {
@@ -696,13 +689,6 @@ export default function App() {
       showToast("Password must be at least 6 characters");
       return;
     }
-    if (signupRole === "employer") {
-      const domain = getEmailDomain(loginEmail);
-      if (BLOCKED_EMPLOYER_DOMAINS.has(domain)) {
-        showToast("Please use a company email address to register as an employer.");
-        return;
-      }
-    }
     setAuthLoading(true);
     try {
       const companyName = signupCompanyName.trim();
@@ -781,7 +767,7 @@ export default function App() {
   const handleModerateJob = async (jobId, status) => {
     setJobs((prev) => {
       const nextJobs = prev.map((job) => (String(job.id) === String(jobId) ? { ...job, status } : job));
-      saveJobsCache(nextJobs.filter((job) => job.status !== "pending" && job.status !== "rejected"));
+      saveJobsCache(nextJobs.filter((job) => job.status !== "rejected"));
       return nextJobs;
     });
     try {
@@ -794,7 +780,7 @@ export default function App() {
   const handleDeleteJob = async (jobId) => {
     setJobs((prev) => {
       const nextJobs = prev.filter((job) => String(job.id) !== String(jobId));
-      saveJobsCache(nextJobs.filter((job) => job.status !== "pending" && job.status !== "rejected"));
+      saveJobsCache(nextJobs.filter((job) => job.status !== "rejected"));
       return nextJobs;
     });
     try {
@@ -805,27 +791,16 @@ export default function App() {
   };
 
   const handleAddJob = async (job) => {
-    if (!user?.id) {
-      const message = "Please sign in with an employer account before posting a job.";
-      showToast(message);
-      return { ok: false, error: message };
-    }
-    if (!canPostJobs && !isAdmin) {
-      const message = "Only employer accounts can post jobs.";
-      showToast(message);
-      return { ok: false, error: message };
-    }
-
     const enrichedJob = {
       ...job,
-      posted_by: user.id,
-      status: "pending",
+      posted_by: user?.id || null,
+      status: "approved",
     };
     try {
       const saved = await addJob(enrichedJob);
       setJobs((prev) => {
         const nextJobs = [saved, ...prev.filter((item) => String(item.id) !== String(saved.id))];
-        saveJobsCache(nextJobs.filter((jobItem) => jobItem.status !== "pending" && jobItem.status !== "rejected"));
+        saveJobsCache(nextJobs.filter((jobItem) => jobItem.status !== "rejected"));
         return nextJobs;
       });
       return { ok: true, persisted: "supabase" };
@@ -834,7 +809,7 @@ export default function App() {
       console.error("Add job failed:", err);
       const lowerMsg = msg.toLowerCase();
       const friendlyMessage = lowerMsg.includes("row-level security")
-        ? "Could not save to DB: run the jobs insert RLS migration in Supabase."
+        ? "Could not save to DB: run the direct job posting migration in Supabase."
         : msg.includes("relation")
           ? "Database table missing. Run the migration in Supabase."
           : `Could not save to DB: ${msg.slice(0, 50)}`;
@@ -843,7 +818,7 @@ export default function App() {
     }
   };
 
-  const visibleJobs = jobs.filter((job) => job.status !== "pending" && job.status !== "rejected");
+  const visibleJobs = jobs.filter((job) => job.status !== "rejected");
   const filteredJobs = filterAndSortJobs(visibleJobs, search, filters);
 
   if (page === "home") {
