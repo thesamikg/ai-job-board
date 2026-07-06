@@ -59,18 +59,18 @@ export default function JobDetailPage({
         <JobDetail job={job} onBack={onBack} backLabel={getBackLabel(returnPage)} onApply={j => setApplyJob(j)} />
       </div>
 
-      <div style={{ background: "linear-gradient(180deg, #ffffff, #eef5ff)", borderTop: "1px solid rgba(37,99,235,0.12)", borderBottom: "1px solid rgba(37,99,235,0.12)", padding: "74px 24px", marginBottom: 80 }}>
+      <div className="why-section" style={{ background: "#2f68e8", borderTop: "1px solid rgba(37,99,235,0.2)", borderBottom: "1px solid rgba(37,99,235,0.2)", padding: "92px 24px 98px", marginBottom: 80 }}>
         <div className="section-padding" style={{ maxWidth: 1040, margin: "0 auto" }}>
-          <h2 style={{ fontFamily: "'Merriweather', serif", fontSize: 26, fontWeight: 700, color: "#0f172a", textAlign: "center", marginBottom: 44 }}>Why AIRoboticsjob?</h2>
-          <div className="grid-1-mobile" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 18 }}>
+          <h2 className="why-heading" style={{ fontFamily: "'Merriweather', serif", fontSize: 28, fontWeight: 700, color: "#ffffff", textAlign: "center", marginBottom: 46 }}>Why AIRoboticsjob?</h2>
+          <div className="why-card-grid grid-1-mobile" style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 20 }}>
             {[["⚡", "AI-First", "Built exclusively for AI, ML, and Robotics professionals. No noise."],
-            ["🎯", "Curated Roles", "Every listing is reviewed for quality, accuracy, and salary transparency."],
+            ["🎯", "Fresh Roles", "New listings go live immediately so candidates can find them right away."],
             ["🔔", "Smart Alerts", "Get notified about roles matching your skills and preferences."],
             ["🌍", "Global Reach", "Discover high-quality AI roles across every region, including remote-first teams."]].map(([icon, title, desc]) => (
-              <div key={title} style={{ textAlign: "left", background: "rgba(255,255,255,0.86)", border: "1px solid rgba(148,163,184,0.22)", borderRadius: 18, padding: "22px 20px", boxShadow: "0 14px 34px rgba(15,23,42,0.07)" }}>
-                <div style={{ width: 42, height: 42, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 23, marginBottom: 16, background: "rgba(37,99,235,0.08)", border: "1px solid rgba(37,99,235,0.14)" }}>{icon}</div>
-                <div style={{ fontFamily: "'Merriweather', serif", fontSize: 15, fontWeight: 700, color: "#0f172a", marginBottom: 8 }}>{title}</div>
-                <div style={{ fontSize: 13, color: "#475569", lineHeight: 1.6 }}>{desc}</div>
+              <div className="why-card" key={title} style={{ textAlign: "left", background: "#ffffff", border: "1px solid rgba(255,255,255,0.42)", borderRadius: 16, padding: "24px 22px 28px", boxShadow: "0 18px 42px rgba(15,23,42,0.16)" }}>
+                <div className="why-card-icon" style={{ width: 40, height: 40, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, marginBottom: 18, background: "rgba(37,99,235,0.08)", border: "1px solid rgba(37,99,235,0.14)" }}>{icon}</div>
+                <div className="why-card-title" style={{ fontFamily: "'Merriweather', serif", fontSize: 15, fontWeight: 700, color: "#0f172a", marginBottom: 8 }}>{title}</div>
+                <div className="why-card-desc" style={{ fontSize: 13, color: "#475569", lineHeight: 1.6 }}>{desc}</div>
               </div>
             ))}
           </div>
