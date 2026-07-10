@@ -22,9 +22,8 @@ export default function DashboardPage({
     const userEmail = String(user?.email || "").toLowerCase();
     return (userId && appId === userId) || (email && userEmail && email === userEmail);
   });
-  const appliedJobs = seekerApplications
-    .map((app) => (jobs || []).find((job) => String(job.id) === String(app.job_id)))
-    .filter(Boolean);
+  const appliedJobIds = new Set(seekerApplications.map((app) => String(app.job_id || "")).filter(Boolean));
+  const appliedJobs = (jobs || []).filter((job) => appliedJobIds.has(String(job.id)));
 
   return (
     <div style={bg}>

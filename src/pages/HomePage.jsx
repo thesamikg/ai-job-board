@@ -1,6 +1,121 @@
-import { Logo, Toast } from "../components/ui";
+import { useState } from "react";
+import { Logo, Toast, Badge, SkillTag } from "../components/ui";
 import { JobCard, EmailModal } from "../components/job";
 import Navbar from "../components/layout/Navbar";
+import {
+  timeSince,
+  isNew,
+  isHot,
+  formatExperienceLevel,
+  formatSalary,
+  getCompanyInitials,
+  getWorkModeLabel,
+  hasSalaryRange,
+  isCompanyLogoImage,
+} from "../utils/jobHelpers";
+
+function HeroPreviewCard({ job, onClick, onApply }) {
+  const [logoFailed, setLogoFailed] = useState(false);
+  const companyLogo = String(job?.companyLogo || "").trim();
+  const useLogoImage = isCompanyLogoImage(companyLogo) && !logoFailed;
+  const companyInitials = getCompanyInitials(job?.company, companyLogo);
+  const showSalary = hasSalaryRange(job);
+
+  return (
+    <div
+      onClick={() => onClick(job)}
+      style={{
+        background: "#ffffff",
+        border: "1px solid rgba(148,163,184,0.24)",
+        borderRadius: 16,
+        padding: "18px 18px 14px",
+        cursor: "pointer",
+        boxShadow: "0 10px 24px rgba(15,23,42,0.06)",
+      }}
+    >
+      <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+        <div style={{
+          width: 48,
+          height: 48,
+          borderRadius: 12,
+          flexShrink: 0,
+          background: "#020617",
+          border: "1px solid rgba(148,163,184,0.22)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#ffffff",
+          fontSize: 13,
+          fontWeight: 900,
+          overflow: "hidden",
+        }}>
+          {useLogoImage ? (
+            <img
+              src={companyLogo}
+              alt={`${job.company} logo`}
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              onError={() => setLogoFailed(true)}
+            />
+          ) : (
+            companyInitials
+          )}
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "flex-start" }}>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontFamily: "'Merriweather', serif", fontSize: 15, fontWeight: 700, color: "#0f172a", lineHeight: 1.25, marginBottom: 6 }}>
+                {job.title}
+              </div>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 8 }}>
+                {isNew(job.posted_at) && <Badge color="#22c55e">New</Badge>}
+                {isHot(job) && <Badge color="#f97316">Hot</Badge>}
+                {job.category && <Badge color="#475569">{job.category}</Badge>}
+              </div>
+            </div>
+            <div style={{ textAlign: "right", flexShrink: 0 }}>
+              {showSalary && <div style={{ fontSize: 12, fontWeight: 800, color: "#2563eb", marginBottom: 4 }}>{formatSalary(job)}</div>}
+              <div style={{ fontSize: 11, color: "#64748b" }}>{timeSince(job.posted_at)}</div>
+            </div>
+          </div>
+          <div style={{ fontSize: 12, color: "#475569", fontWeight: 700, marginBottom: 10 }}>
+            {job.company} · {job.location}
+          </div>
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
+            {(job.skills || []).slice(0, 4).map((skill) => <SkillTag key={skill} skill={skill} />)}
+          </div>
+        </div>
+      </div>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, borderTop: "1px solid rgba(148,163,184,0.18)", paddingTop: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", fontSize: 11, color: "#64748b" }}>
+          <span>📍 {getWorkModeLabel(job)}</span>
+          <span>·</span>
+          <span>{job.job_type}</span>
+          <span>·</span>
+          <span>{formatExperienceLevel(job.experience_level)}</span>
+        </div>
+        <button
+          onClick={(event) => {
+            event.stopPropagation();
+            if (onApply) onApply(job);
+          }}
+          style={{
+            background: "#ffffff",
+            border: "1px solid rgba(37,99,235,0.28)",
+            borderRadius: 999,
+            color: "#2563eb",
+            cursor: "pointer",
+            fontSize: 12,
+            fontWeight: 800,
+            padding: "7px 14px",
+            flexShrink: 0,
+          }}
+        >
+          Apply
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export default function HomePage({
   jobs, heroJobs = jobs, jobsLoading, setPage, search, setSearch, savedJobs, handleSave, showToast,
@@ -9,6 +124,7 @@ export default function HomePage({
 }) {
   const bg = { background: "#f8fafc", minHeight: "100vh", fontFamily: "'Source Sans 3', sans-serif", color: "#334155" };
   const heroPreviewJobs = (heroJobs || []).length > 0 ? heroJobs : jobs;
+  const availableJobs = (jobs || []).length > 2 ? jobs.slice(2, 8) : (jobs || []).slice(0, 8);
 
   return (
     <div style={bg}>
@@ -20,16 +136,16 @@ export default function HomePage({
           position: "relative",
           overflow: "hidden",
           paddingTop: 96,
-          paddingBottom: 36,
+          paddingBottom: 48,
           backgroundImage: "linear-gradient(90deg, rgba(2,6,23,0.95) 0%, rgba(15,23,42,0.88) 38%, rgba(15,23,42,0.5) 68%, rgba(15,23,42,0.12) 100%), url('/images/hero-ai-robotics-lab.jpg')",
           backgroundSize: "cover",
           backgroundPosition: "center",
           borderBottom: "1px solid rgba(37,99,235,0.18)",
         }}
       >
-        <div className="home-hero-shell" style={{ position: "relative", maxWidth: 1180, margin: "0 auto", padding: "0 24px", animation: "fadeIn 0.8s ease forwards" }}>
-          <div className="home-hero-grid" style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.05fr) minmax(320px, 0.75fr)", gap: 36, alignItems: "end", minHeight: 430 }}>
-            <div className="home-hero-copy" style={{ maxWidth: 660, padding: "28px 0 12px", textAlign: "left" }}>
+        <div className="home-hero-shell" style={{ position: "relative", maxWidth: 1080, margin: "0 auto", padding: "0 24px", animation: "fadeIn 0.8s ease forwards" }}>
+          <div className="home-hero-grid" style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(360px, 0.74fr)", gap: 44, alignItems: "center", minHeight: 500 }}>
+            <div className="home-hero-copy" style={{ maxWidth: 610, padding: "34px 0 12px", textAlign: "left" }}>
               <div className="home-role-pill" style={{
             display: "inline-flex", alignItems: "center", gap: 8, marginBottom: 18,
             background: "rgba(37,99,235,0.18)", border: "1px solid rgba(96,165,250,0.34)",
@@ -38,17 +154,17 @@ export default function HomePage({
             <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#60a5fa", display: "inline-block", boxShadow: "0 0 14px #60a5faaa" }} />
             <span style={{ fontSize: 12, color: "#dbeafe", fontWeight: 800 }}>{(heroPreviewJobs || []).length} roles live now</span>
           </div>
-          <h1 className="home-hero-title" style={{ fontFamily: "'Merriweather', serif", fontSize: "clamp(38px, 5.2vw, 60px)", fontWeight: 700, color: "#ffffff", lineHeight: 1.08, marginBottom: 16, textShadow: "0 18px 40px rgba(0,0,0,0.32)" }}>
+          <h1 className="home-hero-title" style={{ fontFamily: "'Merriweather', serif", fontSize: "clamp(42px, 5.4vw, 64px)", fontWeight: 700, color: "#ffffff", lineHeight: 1.04, marginBottom: 18, textShadow: "0 18px 40px rgba(0,0,0,0.32)" }}>
             Find the Best<br />
             <span style={{ background: "linear-gradient(135deg, #93c5fd, #ffffff 45%, #c4b5fd)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>AI & Robotics Jobs</span>
           </h1>
-          <p className="home-hero-subtitle" style={{ fontSize: "clamp(16px, 2vw, 20px)", color: "#cbd5e1", maxWidth: 610, margin: "0 0 24px", lineHeight: 1.65 }}>
+          <p className="home-hero-subtitle" style={{ fontSize: "clamp(16px, 1.8vw, 19px)", color: "#cbd5e1", maxWidth: 590, margin: "0 0 24px", lineHeight: 1.7 }}>
             The premier job board for AI Engineers, ML Scientists, Robotics Engineers, and LLM specialists worldwide.
           </p>
           <div className="search-stack home-search-stack" style={{
             display: "flex", gap: 8, background: "rgba(255,255,255,0.96)",
             border: "1px solid rgba(255,255,255,0.32)", borderRadius: 18, padding: 8,
-            maxWidth: 720, margin: "0 0 14px", flexWrap: "wrap",
+            maxWidth: 620, margin: "0 0 14px", flexWrap: "wrap",
             boxShadow: "0 24px 60px rgba(2,6,23,0.35)",
           }}>
             <input value={search.title} onChange={e => setSearch(s => ({ ...s, title: e.target.value }))}
@@ -72,16 +188,13 @@ export default function HomePage({
           <div className="home-popular-links" style={{ fontSize: 13, color: "#cbd5e1", marginBottom: 20 }}>
             Popular: <span style={{ color: "#93c5fd", cursor: "pointer", fontWeight: 700 }}>LLM Engineer</span> · <span style={{ color: "#93c5fd", cursor: "pointer", fontWeight: 700 }}>ML Research</span> · <span style={{ color: "#93c5fd", cursor: "pointer", fontWeight: 700 }}>Computer Vision</span> · <span style={{ color: "#93c5fd", cursor: "pointer", fontWeight: 700 }}>Robotics</span>
           </div>
-          <a href="https://www.uneed.best/tool/airobotics-job" target="_blank" rel="noopener noreferrer" style={{ display: "inline-block", marginBottom: 12 }}>
-            <img src="https://www.uneed.best/POTD2A.png" style={{ display: "block", width: 250, maxWidth: "100%", height: "auto" }} alt="Uneed POTD2 Badge" />
-          </a>
             </div>
             <div className="home-hero-preview" style={{
-              alignSelf: "end",
-              background: "rgba(255,255,255,0.82)",
+              alignSelf: "center",
+              background: "rgba(255,255,255,0.9)",
               border: "1px solid rgba(255,255,255,0.42)",
               borderRadius: 24,
-              padding: 14,
+              padding: 18,
               boxShadow: "0 28px 70px rgba(2,6,23,0.34)",
               backdropFilter: "blur(18px)",
             }}>
@@ -91,7 +204,7 @@ export default function HomePage({
               </div>
               <div className="home-jobs-preview" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {(heroPreviewJobs || []).slice(0, 2).map(job => (
-                  <JobCard key={job.id} job={job} onClick={j => openJobDetail(j, "home")} onApply={j => setApplyJob(j)} />
+                  <HeroPreviewCard key={job.id} job={job} onClick={j => openJobDetail(j, "home")} onApply={j => setApplyJob(j)} />
                 ))}
               </div>
             </div>
@@ -100,7 +213,7 @@ export default function HomePage({
       </div>
 
       {/* Available Jobs */}
-      <div className="section-padding page-content home-jobs-section" style={{ maxWidth: 980, margin: "0 auto", padding: "54px 24px 86px" }}>
+      <div className="section-padding page-content home-jobs-section" style={{ maxWidth: 900, margin: "0 auto", padding: "56px 24px 92px" }}>
         <div className="home-jobs-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
           <div>
             <div style={{ fontSize: 12, color: "#2563eb", fontWeight: 800, letterSpacing: 1.1, textTransform: "uppercase", marginBottom: 6 }}>Curated opportunities</div>
@@ -112,7 +225,7 @@ export default function HomePage({
           {jobsLoading ? (
             <div style={{ textAlign: "center", padding: 40, color: "#64748b", fontSize: 14 }}>Loading jobs…</div>
           ) : (
-            (jobs || []).slice(2, 8).map(job => (
+            availableJobs.map(job => (
               <JobCard key={job.id} job={job} onClick={j => openJobDetail(j, "home")} onApply={j => setApplyJob(j)} />
             ))
           )}
@@ -120,18 +233,18 @@ export default function HomePage({
       </div>
 
       {/* Why choose */}
-      <div style={{ background: "linear-gradient(180deg, #ffffff, #eef5ff)", borderTop: "1px solid rgba(37,99,235,0.12)", borderBottom: "1px solid rgba(37,99,235,0.12)", padding: "74px 24px", marginBottom: 80 }}>
+      <div className="why-section" style={{ background: "#2f68e8", borderTop: "1px solid rgba(37,99,235,0.2)", borderBottom: "1px solid rgba(37,99,235,0.2)", padding: "92px 24px 98px", marginBottom: 80 }}>
         <div className="section-padding" style={{ maxWidth: 1040, margin: "0 auto" }}>
-          <h2 style={{ fontFamily: "'Merriweather', serif", fontSize: 26, fontWeight: 700, color: "#0f172a", textAlign: "center", marginBottom: 44 }}>Why AIRoboticsjob?</h2>
-          <div className="grid-1-mobile" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 18 }}>
+          <h2 className="why-heading" style={{ fontFamily: "'Merriweather', serif", fontSize: 28, fontWeight: 700, color: "#ffffff", textAlign: "center", marginBottom: 46 }}>Why AIRoboticsjob?</h2>
+          <div className="why-card-grid grid-1-mobile" style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 20 }}>
             {[["⚡", "AI-First", "Built exclusively for AI, ML, and Robotics professionals. No noise."],
             ["🎯", "Fresh Roles", "New listings go live immediately so candidates can find them right away."],
             ["🔔", "Smart Alerts", "Get notified about roles matching your skills and preferences."],
             ["🌍", "Global Reach", "Discover high-quality AI roles across every region, including remote-first teams."]].map(([icon, title, desc]) => (
-              <div key={title} style={{ textAlign: "left", background: "rgba(255,255,255,0.86)", border: "1px solid rgba(148,163,184,0.22)", borderRadius: 18, padding: "22px 20px", boxShadow: "0 14px 34px rgba(15,23,42,0.07)" }}>
-                <div style={{ width: 42, height: 42, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 23, marginBottom: 16, background: "rgba(37,99,235,0.08)", border: "1px solid rgba(37,99,235,0.14)" }}>{icon}</div>
-                <div style={{ fontFamily: "'Merriweather', serif", fontSize: 15, fontWeight: 700, color: "#0f172a", marginBottom: 8 }}>{title}</div>
-                <div style={{ fontSize: 13, color: "#475569", lineHeight: 1.6 }}>{desc}</div>
+              <div className="why-card" key={title} style={{ textAlign: "left", background: "#ffffff", border: "1px solid rgba(255,255,255,0.42)", borderRadius: 16, padding: "24px 22px 28px", boxShadow: "0 18px 42px rgba(15,23,42,0.16)" }}>
+                <div className="why-card-icon" style={{ width: 40, height: 40, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, marginBottom: 18, background: "rgba(37,99,235,0.08)", border: "1px solid rgba(37,99,235,0.14)" }}>{icon}</div>
+                <div className="why-card-title" style={{ fontFamily: "'Merriweather', serif", fontSize: 15, fontWeight: 700, color: "#0f172a", marginBottom: 8 }}>{title}</div>
+                <div className="why-card-desc" style={{ fontSize: 13, color: "#475569", lineHeight: 1.6 }}>{desc}</div>
               </div>
             ))}
           </div>
@@ -139,8 +252,8 @@ export default function HomePage({
       </div>
 
       {/* Email subscribe */}
-      <div className="section-padding" style={{ maxWidth: 600, margin: "0 auto 80px", padding: "0 24px", textAlign: "center" }}>
-        <div style={{ background: "#ffffff", border: "1px solid rgba(148,163,184,0.22)", borderRadius: 24, padding: "34px 28px", boxShadow: "0 18px 42px rgba(15,23,42,0.08)" }}>
+      <div className="section-padding" style={{ maxWidth: 560, margin: "0 auto 86px", padding: "0 24px", textAlign: "center" }}>
+        <div style={{ background: "#ffffff", border: "1px solid rgba(148,163,184,0.22)", borderRadius: 22, padding: "36px 28px", boxShadow: "0 22px 58px rgba(15,23,42,0.1)" }}>
         <h2 style={{ fontFamily: "'Merriweather', serif", fontSize: 22, fontWeight: 700, color: "#0f172a", marginBottom: 12 }}>Stay ahead of the curve</h2>
         <p style={{ fontSize: 14, color: "#475569", marginBottom: 24, lineHeight: 1.7 }}>Get weekly AI job alerts, salary reports, and hiring trends delivered to your inbox.</p>
         {!subscribed ? (

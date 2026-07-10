@@ -11,6 +11,14 @@ function json(statusCode, body) {
 }
 
 function parseCookies(cookieHeader = "") {
+  const safeDecode = (value) => {
+    try {
+      return decodeURIComponent(value);
+    } catch {
+      return value;
+    }
+  };
+
   return cookieHeader
     .split(";")
     .map((part) => part.trim())
@@ -18,7 +26,7 @@ function parseCookies(cookieHeader = "") {
     .reduce((acc, part) => {
       const [rawName, ...rest] = part.split("=");
       if (!rawName) return acc;
-      acc[decodeURIComponent(rawName)] = decodeURIComponent(rest.join("=") || "");
+      acc[safeDecode(rawName)] = safeDecode(rest.join("=") || "");
       return acc;
     }, {});
 }
@@ -35,7 +43,7 @@ function normalizeCheckoutPayload(body = {}) {
     product_cart: [
       {
         product_id: productId,
-        quantity: Number.isFinite(quantity) && quantity > 0 ? quantity : 1,
+        quantity: Number.isInteger(quantity) && quantity > 0 ? quantity : 1,
       },
     ],
     billing: body.billing,

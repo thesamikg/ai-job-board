@@ -38,7 +38,7 @@ function getCachedRole(userId, email) {
   if (byId) return normalizeRole(byId);
   const key = String(email || "").toLowerCase();
   const byEmail = key ? map[key] : null;
-  return normalizeRole(byEmail);
+  return byEmail ? normalizeRole(byEmail) : null;
 }
 
 export function cacheUserRole(userId, email, role) {
@@ -98,12 +98,14 @@ export async function ensureUserProfile(user, selectedRole = "job_seeker", compa
 
 export async function fetchUserRole(userId, email, fallbackRole = "job_seeker") {
   if (isAdminUser(email)) return "admin";
+  const cachedRole = getCachedRole(userId, email);
+  const safeFallback = fallbackRole === "job_seeker" && cachedRole ? cachedRole : fallbackRole || cachedRole;
   if (!isSupabaseConfigured || !supabase || !userId) {
-    return normalizeRole(fallbackRole || getCachedRole(userId, email));
+    return normalizeRole(safeFallback);
   }
   const { data, error } = await supabase.from("profiles").select("role").eq("id", userId).maybeSingle();
   if (error || !data?.role) {
-    return normalizeRole(fallbackRole || getCachedRole(userId, email));
+    return normalizeRole(safeFallback);
   }
   const role = normalizeRole(data.role);
   cacheUserRole(userId, email, role);

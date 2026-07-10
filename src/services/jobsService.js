@@ -11,6 +11,19 @@ import {
  */
 function toJob(row) {
   if (!row) return null;
+  let skills = [];
+  if (Array.isArray(row.skills)) {
+    skills = row.skills;
+  } else if (row.skills) {
+    try {
+      const parsedSkills = JSON.parse(row.skills);
+      skills = Array.isArray(parsedSkills) ? parsedSkills : [];
+    } catch {
+      skills = [];
+    }
+  }
+
+  const postedAt = row.posted_at ? new Date(row.posted_at) : new Date();
   return {
     id: row.id,
     title: row.title,
@@ -24,10 +37,10 @@ function toJob(row) {
     experience_level: normalizeExperienceLevel(row.experience_level) || DEFAULT_EXPERIENCE_LEVEL,
     remote: Boolean(row.remote),
     hybrid: Boolean(row.hybrid),
-    skills: Array.isArray(row.skills) ? row.skills : (row.skills ? JSON.parse(row.skills || "[]") : []),
+    skills,
     description: row.description || "",
     apply_url: row.apply_url || "",
-    posted_at: row.posted_at ? new Date(row.posted_at) : new Date(),
+    posted_at: Number.isNaN(postedAt.getTime()) ? new Date() : postedAt,
     featured: Boolean(row.featured),
     category: normalizeJobCategory(row.category) || DEFAULT_CATEGORY,
     status: row.status || "approved",
@@ -80,7 +93,7 @@ export async function fetchJobs(options = {}) {
     throw error;
   }
 
-  const jobs = (data || []).map(toJob);
+  const jobs = (data || []).map(toJob).filter(Boolean);
   if (includeAll) return jobs;
   return jobs.filter((job) => job.status !== "pending" && job.status !== "rejected");
 }
@@ -91,7 +104,10 @@ export async function fetchJobs(options = {}) {
 export async function addJob(job) {
   const row = toRow(job);
   if (job.posted_at) {
-    row.posted_at = job.posted_at.toISOString();
+    const postedAt = new Date(job.posted_at);
+    if (!Number.isNaN(postedAt.getTime())) {
+      row.posted_at = postedAt.toISOString();
+    }
   }
 
   const response = await fetch("/api/jobs", {

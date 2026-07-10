@@ -1,5 +1,7 @@
 export function timeSince(date) {
-  const hours = Math.floor((Date.now() - date) / (1000 * 60 * 60));
+  const timestamp = new Date(date).getTime();
+  if (!Number.isFinite(timestamp)) return "Recently";
+  const hours = Math.max(0, Math.floor((Date.now() - timestamp) / (1000 * 60 * 60)));
   if (hours < 1) return "Just now";
   if (hours < 24) return `${hours}h ago`;
   const days = Math.floor(hours / 24);
@@ -7,7 +9,10 @@ export function timeSince(date) {
 }
 
 export function isNew(date) {
-  return Date.now() - date < 48 * 60 * 60 * 1000;
+  const timestamp = new Date(date).getTime();
+  if (!Number.isFinite(timestamp)) return false;
+  const age = Date.now() - timestamp;
+  return age >= 0 && age < 48 * 60 * 60 * 1000;
 }
 
 export function hasSalaryRange(job) {

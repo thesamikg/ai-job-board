@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { HomePage, JobsPage, DashboardPage, LoginPage, AddJobPage, AdminPage, JobDetailPage } from "./pages";
 import { filterAndSortJobs } from "./utils/filterJobs";
 import { fetchJobs, addJob, updateJobStatus, deleteJob } from "./services/jobsService";
@@ -219,6 +219,14 @@ function buildJobPath(job) {
   return `/job/${category}/${title}/${id}`;
 }
 
+function safeDecodeURIComponent(value) {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return String(value || "");
+  }
+}
+
 function parseAppRoute(pathname) {
   const path = String(pathname || "/").replace(/\/+$/, "") || "/";
   if (path === "/") return { page: "home" };
@@ -233,9 +241,9 @@ function parseAppRoute(pathname) {
   if (parts.length >= 4 && parts[0] === "job") {
     return {
       page: "jobDetail",
-      categorySlug: decodeURIComponent(parts[1] || ""),
-      titleSlug: decodeURIComponent(parts[2] || ""),
-      jobId: decodeURIComponent(parts.slice(3).join("/")),
+      categorySlug: safeDecodeURIComponent(parts[1] || ""),
+      titleSlug: safeDecodeURIComponent(parts[2] || ""),
+      jobId: safeDecodeURIComponent(parts.slice(3).join("/")),
     };
   }
 
@@ -295,9 +303,16 @@ export default function App() {
   const [adminUsers, setAdminUsers] = useState([]);
   const [applications, setApplications] = useState([]);
   const [adminLoading, setAdminLoading] = useState(false);
+  const toastTimerRef = useRef(null);
   const userRole = user?.role || "job_seeker";
   const isAdmin = userRole === "admin";
   const canPostJobs = true;
+
+  useEffect(() => () => {
+    if (toastTimerRef.current) {
+      clearTimeout(toastTimerRef.current);
+    }
+  }, []);
   
   const applySessionUser = async (sessionUser, preferredRole = "job_seeker") => {
     if (!sessionUser) {
@@ -359,7 +374,7 @@ export default function App() {
         const data = await fetchJobsWithTimeout({ includeAll: true }, 5000);
         const nextJobs = Array.isArray(data) ? data : [];
         setJobs(nextJobs);
-        saveJobsCache(nextJobs);
+        saveJobsCache(nextJobs.filter((job) => job?.status !== "pending" && job?.status !== "rejected"));
       } catch (err) {
         console.warn("Could not load jobs from Supabase:", err);
         if (cachedJobs.length === 0) {
@@ -430,12 +445,23 @@ export default function App() {
   }, [jobs, jobsLoading, page, selectedJob]);
 
   useEffect(() => {
-    getSession().then(async ({ data: { session } }) => {
-      if (session?.user) {
-        await applySessionUser(session.user);
-      }
-    });
+    let active = true;
+    getSession()
+      .then(async ({ data: { session } }) => {
+        if (!active) return;
+        if (session?.user) {
+          await applySessionUser(session.user);
+          return;
+        }
+        setUser(null);
+        saveCurrentUser(null);
+        setSavedJobs([]);
+      })
+      .catch((err) => {
+        console.warn("Could not restore auth session:", err);
+      });
     const unsubscribe = onAuthStateChange(async (event, session) => {
+      if (!active) return;
       if (session?.user) {
         await applySessionUser(session.user);
         if (event === "SIGNED_IN") {
@@ -446,7 +472,10 @@ export default function App() {
         saveCurrentUser(null);
       }
     });
-    return unsubscribe;
+    return () => {
+      active = false;
+      unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
@@ -518,8 +547,14 @@ export default function App() {
   }, [user?.id, user?.email, isAdmin]);
 
   const showToast = (msg) => {
+    if (toastTimerRef.current) {
+      clearTimeout(toastTimerRef.current);
+    }
     setToast({ message: msg, visible: true });
-    setTimeout(() => setToast(t => ({ ...t, visible: false })), 3000);
+    toastTimerRef.current = setTimeout(() => {
+      setToast(t => ({ ...t, visible: false }));
+      toastTimerRef.current = null;
+    }, 3000);
   };
 
   const handleCategorySelect = (category) => {
@@ -611,8 +646,8 @@ export default function App() {
       submitted_at: new Date().toISOString(),
     }, ...prev]);
     setApplyJob(null);
-    showToast("✓ Redirecting to application...");
-    setTimeout(() => window.open(job.apply_url, "_blank"), 500);
+    showToast("✓ Opening application...");
+    window.open(job.apply_url, "_blank", "noopener,noreferrer");
   };
 
   const handleSignIn = async () => {
@@ -765,28 +800,32 @@ export default function App() {
   };
 
   const handleModerateJob = async (jobId, status) => {
-    setJobs((prev) => {
-      const nextJobs = prev.map((job) => (String(job.id) === String(jobId) ? { ...job, status } : job));
-      saveJobsCache(nextJobs.filter((job) => job.status !== "rejected"));
-      return nextJobs;
-    });
     try {
       await updateJobStatus(jobId, status);
+      setJobs((prev) => {
+        const nextJobs = prev.map((job) => (String(job.id) === String(jobId) ? { ...job, status } : job));
+        saveJobsCache(nextJobs.filter((job) => job.status === "approved"));
+        return nextJobs;
+      });
+      showToast(status === "approved" ? "✓ Job approved" : "Job rejected");
     } catch (err) {
       console.warn("Could not update remote job status:", err);
+      showToast(err?.message || "Could not update job status.");
     }
   };
 
   const handleDeleteJob = async (jobId) => {
-    setJobs((prev) => {
-      const nextJobs = prev.filter((job) => String(job.id) !== String(jobId));
-      saveJobsCache(nextJobs.filter((job) => job.status !== "rejected"));
-      return nextJobs;
-    });
     try {
       await deleteJob(jobId);
+      setJobs((prev) => {
+        const nextJobs = prev.filter((job) => String(job.id) !== String(jobId));
+        saveJobsCache(nextJobs.filter((job) => job.status === "approved"));
+        return nextJobs;
+      });
+      showToast("✓ Job deleted");
     } catch (err) {
       console.warn("Could not delete remote job:", err);
+      showToast(err?.message || "Could not delete job.");
     }
   };
 
@@ -819,7 +858,7 @@ export default function App() {
   };
 
   const visibleJobs = jobs.filter((job) => job.status !== "pending" && job.status !== "rejected");
-  const heroJobs = jobs.filter((job) => job.status !== "rejected");
+  const heroJobs = visibleJobs;
   const filteredJobs = filterAndSortJobs(visibleJobs, search, filters);
 
   if (page === "home") {

@@ -20,10 +20,9 @@ export const EXPERIENCE_LEVEL_SUGGESTIONS = [
 
 export const JOB_CATEGORIES = [
   "AI Engineering",
-  "Machine Learning",
+  "AI/ML Engineering",
   "Deep Learning",
   "NLP",
-  "Computer Vision",
   "Robotics Engineering",
   "Embedded Systems",
   "Control Systems",
@@ -31,7 +30,6 @@ export const JOB_CATEGORIES = [
   "SLAM & Navigation",
   "AI Research",
   "Robotics Research",
-  "Data Science",
   "MLOps",
   "AI Product",
   "AI UX",
@@ -42,6 +40,9 @@ export const JOB_CATEGORIES = [
 const LEGACY_CATEGORY_MAP = {
   Robotics: "Robotics Engineering",
   Research: "AI Research",
+  "Machine Learning": "AI/ML Engineering",
+  "Data Science": "AI/ML Engineering",
+  "Computer Vision": "AI/ML Engineering",
   Remote: DEFAULT_CATEGORY,
   Global: DEFAULT_CATEGORY,
 };
@@ -59,6 +60,7 @@ const LEGACY_EXPERIENCE_MAP = {
 
 const CATEGORY_META = {
   "AI Engineering": { icon: "⚡", color: "#8b5cf6" },
+  "AI/ML Engineering": { icon: "🧠", color: "#2563eb" },
   "Machine Learning": { icon: "🧠", color: "#2563eb" },
   "Deep Learning": { icon: "🧬", color: "#0f766e" },
   "NLP": { icon: "💬", color: "#7c3aed" },

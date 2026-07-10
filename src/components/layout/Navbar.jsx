@@ -13,7 +13,7 @@ const categoryBtn = (page, open = false) => ({
   background: open || page === "jobs" ? "rgba(37,99,235,0.08)" : "#ffffff",
   border: `1px solid ${open || page === "jobs" ? "rgba(37,99,235,0.72)" : "rgba(37,99,235,0.36)"}`,
   borderRadius: 999,
-  padding: "10px 18px",
+  padding: "12px 20px",
   color: "#2563eb",
   cursor: "pointer",
   fontSize: 14,
@@ -26,7 +26,7 @@ const postJobBtn = {
   background: "linear-gradient(135deg, #1d4ed8, #2563eb)",
   border: "1px solid rgba(29,78,216,0.7)",
   borderRadius: 999,
-  padding: "10px 18px",
+  padding: "12px 22px",
   color: "#ffffff",
   cursor: "pointer",
   fontSize: 14,
@@ -36,7 +36,7 @@ const postJobBtn = {
 };
 
 const FEATURED_CATEGORY_OPTIONS = CATEGORY_OPTIONS.filter((category) => (
-  ["AI Engineering", "Machine Learning", "Robotics Engineering", "AI Research"].includes(category.name)
+  ["AI Engineering", "AI/ML Engineering", "Robotics Engineering", "AI Research"].includes(category.name)
 ));
 
 export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false, canPostJobs = false, onSelectCategory }) {
@@ -87,8 +87,8 @@ export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false
     <nav style={{
       position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
       background: "rgba(255,255,255,0.9)", backdropFilter: "blur(22px)",
-      borderBottom: "1px solid rgba(148,163,184,0.22)", padding: "6px 18px 6px 22px",
-      display: "flex", alignItems: "center", justifyContent: "space-between", minHeight: 60,
+      borderBottom: "1px solid rgba(148,163,184,0.22)", padding: "8px 28px",
+      display: "flex", alignItems: "center", justifyContent: "space-between", minHeight: 72,
       boxShadow: "0 12px 30px rgba(15,23,42,0.07)",
     }}>
       <div onClick={() => goTo("home")} style={{ cursor: "pointer" }}><Logo /></div>

@@ -11,10 +11,13 @@ update public.jobs
 set category = case
   when category = 'Robotics' then 'Robotics Engineering'
   when category = 'Research' then 'AI Research'
+  when category = 'Machine Learning' then 'AI/ML Engineering'
+  when category = 'Data Science' then 'AI/ML Engineering'
+  when category = 'Computer Vision' then 'AI/ML Engineering'
   when category in ('Remote', 'Global') then 'AI Engineering'
   else category
 end
-where category in ('Robotics', 'Research', 'Remote', 'Global');
+where category in ('Robotics', 'Research', 'Machine Learning', 'Data Science', 'Computer Vision', 'Remote', 'Global');
 
 update public.jobs
 set experience_level = case
