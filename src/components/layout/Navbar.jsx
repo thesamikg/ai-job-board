@@ -2,391 +2,209 @@ import { useEffect, useRef, useState } from "react";
 import { Logo } from "../ui";
 import { CATEGORY_OPTIONS } from "../../data/jobs";
 
-const navBtn = (page, p) => ({
-  background: page === p ? "rgba(37,99,235,0.1)" : "transparent",
-  border: `1px solid ${page === p ? "rgba(37,99,235,0.3)" : "transparent"}`,
-  borderRadius: 999, padding: "8px 15px", color: page === p ? "#1d4ed8" : "#475569",
-  cursor: "pointer", fontSize: 13, fontWeight: 700, transition: "all 0.18s ease", fontFamily: "inherit"
-});
-
-const categoryBtn = (page, open = false) => ({
-  background: open || page === "jobs" ? "rgba(37,99,235,0.08)" : "#ffffff",
-  border: `1px solid ${open || page === "jobs" ? "rgba(37,99,235,0.72)" : "rgba(37,99,235,0.36)"}`,
-  borderRadius: 999,
-  padding: "10px 18px",
-  color: "#2563eb",
-  cursor: "pointer",
-  fontSize: 14,
-  fontWeight: 700,
-  fontFamily: "'Source Sans 3', sans-serif",
-  boxShadow: open ? "0 12px 26px rgba(37,99,235,0.14)" : "0 6px 18px rgba(37,99,235,0.08)",
-});
-
-const postJobBtn = {
-  background: "linear-gradient(135deg, #1d4ed8, #2563eb)",
-  border: "1px solid rgba(29,78,216,0.7)",
-  borderRadius: 999,
-  padding: "10px 18px",
-  color: "#ffffff",
-  cursor: "pointer",
-  fontSize: 14,
-  fontWeight: 700,
-  fontFamily: "'Source Sans 3', sans-serif",
-  boxShadow: "0 12px 24px rgba(37,99,235,0.22)",
-};
-
 const FEATURED_CATEGORY_OPTIONS = CATEGORY_OPTIONS.filter((category) => (
-  ["AI Engineering", "Machine Learning", "Robotics Engineering", "AI Research"].includes(category.name)
+  [
+    "AI Engineering",
+    "AI/ML Engineering",
+    "Robotics Engineering",
+    "Autonomous Systems",
+    "AI Research",
+    "MLOps",
+  ].includes(category.name)
 ));
 
-export default function Navbar({ page, setPage, user, onSignOut, isAdmin = false, canPostJobs = false, onSelectCategory }) {
+export default function Navbar({
+  page,
+  setPage,
+  user,
+  onSignOut,
+  isAdmin = false,
+  canPostJobs = false,
+  onSelectCategory,
+}) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
   const [categoryOpen, setCategoryOpen] = useState(false);
-  const [mobileCategoryOpen, setMobileCategoryOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const categoryRef = useRef(null);
+  const profileRef = useRef(null);
   const isSignedIn = Boolean(user?.id || user?.email);
-  const isEmployerLike = Boolean(canPostJobs);
   const displayName = String(user?.name || user?.email?.split("@")[0] || "User");
   const email = String(user?.email || "");
   const initial = (displayName.trim().charAt(0) || "U").toUpperCase();
 
-  const goTo = (p) => {
-    setPage(p);
+  const closeMenus = () => {
     setMenuOpen(false);
-    setProfileOpen(false);
     setCategoryOpen(false);
-    setMobileCategoryOpen(false);
+    setProfileOpen(false);
   };
 
-  const handleCategoryPick = (category) => {
+  const goTo = (nextPage) => {
+    setPage(nextPage);
+    closeMenus();
+  };
+
+  const pickCategory = (category) => {
     if (typeof onSelectCategory === "function") {
       onSelectCategory(category);
     } else {
       setPage("jobs");
     }
-    setMenuOpen(false);
-    setProfileOpen(false);
-    setCategoryOpen(false);
-    setMobileCategoryOpen(false);
+    closeMenus();
   };
 
   useEffect(() => {
-    function handleClickOutside(event) {
-      if (!categoryRef.current?.contains(event.target)) {
-        setCategoryOpen(false);
-      }
-    }
+    const handleOutsideClick = (event) => {
+      if (!categoryRef.current?.contains(event.target)) setCategoryOpen(false);
+      if (!profileRef.current?.contains(event.target)) setProfileOpen(false);
+    };
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
   }, []);
 
   return (
     <>
-    <nav style={{
-      position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
-      background: "rgba(255,255,255,0.9)", backdropFilter: "blur(22px)",
-      borderBottom: "1px solid rgba(148,163,184,0.22)", padding: "6px 18px 6px 22px",
-      display: "flex", alignItems: "center", justifyContent: "space-between", minHeight: 60,
-      boxShadow: "0 12px 30px rgba(15,23,42,0.07)",
-    }}>
-      <div onClick={() => goTo("home")} style={{ cursor: "pointer" }}><Logo /></div>
+      <nav className="new-navbar">
+        <button className="nav-logo-button" onClick={() => goTo("home")} aria-label="Go to homepage">
+          <Logo />
+        </button>
 
-      {/* Desktop nav - hidden on mobile */}
-      <div className="nav-desktop" style={{ display: "flex", gap: 8, alignItems: "center" }}>
-        <div ref={categoryRef} style={{ position: "relative" }}>
+        <div className="nav-desktop new-nav-links">
           <button
-            onClick={() => {
-              setCategoryOpen((v) => !v);
-              setProfileOpen(false);
-            }}
-            style={{ ...categoryBtn(page, categoryOpen), display: "inline-flex", alignItems: "center", gap: 8 }}
+            className={page === "jobs" ? "nav-link nav-link-active" : "nav-link"}
+            onClick={() => goTo("jobs")}
           >
-            Browse by Category
-            <span style={{
-              width: 8,
-              height: 8,
-              borderRight: "2px solid #2563eb",
-              borderBottom: "2px solid #2563eb",
-              transform: categoryOpen ? "rotate(-135deg)" : "rotate(45deg)",
-              transition: "transform 0.15s ease",
-              marginLeft: 4,
-              marginTop: categoryOpen ? 4 : -2,
-            }} />
+            Find jobs
           </button>
-          {categoryOpen && (
-            <div style={{
-              position: "absolute",
-              top: "calc(100% + 8px)",
-              left: 0,
-              minWidth: 220,
-              background: "#ffffff",
-              border: "1px solid rgba(148,163,184,0.28)",
-              borderRadius: 16,
-              padding: 8,
-              boxShadow: "0 22px 44px rgba(15,23,42,0.16)",
-              zIndex: 130,
-            }}>
-              {FEATURED_CATEGORY_OPTIONS.map((category) => (
-                <button
-                  key={category.name}
-                  onClick={() => handleCategoryPick(category.name)}
-                  style={{
-                    width: "100%",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 10,
-                    background: "#ffffff",
-                    border: "none",
-                    borderRadius: 12,
-                    padding: "11px 12px",
-                    color: "#334155",
-                    fontSize: 13,
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    textAlign: "left",
-                  }}
-                >
-                  <span>{category.icon}</span>
-                  <span>{category.name}</span>
-                </button>
-              ))}
-            </div>
+
+          <div className="nav-dropdown-wrap" ref={categoryRef}>
+            <button
+              className={categoryOpen ? "nav-link nav-link-active" : "nav-link"}
+              onClick={() => {
+                setCategoryOpen((open) => !open);
+                setProfileOpen(false);
+              }}
+              aria-expanded={categoryOpen}
+            >
+              Browse fields <span className="nav-chevron">⌄</span>
+            </button>
+            {categoryOpen && (
+              <div className="nav-dropdown">
+                <span className="nav-dropdown-label">Explore specialist fields</span>
+                {FEATURED_CATEGORY_OPTIONS.map((category) => (
+                  <button key={category.name} onClick={() => pickCategory(category.name)}>
+                    <span aria-hidden="true">{category.icon}</span>
+                    <span>{category.name}</span>
+                    <i aria-hidden="true">→</i>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {isSignedIn && (
+            <button
+              className={page === "dashboard" ? "nav-link nav-link-active" : "nav-link"}
+              onClick={() => goTo("dashboard")}
+            >
+              Dashboard
+            </button>
+          )}
+
+          {isAdmin && (
+            <button
+              className={page === "admin" ? "nav-link nav-link-active" : "nav-link"}
+              onClick={() => goTo("admin")}
+            >
+              Admin
+            </button>
           )}
         </div>
-        {!isSignedIn && (
-          <button onClick={() => goTo("addJob")} style={postJobBtn}>Post a Job</button>
-        )}
-        {isSignedIn && isEmployerLike && (
-          <button onClick={() => goTo("addJob")} style={postJobBtn}>Post a Job</button>
-        )}
-        {isSignedIn ? (
-          <>
-            <button onClick={() => goTo("jobs")} style={navBtn(page, "jobs")}>Jobs</button>
-            <button onClick={() => goTo("dashboard")} style={navBtn(page, "dashboard")}>Dashboard</button>
-            <div style={{ position: "relative", marginLeft: 4 }}>
+
+        <div className="nav-desktop new-nav-actions">
+          {!isSignedIn ? (
+            <button className="nav-sign-in" onClick={() => goTo("login")}>Sign in</button>
+          ) : (
+            <div className="nav-profile-wrap" ref={profileRef}>
               <button
+                className="nav-profile-button"
                 onClick={() => {
-                  setProfileOpen((v) => !v);
+                  setProfileOpen((open) => !open);
                   setCategoryOpen(false);
                 }}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 8,
-                  background: "#ffffff",
-                  border: "1px solid rgba(148,163,184,0.45)",
-                  borderRadius: 999,
-                  padding: "5px 12px 5px 5px",
-                  cursor: "pointer",
-                  boxShadow: "0 8px 20px rgba(15,23,42,0.06)",
-                }}
+                aria-expanded={profileOpen}
               >
-                <span style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: "50%",
-                  background: "linear-gradient(135deg, #1d4ed8, #2563eb)",
-                  color: "#ffffff",
-                  fontSize: 13,
-                  fontWeight: 800,
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontFamily: "'Source Sans 3', sans-serif",
-                }}>{initial}</span>
-                <span style={{ fontSize: 12, fontWeight: 700, color: "#334155" }}>Profile</span>
+                <span>{initial}</span>
+                <small>{displayName}</small>
               </button>
               {profileOpen && (
-                <div style={{
-                  position: "absolute",
-                  top: "calc(100% + 8px)",
-                  right: 0,
-                  minWidth: 240,
-                  background: "#ffffff",
-                  border: "1px solid rgba(148,163,184,0.35)",
-                  borderRadius: 16,
-                  padding: 12,
-                  boxShadow: "0 22px 44px rgba(15,23,42,0.16)",
-                  zIndex: 120,
-                }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-                    <span style={{
-                      width: 34,
-                      height: 34,
-                      borderRadius: 12,
-                      background: "linear-gradient(135deg, #1d4ed8, #2563eb)",
-                      color: "#ffffff",
-                      fontSize: 14,
-                      fontWeight: 800,
-                      display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}>{initial}</span>
-                    <div style={{ minWidth: 0 }}>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: "#0f172a", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{displayName}</div>
-                      <div style={{ fontSize: 12, color: "#64748b", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{email}</div>
-                    </div>
+                <div className="profile-dropdown">
+                  <div>
+                    <strong>{displayName}</strong>
+                    <span>{email}</span>
                   </div>
+                  <button onClick={() => goTo("dashboard")}>Open dashboard</button>
                   <button
                     onClick={() => {
-                      setProfileOpen(false);
+                      closeMenus();
                       onSignOut();
                     }}
-                    style={{
-                      width: "100%",
-                      background: "linear-gradient(135deg, #1d4ed8, #2563eb)",
-                      border: "none",
-                      borderRadius: 8,
-                      padding: "10px 12px",
-                      color: "#ffffff",
-                      fontSize: 13,
-                      fontWeight: 700,
-                      cursor: "pointer",
-                    }}
                   >
-                    Sign Out
+                    Sign out
                   </button>
                 </div>
               )}
             </div>
-          </>
-        ) : null}
-      </div>
+          )}
+          {(!isSignedIn || canPostJobs) && (
+            <button className="coral-button nav-post-button" onClick={() => goTo("addJob")}>
+              Post a job
+            </button>
+          )}
+        </div>
 
-      {/* Hamburger - visible only on mobile */}
-      <button
-        className="nav-hamburger"
-        onClick={() => setMenuOpen(!menuOpen)}
-        aria-label="Menu"
-        style={{
-          display: "none", flexDirection: "column", gap: 5, padding: 8,
-          background: "#ffffff", border: "1px solid rgba(148,163,184,0.35)",
-          borderRadius: 10, cursor: "pointer",
-          boxShadow: "0 8px 18px rgba(15,23,42,0.08)",
-        }}
-      >
-        <span style={{ width: 22, height: 2, background: "#475569", borderRadius: 1 }} />
-        <span style={{ width: 22, height: 2, background: "#475569", borderRadius: 1 }} />
-        <span style={{ width: 22, height: 2, background: "#475569", borderRadius: 1 }} />
-      </button>
-    </nav>
+        <button
+          className="nav-hamburger"
+          onClick={() => setMenuOpen((open) => !open)}
+          aria-label="Toggle menu"
+          aria-expanded={menuOpen}
+        >
+          <span />
+          <span />
+          <span />
+        </button>
+      </nav>
 
-    {/* Mobile menu overlay */}
-    {menuOpen && (
-      <div className="nav-mobile-menu" onClick={() => setMenuOpen(false)}>
-        <div className="nav-mobile-links" onClick={e => e.stopPropagation()}>
-          <button onClick={() => setMobileCategoryOpen((v) => !v)} style={{
-            ...categoryBtn(page, mobileCategoryOpen),
-            width: "100%",
-            borderRadius: 10,
-            padding: "12px 20px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}>
-            <span>Browse by Category</span>
-            <span style={{
-              width: 8,
-              height: 8,
-              borderRight: "2px solid #2563eb",
-              borderBottom: "2px solid #2563eb",
-              transform: mobileCategoryOpen ? "rotate(-135deg)" : "rotate(45deg)",
-              transition: "transform 0.15s ease",
-              marginTop: mobileCategoryOpen ? 4 : -2,
-            }} />
-          </button>
-          {mobileCategoryOpen && (
-            <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 4px 4px" }}>
+      {menuOpen && (
+        <div className="nav-mobile-menu">
+          <div className="new-mobile-nav">
+            <button onClick={() => goTo("jobs")}>Find jobs <span>→</span></button>
+            <div className="mobile-fields">
+              <span>Browse fields</span>
               {FEATURED_CATEGORY_OPTIONS.map((category) => (
-                <button
-                  key={category.name}
-                  onClick={() => handleCategoryPick(category.name)}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 10,
-                    width: "100%",
-                    background: "#ffffff",
-                    border: "1px solid rgba(148,163,184,0.22)",
-                    borderRadius: 10,
-                    padding: "11px 14px",
-                    color: "#334155",
-                    fontSize: 14,
-                    fontWeight: 600,
-                    cursor: "pointer",
-                  }}
-                >
-                  <span>{category.icon}</span>
-                  <span>{category.name}</span>
+                <button key={category.name} onClick={() => pickCategory(category.name)}>
+                  <span>{category.icon} {category.name}</span>
+                  <i>→</i>
                 </button>
               ))}
             </div>
-          )}
-          {!isSignedIn && (
-            <button onClick={() => goTo("addJob")} style={{
-              ...postJobBtn,
-              borderRadius: 10,
-              padding: "12px 20px",
-              fontSize: 14,
-              width: "100%",
-            }}>Post a Job</button>
-          )}
-          {isSignedIn && isEmployerLike && (
-            <button onClick={() => goTo("addJob")} style={{
-              ...postJobBtn,
-              borderRadius: 10,
-              padding: "12px 20px",
-              fontSize: 14,
-              width: "100%",
-            }}>Post a Job</button>
-          )}
-          {isSignedIn ? (
-            <>
-              <button onClick={() => goTo("jobs")} style={{ ...navBtn(page, "jobs"), marginTop: 8, width: "100%", padding: "12px 20px" }}>Jobs</button>
-              <button onClick={() => goTo("dashboard")} style={{ ...navBtn(page, "dashboard"), marginTop: 8, width: "100%", padding: "12px 20px" }}>Dashboard</button>
-              <button
-                onClick={() => {
-                  setProfileOpen((v) => !v);
-                  setMobileCategoryOpen(false);
-                }}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                  width: "100%",
-                  background: "#ffffff",
-                  border: "1px solid rgba(148,163,184,0.45)",
-                  borderRadius: 10,
-                  padding: "10px 12px",
-                  marginTop: 8,
-                  cursor: "pointer",
-                }}
-              >
-                <span style={{
-                  width: 30, height: 30, borderRadius: "50%",
-                  background: "linear-gradient(135deg, #1d4ed8, #2563eb)",
-                  color: "#ffffff", fontSize: 13, fontWeight: 800,
-                  display: "inline-flex", alignItems: "center", justifyContent: "center",
-                }}>{initial}</span>
-                <span style={{ fontSize: 13, fontWeight: 700, color: "#334155" }}>Profile</span>
+            {isSignedIn ? (
+              <>
+                <button onClick={() => goTo("dashboard")}>Dashboard <span>→</span></button>
+                {isAdmin && <button onClick={() => goTo("admin")}>Admin <span>→</span></button>}
+                <button onClick={() => { closeMenus(); onSignOut(); }}>Sign out <span>→</span></button>
+              </>
+            ) : (
+              <button onClick={() => goTo("login")}>Sign in <span>→</span></button>
+            )}
+            {(!isSignedIn || canPostJobs) && (
+              <button className="coral-button mobile-post-button" onClick={() => goTo("addJob")}>
+                Post a job <span>→</span>
               </button>
-              {profileOpen && (
-                <div style={{ width: "100%", border: "1px solid rgba(148,163,184,0.35)", borderRadius: 10, padding: 10, marginTop: 8 }}>
-                  <div style={{ fontSize: 12, color: "#64748b", marginBottom: 8, wordBreak: "break-word" }}>{email}</div>
-                  <button onClick={() => { setProfileOpen(false); onSignOut(); }} style={{
-                    background: "linear-gradient(135deg, #1d4ed8, #2563eb)", color: "#ffffff",
-                    border: "none", borderRadius: 10, padding: "12px 16px",
-                    fontSize: 14, fontWeight: 700, cursor: "pointer", width: "100%"
-                  }}>Sign Out</button>
-                </div>
-              )}
-            </>
-          ) : null}
+            )}
+          </div>
         </div>
-      </div>
-    )}
-  </>
+      )}
+    </>
   );
 }

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { JobCard, EmailModal } from "../components/job";
 import Navbar from "../components/layout/Navbar";
 import { Toast } from "../components/ui";
@@ -5,209 +6,221 @@ import { ALL_SKILLS, CATEGORY_OPTIONS, EXPERIENCE_LEVEL_SUGGESTIONS } from "../d
 
 export default function JobsPage({
   jobsLoading, page, setPage, search, setSearch, filters, setFilters, filteredJobs,
-  savedJobs, handleSave, openJobDetail, applyJob, setApplyJob,
-  handleApplySubmit, toast, user, onSignOut, isAdmin, canPostJobs, onSelectCategory
+  openJobDetail, applyJob, setApplyJob, handleApplySubmit, toast,
+  user, onSignOut, isAdmin, canPostJobs, onSelectCategory
 }) {
-  const bg = { background: "linear-gradient(180deg, #eef5ff 0%, #f8fafc 260px, #f8fafc 100%)", minHeight: "100vh", fontFamily: "'Source Sans 3', sans-serif", color: "#475569" };
-  const filterSectionTitleStyle = {
-    fontSize: 11,
-    color: "#64748b",
-    fontWeight: 700,
-    letterSpacing: 1,
-    textTransform: "uppercase",
-    marginBottom: 12,
-  };
-  const filterLabelStyle = { display: "flex", gap: 10, alignItems: "center", cursor: "pointer" };
-  const clearButtonStyle = {
-    fontSize: 11,
-    background: "transparent",
-    border: "none",
-    cursor: "pointer",
-    marginTop: 8,
-    padding: 0,
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
+  const clearFilters = () => {
+    setFilters((current) => ({
+      ...current,
+      category: "",
+      remote: false,
+      exp: "",
+      skills: [],
+    }));
   };
 
+  const activeFilterCount = [
+    filters.category,
+    filters.remote,
+    filters.exp,
+    ...(filters.skills || []),
+  ].filter(Boolean).length;
+
   return (
-    <div style={bg}>
-      <Navbar page={page} setPage={setPage} user={user} onSignOut={onSignOut} isAdmin={isAdmin} canPostJobs={canPostJobs} onSelectCategory={onSelectCategory} />
-      <div style={{ paddingTop: 88 }} className="page-content">
-        <div style={{ maxWidth: 1180, margin: "0 auto", padding: "22px 20px 0" }}>
-          <div style={{ marginBottom: 18 }}>
-            <div style={{ fontSize: 12, color: "#2563eb", fontWeight: 800, letterSpacing: 1.1, textTransform: "uppercase", marginBottom: 8 }}>AI and robotics opportunities</div>
-            <h1 style={{ fontFamily: "'Merriweather', serif", fontSize: "clamp(28px, 4vw, 42px)", color: "#0f172a", marginBottom: 8 }}>Find your next technical role</h1>
-            <p style={{ maxWidth: 680, color: "#475569", fontSize: 15, lineHeight: 1.65 }}>Search curated AI, ML, robotics, computer vision, and LLM jobs from teams building serious technology.</p>
+    <div className="site-shell jobs-page-shell">
+      <Navbar
+        page={page}
+        setPage={setPage}
+        user={user}
+        onSignOut={onSignOut}
+        isAdmin={isAdmin}
+        canPostJobs={canPostJobs}
+        onSelectCategory={onSelectCategory}
+      />
+
+      <main className="jobs-main">
+        <section className="jobs-intro">
+          <div>
+            <span className="section-kicker">Specialist opportunities</span>
+            <h1>Find work at the frontier.</h1>
+            <p>AI, machine learning, and robotics roles from ambitious teams around the world.</p>
           </div>
-        </div>
-        <div style={{ background: "rgba(255,255,255,0.72)", backdropFilter: "blur(20px)", borderTop: "1px solid rgba(148,163,184,0.18)", borderBottom: "1px solid rgba(148,163,184,0.24)" }}>
-          <div className="jobs-toolbar" style={{ maxWidth: 1180, margin: "0 auto", padding: "16px 20px", display: "flex", gap: 10, flexWrap: "wrap" }}>
-            <input value={search.title} onChange={e => setSearch(s => ({ ...s, title: e.target.value }))}
-              placeholder="Search roles, companies, skills…" style={{
-                flex: "2 1 240px", padding: "12px 16px", background: "#ffffff",
-                border: "1px solid rgba(148,163,184,0.32)", borderRadius: 12, color: "#0f172a", fontSize: 14, outline: "none",
-                boxShadow: "0 8px 22px rgba(15,23,42,0.05)",
-              }} />
-            <input value={search.location} onChange={e => setSearch(s => ({ ...s, location: e.target.value }))}
-              placeholder="Location…" style={{
-                flex: "1 1 160px", padding: "12px 16px", background: "#ffffff",
-                border: "1px solid rgba(148,163,184,0.32)", borderRadius: 12, color: "#0f172a", fontSize: 14, outline: "none",
-                boxShadow: "0 8px 22px rgba(15,23,42,0.05)",
-              }} />
-            <div style={{ position: "relative", flex: "0 0 auto" }}>
-              <select className="jobs-sort" value={filters.sort} onChange={e => setFilters(f => ({ ...f, sort: e.target.value }))} style={{
-                minWidth: 220,
-                padding: "12px 48px 12px 14px",
-                background: "#ffffff",
-                border: "1px solid rgba(148,163,184,0.34)",
-                borderRadius: 12,
-                color: "#475569",
-                fontSize: 13,
-                outline: "none",
-                cursor: "pointer",
-                appearance: "none",
-                WebkitAppearance: "none",
-                MozAppearance: "none",
-                boxShadow: "0 8px 22px rgba(15,23,42,0.05)",
-              }}>
-                <option value="newest">Newest First</option>
-                <option value="salary">Salary: High to Low</option>
-                <option value="remote">Remote First</option>
-              </select>
-              <span
-                aria-hidden="true"
-                style={{
-                  position: "absolute",
-                  right: 16,
-                  top: "50%",
-                  width: 10,
-                  height: 10,
-                  borderRight: "2px solid #64748b",
-                  borderBottom: "2px solid #64748b",
-                  transform: "translateY(-65%) rotate(45deg)",
-                  pointerEvents: "none",
-                }}
-              />
-            </div>
+          <div className="jobs-count-card">
+            <strong>{filteredJobs.length}</strong>
+            <span>open roles</span>
           </div>
-        </div>
-        <div className="jobs-layout" style={{ display: "flex", alignItems: "flex-start", maxWidth: 1180, margin: "0 auto", padding: "28px 20px 72px", gap: 24 }}>
-          <div className="jobs-results" style={{ flex: 1, minWidth: 0 }}>
-            <div className="jobs-results-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", minHeight: 40, marginBottom: 16 }}>
-              <span style={{ fontSize: 14, color: "#64748b" }}><span style={{ color: "#1e293b", fontWeight: 800 }}>{filteredJobs.length}</span> jobs found</span>
-              {filters.category ? (
-                <button
-                  onClick={() => setFilters((f) => ({ ...f, category: "" }))}
-                  style={{
-                    background: "rgba(37,99,235,0.08)",
-                    border: "1px solid rgba(37,99,235,0.25)",
-                    borderRadius: 999,
-                    padding: "8px 13px",
-                    color: "#1d4ed8",
-                    fontSize: 12,
-                    fontWeight: 700,
-                    cursor: "pointer",
-                  }}
-                >
-                  {filters.category} ×
-                </button>
-              ) : null}
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              {jobsLoading ? (
-                <div style={{ textAlign: "center", padding: "60px 20px", color: "#94a3b8" }}>
-                  <div style={{ fontSize: 16, color: "#64748b", fontWeight: 700 }}>Loading jobs…</div>
-                </div>
-              ) : filteredJobs.length === 0 ? (
-                <div style={{ textAlign: "center", padding: "54px 20px", color: "#94a3b8", background: "#ffffff", border: "1px solid rgba(148,163,184,0.22)", borderRadius: 20, boxShadow: "0 12px 30px rgba(15,23,42,0.06)" }}>
-                  <div style={{ fontSize: 17, color: "#0f172a", fontWeight: 800, marginBottom: 6 }}>No jobs match your filters</div>
-                  <div style={{ fontSize: 14, color: "#64748b" }}>Try broadening the role, location, or skills filter.</div>
-                </div>
-              ) : filteredJobs.map(job => (
-                <JobCard key={job.id} job={job} onClick={j => openJobDetail(j, "jobs")} onApply={j => setApplyJob(j)} />
-              ))}
-            </div>
-          </div>
-          <aside className="jobs-sidebar" style={{ width: 300, flexShrink: 0, paddingTop: 56 }}>
-            <div
-              className="jobs-sidebar-inner"
-              style={{
-                position: "sticky",
-                top: 104,
-                background: "rgba(255,255,255,0.88)",
-                border: "1px solid rgba(148,163,184,0.28)",
-                borderRadius: 20,
-                padding: "18px 16px",
-                boxShadow: "0 18px 42px rgba(15,23,42,0.09)",
-                backdropFilter: "blur(20px)",
-                maxHeight: "calc(100vh - 124px)",
-                overflowY: "auto",
-                overscrollBehavior: "contain",
-              }}
+        </section>
+
+        <section className="jobs-search-bar" aria-label="Search jobs">
+          <label>
+            <span>What</span>
+            <input
+              value={search.title}
+              onChange={(event) => setSearch((current) => ({ ...current, title: event.target.value }))}
+              placeholder="Role, company, or skill"
+            />
+          </label>
+          <label>
+            <span>Where</span>
+            <input
+              value={search.location}
+              onChange={(event) => setSearch((current) => ({ ...current, location: event.target.value }))}
+              placeholder="Remote or location"
+            />
+          </label>
+          <label className="jobs-sort-label">
+            <span>Sort by</span>
+            <select
+              className="jobs-sort"
+              value={filters.sort}
+              onChange={(event) => setFilters((current) => ({ ...current, sort: event.target.value }))}
             >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", minHeight: 40, marginBottom: 18, paddingBottom: 14, borderBottom: "1px solid rgba(148,163,184,0.16)" }}>
-                <div>
-                  <div style={{ fontSize: 12, color: "#64748b", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", marginBottom: 6 }}>Filters</div>
-                  <div style={{ fontSize: 14, color: "#0f172a", fontWeight: 700 }}>Refine job matches</div>
-                </div>
+              <option value="newest">Newest first</option>
+              <option value="salary">Highest salary</option>
+              <option value="remote">Remote first</option>
+            </select>
+          </label>
+        </section>
+
+        <section className="jobs-content">
+          <aside className="jobs-sidebar">
+            <div className={`jobs-sidebar-inner${filtersOpen ? " filters-open" : ""}`}>
+              <div className="filter-header">
                 <button
-                  onClick={() => setFilters((f) => ({ ...f, category: "", remote: false, exp: "", skills: [] }))}
-                  style={{ ...clearButtonStyle, marginTop: 0, color: "#2563eb", fontWeight: 700 }}
+                  className="filter-toggle"
+                  onClick={() => setFiltersOpen((open) => !open)}
+                  aria-expanded={filtersOpen}
                 >
-                  Clear all
+                  <span>Filter jobs</span>
+                  {activeFilterCount > 0 && <small>{activeFilterCount} active</small>}
+                  <i>{filtersOpen ? "Hide" : "Show"}</i>
                 </button>
+                <button className="filter-clear" onClick={clearFilters}>Clear</button>
               </div>
-              <div style={{ marginBottom: 24 }}>
-                <h4 style={filterSectionTitleStyle}>Categories</h4>
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  {CATEGORY_OPTIONS.map((category) => (
-                    <label key={category.name} style={filterLabelStyle}>
+
+              <div className="filter-body">
+                <details className="filter-group" open>
+                  <summary>Field <span>+</span></summary>
+                  <div className="filter-options">
+                    {CATEGORY_OPTIONS.map((category) => (
+                      <label key={category.name}>
+                        <input
+                          type="radio"
+                          name="category"
+                          checked={filters.category === category.name}
+                          onChange={() => setFilters((current) => ({ ...current, category: category.name }))}
+                        />
+                        <span>{category.icon} {category.name}</span>
+                      </label>
+                    ))}
+                  </div>
+                </details>
+
+                <details className="filter-group" open>
+                  <summary>Work style <span>+</span></summary>
+                  <div className="filter-options">
+                    <label>
                       <input
-                        type="radio"
-                        name="category"
-                        checked={filters.category === category.name}
-                        onChange={() => setFilters((f) => ({ ...f, category: category.name }))}
-                        style={{ accentColor: "#2563eb" }}
+                        type="checkbox"
+                        checked={filters.remote}
+                        onChange={(event) => setFilters((current) => ({ ...current, remote: event.target.checked }))}
                       />
-                      <span style={{ fontSize: 13, color: "#475569" }}>{category.icon} {category.name}</span>
+                      <span>Remote only</span>
                     </label>
-                  ))}
-                </div>
-                {filters.category && <button onClick={() => setFilters((f) => ({ ...f, category: "" }))} style={{ ...clearButtonStyle, color: "#2563eb" }}>Clear</button>}
-              </div>
-              <div style={{ marginBottom: 24, paddingTop: 20, borderTop: "1px solid rgba(148,163,184,0.16)" }}>
-                <h4 style={filterSectionTitleStyle}>Work Mode</h4>
-                <label style={filterLabelStyle}>
-                  <input type="checkbox" checked={filters.remote} onChange={e => setFilters(f => ({ ...f, remote: e.target.checked }))} style={{ accentColor: "#7c3aed" }} />
-                  <span style={{ fontSize: 13, color: "#475569" }}>Remote only</span>
-                </label>
-              </div>
-              <div style={{ marginBottom: 24, paddingTop: 20, borderTop: "1px solid rgba(148,163,184,0.16)" }}>
-                <h4 style={filterSectionTitleStyle}>Experience</h4>
-                {EXPERIENCE_LEVEL_SUGGESTIONS.map((experienceLevel) => (
-                  <label key={experienceLevel} style={{ ...filterLabelStyle, marginBottom: 8 }}>
-                    <input type="radio" name="exp" checked={filters.exp === experienceLevel} onChange={() => setFilters(f => ({ ...f, exp: experienceLevel }))} style={{ accentColor: "#7c3aed" }} />
-                    <span style={{ fontSize: 13, color: "#475569" }}>{experienceLevel}</span>
-                  </label>
-                ))}
-                {filters.exp && <button onClick={() => setFilters(f => ({ ...f, exp: "" }))} style={{ ...clearButtonStyle, color: "#7c3aed", marginTop: 4 }}>Clear</button>}
-              </div>
-              <div style={{ paddingTop: 20, borderTop: "1px solid rgba(148,163,184,0.16)" }}>
-                <h4 style={filterSectionTitleStyle}>Skills</h4>
-                <div style={{ display: "flex", flexDirection: "column", gap: 8, flexWrap: "wrap", maxHeight: "none" }}>
-                  {ALL_SKILLS.map(skill => (
-                    <label key={skill} style={filterLabelStyle}>
-                      <input type="checkbox" checked={filters.skills.includes(skill)}
-                        onChange={e => setFilters(f => ({ ...f, skills: e.target.checked ? [...f.skills, skill] : f.skills.filter(s => s !== skill) }))}
-                        style={{ accentColor: "#7c3aed" }} />
-                      <span style={{ fontSize: 13, color: "#475569" }}>{skill}</span>
-                    </label>
-                  ))}
-                </div>
+                  </div>
+                </details>
+
+                <details className="filter-group">
+                  <summary>Experience <span>+</span></summary>
+                  <div className="filter-options">
+                    {EXPERIENCE_LEVEL_SUGGESTIONS.map((experience) => (
+                      <label key={experience}>
+                        <input
+                          type="radio"
+                          name="experience"
+                          checked={filters.exp === experience}
+                          onChange={() => setFilters((current) => ({ ...current, exp: experience }))}
+                        />
+                        <span>{experience}</span>
+                      </label>
+                    ))}
+                  </div>
+                </details>
+
+                <details className="filter-group">
+                  <summary>Skills <span>+</span></summary>
+                  <div className="filter-options">
+                    {ALL_SKILLS.map((skill) => (
+                      <label key={skill}>
+                        <input
+                          type="checkbox"
+                          checked={filters.skills.includes(skill)}
+                          onChange={(event) => setFilters((current) => ({
+                            ...current,
+                            skills: event.target.checked
+                              ? [...current.skills, skill]
+                              : current.skills.filter((item) => item !== skill),
+                          }))}
+                        />
+                        <span>{skill}</span>
+                      </label>
+                    ))}
+                  </div>
+                </details>
               </div>
             </div>
           </aside>
-        </div>
-      </div>
-      {applyJob && <EmailModal job={applyJob} onClose={() => setApplyJob(null)} onSubmit={handleApplySubmit} />}
+
+          <div className="jobs-results">
+            <div className="results-header">
+              <div>
+                <strong>{filteredJobs.length} jobs</strong>
+                <span> matching your search</span>
+              </div>
+              {filters.category && (
+                <button
+                  className="active-filter-pill"
+                  onClick={() => setFilters((current) => ({ ...current, category: "" }))}
+                >
+                  {filters.category} ×
+                </button>
+              )}
+            </div>
+
+            <div className="job-list-shell">
+              {jobsLoading ? (
+                <div className="list-state">Loading the latest roles…</div>
+              ) : filteredJobs.length === 0 ? (
+                <div className="empty-jobs-state">
+                  <span>0 roles</span>
+                  <h2>No exact matches yet.</h2>
+                  <p>Try a broader title, location, or fewer filters.</p>
+                  <button onClick={clearFilters}>Clear filters</button>
+                </div>
+              ) : (
+                filteredJobs.map((job) => (
+                  <JobCard
+                    key={job.id}
+                    job={job}
+                    onClick={(selectedJob) => openJobDetail(selectedJob, "jobs")}
+                    onApply={(selectedJob) => setApplyJob(selectedJob)}
+                  />
+                ))
+              )}
+            </div>
+          </div>
+        </section>
+      </main>
+
+      {applyJob && (
+        <EmailModal
+          job={applyJob}
+          onClose={() => setApplyJob(null)}
+          onSubmit={handleApplySubmit}
+        />
+      )}
       <Toast message={toast.message} visible={toast.visible} />
     </div>
   );
