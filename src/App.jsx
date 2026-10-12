@@ -830,25 +830,19 @@ export default function App() {
 
   if (page === "home") {
     return (
-      <HomePage
-        jobs={visibleJobs}
+      <JobsPage
         jobsLoading={jobsLoading}
+        page="home"
         setPage={navigateToPage}
         search={search}
         setSearch={setSearch}
-        savedJobs={savedJobs}
-        handleSave={handleSave}
-        showToast={showToast}
+        filters={filters}
+        setFilters={setFilters}
+        filteredJobs={filteredJobs}
         openJobDetail={openJobDetail}
         applyJob={applyJob}
         setApplyJob={setApplyJob}
         handleApplySubmit={handleApplySubmit}
-        emailInput={emailInput}
-        setEmailInput={setEmailInput}
-        subscribed={subscribed}
-        setSubscribed={setSubscribed}
-        subscribeLoading={subscribeLoading}
-        onSubscribe={handleNewsletterSubscribe}
         toast={toast}
         user={user}
         onSignOut={handleSignOut}

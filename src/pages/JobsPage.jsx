@@ -10,6 +10,7 @@ export default function JobsPage({
   user, onSignOut, isAdmin, canPostJobs, onSelectCategory
 }) {
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const isDirectoryHome = page === "home";
 
   const clearFilters = () => {
     setFilters((current) => ({
@@ -40,8 +41,17 @@ export default function JobsPage({
         onSelectCategory={onSelectCategory}
       />
 
-      <main className="jobs-main">
-        <section className="jobs-intro">
+      <main className={`jobs-main${isDirectoryHome ? " directory-home-main" : ""}`}>
+        {isDirectoryHome ? (
+          <section className="directory-home-heading">
+            <div>
+              <h1>AI &amp; robotics jobs for people building what’s next.</h1>
+              <p>Curated roles in artificial intelligence, machine learning, and robotics.</p>
+            </div>
+            <button onClick={() => setPage("addJob")}>Post a job <span aria-hidden="true">→</span></button>
+          </section>
+        ) : (
+          <section className="jobs-intro">
           <div>
             <span className="section-kicker">Specialist opportunities</span>
             <h1>Find work at the frontier.</h1>
@@ -51,7 +61,8 @@ export default function JobsPage({
             <strong>{filteredJobs.length}</strong>
             <span>open roles</span>
           </div>
-        </section>
+          </section>
+        )}
 
         <section className="jobs-search-bar" aria-label="Search jobs">
           <label>
@@ -84,8 +95,26 @@ export default function JobsPage({
           </label>
         </section>
 
-        <section className="jobs-content">
-          <aside className="jobs-sidebar">
+        {isDirectoryHome && (
+          <section className="directory-category-row" aria-label="Filter by field">
+            <span>Explore:</span>
+            {CATEGORY_OPTIONS.slice(0, 7).map((category) => (
+              <button
+                key={category.name}
+                className={filters.category === category.name ? "directory-category-active" : ""}
+                onClick={() => setFilters((current) => ({
+                  ...current,
+                  category: current.category === category.name ? "" : category.name,
+                }))}
+              >
+                {category.icon} {category.name}
+              </button>
+            ))}
+          </section>
+        )}
+
+        <section className={`jobs-content${isDirectoryHome ? " directory-content" : ""}`}>
+          {!isDirectoryHome && <aside className="jobs-sidebar">
             <div className={`jobs-sidebar-inner${filtersOpen ? " filters-open" : ""}`}>
               <div className="filter-header">
                 <button
@@ -171,13 +200,13 @@ export default function JobsPage({
                 </details>
               </div>
             </div>
-          </aside>
+          </aside>}
 
           <div className="jobs-results">
             <div className="results-header">
               <div>
                 <strong>{filteredJobs.length} jobs</strong>
-                <span> matching your search</span>
+                <span>{isDirectoryHome ? " open roles" : " matching your search"}</span>
               </div>
               {filters.category && (
                 <button
