@@ -137,10 +137,8 @@ export default function HomePage({
           overflow: "hidden",
           paddingTop: 96,
           paddingBottom: 48,
-          backgroundImage: "linear-gradient(90deg, rgba(2,6,23,0.95) 0%, rgba(15,23,42,0.88) 38%, rgba(15,23,42,0.5) 68%, rgba(15,23,42,0.12) 100%), url('/images/hero-ai-robotics-lab.jpg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          borderBottom: "1px solid rgba(37,99,235,0.18)",
+          background: "#f8fafc",
+          borderBottom: "1px solid rgba(148,163,184,0.22)",
         }}
       >
         <div className="home-hero-shell" style={{ position: "relative", maxWidth: 1080, margin: "0 auto", padding: "0 24px", animation: "fadeIn 0.8s ease forwards" }}>
@@ -148,24 +146,24 @@ export default function HomePage({
             <div className="home-hero-copy" style={{ maxWidth: 610, padding: "34px 0 12px", textAlign: "left" }}>
               <div className="home-role-pill" style={{
             display: "inline-flex", alignItems: "center", gap: 8, marginBottom: 18,
-            background: "rgba(37,99,235,0.18)", border: "1px solid rgba(96,165,250,0.34)",
-            borderRadius: 99, padding: "7px 16px", backdropFilter: "blur(14px)"
+            background: "#eff6ff", border: "1px solid #bfdbfe",
+            borderRadius: 99, padding: "7px 16px"
           }}>
             <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#60a5fa", display: "inline-block", boxShadow: "0 0 14px #60a5faaa" }} />
-            <span style={{ fontSize: 12, color: "#dbeafe", fontWeight: 800 }}>{(heroPreviewJobs || []).length} roles live now</span>
+            <span style={{ fontSize: 12, color: "#1d4ed8", fontWeight: 800 }}>{(heroPreviewJobs || []).length} roles live now</span>
           </div>
-          <h1 className="home-hero-title" style={{ fontFamily: "'Merriweather', serif", fontSize: "clamp(42px, 5.4vw, 64px)", fontWeight: 700, color: "#ffffff", lineHeight: 1.04, marginBottom: 18, textShadow: "0 18px 40px rgba(0,0,0,0.32)" }}>
+          <h1 className="home-hero-title" style={{ fontFamily: "'Merriweather', serif", fontSize: "clamp(42px, 5.4vw, 64px)", fontWeight: 700, color: "#0f172a", lineHeight: 1.04, marginBottom: 18 }}>
             Find the Best<br />
-            <span style={{ background: "linear-gradient(135deg, #93c5fd, #ffffff 45%, #c4b5fd)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>AI & Robotics Jobs</span>
+            <span style={{ color: "#2563eb" }}>AI & Robotics Jobs</span>
           </h1>
-          <p className="home-hero-subtitle" style={{ fontSize: "clamp(16px, 1.8vw, 19px)", color: "#cbd5e1", maxWidth: 590, margin: "0 0 24px", lineHeight: 1.7 }}>
+          <p className="home-hero-subtitle" style={{ fontSize: "clamp(16px, 1.8vw, 19px)", color: "#475569", maxWidth: 590, margin: "0 0 24px", lineHeight: 1.7 }}>
             The premier job board for AI Engineers, ML Scientists, Robotics Engineers, and LLM specialists worldwide.
           </p>
           <div className="search-stack home-search-stack" style={{
             display: "flex", gap: 8, background: "rgba(255,255,255,0.96)",
-            border: "1px solid rgba(255,255,255,0.32)", borderRadius: 18, padding: 8,
+            border: "1px solid rgba(148,163,184,0.32)", borderRadius: 18, padding: 8,
             maxWidth: 620, margin: "0 0 14px", flexWrap: "wrap",
-            boxShadow: "0 24px 60px rgba(2,6,23,0.35)",
+            boxShadow: "0 12px 28px rgba(15,23,42,0.08)",
           }}>
             <input value={search.title} onChange={e => setSearch(s => ({ ...s, title: e.target.value }))}
               placeholder="Job title, company, skill…" style={{
@@ -185,18 +183,17 @@ export default function HomePage({
               boxShadow: "0 12px 26px rgba(37,99,235,0.28)",
             }}>Browse Jobs</button>
           </div>
-          <div className="home-popular-links" style={{ fontSize: 13, color: "#cbd5e1", marginBottom: 20 }}>
-            Popular: <span style={{ color: "#93c5fd", cursor: "pointer", fontWeight: 700 }}>LLM Engineer</span> · <span style={{ color: "#93c5fd", cursor: "pointer", fontWeight: 700 }}>ML Research</span> · <span style={{ color: "#93c5fd", cursor: "pointer", fontWeight: 700 }}>Computer Vision</span> · <span style={{ color: "#93c5fd", cursor: "pointer", fontWeight: 700 }}>Robotics</span>
+          <div className="home-popular-links" style={{ fontSize: 13, color: "#64748b", marginBottom: 20 }}>
+            Popular: <span style={{ color: "#2563eb", cursor: "pointer", fontWeight: 700 }}>LLM Engineer</span> · <span style={{ color: "#2563eb", cursor: "pointer", fontWeight: 700 }}>ML Research</span> · <span style={{ color: "#2563eb", cursor: "pointer", fontWeight: 700 }}>Computer Vision</span> · <span style={{ color: "#2563eb", cursor: "pointer", fontWeight: 700 }}>Robotics</span>
           </div>
             </div>
             <div className="home-hero-preview" style={{
               alignSelf: "center",
               background: "rgba(255,255,255,0.9)",
-              border: "1px solid rgba(255,255,255,0.42)",
+              border: "1px solid rgba(148,163,184,0.24)",
               borderRadius: 24,
               padding: 18,
-              boxShadow: "0 28px 70px rgba(2,6,23,0.34)",
-              backdropFilter: "blur(18px)",
+              boxShadow: "0 16px 34px rgba(15,23,42,0.1)",
             }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, padding: "2px 4px" }}>
                 <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: 1, textTransform: "uppercase", color: "#1d4ed8" }}>Featured roles</span>

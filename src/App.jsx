@@ -11,7 +11,16 @@ const PENDING_SIGNUP_ROLE_KEY = "ai_jobboard_pending_signup_role";
 const SAVED_JOBS_BY_USER_KEY = "ai_jobboard_saved_jobs_by_user";
 const LOCAL_PAGE_KEY = "ai_jobboard_current_page";
 const LOCAL_USER_KEY = "ai_jobboard_current_user";
-const JOBS_CACHE_KEY = "ai_jobboard_jobs_cache_v1";
+const JOBS_CACHE_KEY = "ai_jobboard_jobs_cache_v2";
+const PUBLIC_JOB_STATUSES = new Set(["published", "approved"]);
+
+function isPublicJob(job) {
+  if (!PUBLIC_JOB_STATUSES.has(job?.status)) return false;
+  const rawExpiry = job?.expiresAt ?? job?.expires_at;
+  if (!rawExpiry) return true;
+  const expiry = new Date(rawExpiry);
+  return !Number.isNaN(expiry.getTime()) && expiry > new Date();
+}
 
 function getUserStorageId(user) {
   if (!user) return "";
@@ -123,7 +132,13 @@ function loadJobsCache() {
     const raw = localStorage.getItem(JOBS_CACHE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.map(normalizeCachedJob) : [];
+    if (!Array.isArray(parsed)) return [];
+    const cachedJobs = parsed.map(normalizeCachedJob);
+    const activePublicJobs = cachedJobs.filter(isPublicJob);
+    if (activePublicJobs.length !== cachedJobs.length) {
+      saveJobsCache(activePublicJobs);
+    }
+    return activePublicJobs;
   } catch {
     return [];
   }
@@ -361,45 +376,57 @@ export default function App() {
   };
 
   useEffect(() => {
+    let active = true;
     async function loadJobs() {
       clearLegacyLocalJobCache();
       const cachedJobs = loadJobsCache();
       if (cachedJobs.length > 0) {
-        setJobs(cachedJobs);
-        setJobsLoading(false);
+        if (active) {
+          setJobs(cachedJobs);
+          setJobsLoading(false);
+        }
       } else {
-        setJobsLoading(true);
+        if (active) setJobsLoading(true);
       }
       try {
-        const data = await fetchJobsWithTimeout({ includeAll: true }, 5000);
+        const data = await fetchJobsWithTimeout({ includeAll: Boolean(user?.id) }, 5000);
+        if (!active) return;
         const nextJobs = Array.isArray(data) ? data : [];
         setJobs(nextJobs);
-        saveJobsCache(nextJobs.filter((job) => job?.status !== "pending" && job?.status !== "rejected"));
+        saveJobsCache(nextJobs.filter(isPublicJob));
       } catch (err) {
+        if (!active) return;
         console.warn("Could not load jobs from Supabase:", err);
         if (cachedJobs.length === 0) {
           setJobs([]);
         }
       } finally {
-        setJobsLoading(false);
+        if (active) setJobsLoading(false);
       }
     }
     loadJobs();
-  }, []);
+    return () => {
+      active = false;
+    };
+  }, [user]);
 
   useEffect(() => {
+    let active = true;
     async function loadAdminJobs() {
       if (!isAdmin || page !== "admin") return;
       try {
         const data = await fetchJobsWithTimeout({ includeAll: true }, 5000);
-        if (Array.isArray(data)) {
+        if (active && Array.isArray(data)) {
           setJobs(data);
         }
       } catch (err) {
-        console.warn("Could not load full admin jobs:", err);
+        if (active) console.warn("Could not load full admin jobs:", err);
       }
     }
     loadAdminJobs();
+    return () => {
+      active = false;
+    };
   }, [isAdmin, page]);
 
   useEffect(() => {
@@ -789,6 +816,11 @@ export default function App() {
     setApplications([]);
     setSelectedJob(null);
     setApplyJob(null);
+    setJobs((currentJobs) => {
+      const publicJobs = currentJobs.filter(isPublicJob);
+      saveJobsCache(publicJobs);
+      return publicJobs;
+    });
     navigateToPage("home", { replace: true, preserveScroll: true });
     try {
       await signOut();
@@ -803,11 +835,13 @@ export default function App() {
     try {
       await updateJobStatus(jobId, status);
       setJobs((prev) => {
-        const nextJobs = prev.map((job) => (String(job.id) === String(jobId) ? { ...job, status } : job));
-        saveJobsCache(nextJobs.filter((job) => job.status === "approved"));
+        const nextJobs = prev.map((job) => (String(job.id) === String(jobId)
+          ? { ...job, status, expiresAt: status === "published" ? null : job.expiresAt }
+          : job));
+        saveJobsCache(nextJobs.filter(isPublicJob));
         return nextJobs;
       });
-      showToast(status === "approved" ? "✓ Job approved" : "Job rejected");
+      showToast(status === "published" ? "✓ Job published" : "Job rejected");
     } catch (err) {
       console.warn("Could not update remote job status:", err);
       showToast(err?.message || "Could not update job status.");
@@ -819,7 +853,7 @@ export default function App() {
       await deleteJob(jobId);
       setJobs((prev) => {
         const nextJobs = prev.filter((job) => String(job.id) !== String(jobId));
-        saveJobsCache(nextJobs.filter((job) => job.status === "approved"));
+        saveJobsCache(nextJobs.filter(isPublicJob));
         return nextJobs;
       });
       showToast("✓ Job deleted");
@@ -833,13 +867,13 @@ export default function App() {
     const enrichedJob = {
       ...job,
       posted_by: user?.id || null,
-      status: "pending",
+      status: "pending_review",
     };
     try {
       const saved = await addJob(enrichedJob);
       setJobs((prev) => {
         const nextJobs = [saved, ...prev.filter((item) => String(item.id) !== String(saved.id))];
-        saveJobsCache(nextJobs.filter((jobItem) => jobItem.status !== "pending" && jobItem.status !== "rejected"));
+        saveJobsCache(nextJobs.filter(isPublicJob));
         return nextJobs;
       });
       return { ok: true, persisted: "supabase" };
@@ -857,32 +891,25 @@ export default function App() {
     }
   };
 
-  const visibleJobs = jobs.filter((job) => job.status !== "pending" && job.status !== "rejected");
+  const visibleJobs = jobs.filter(isPublicJob);
   const heroJobs = visibleJobs;
   const filteredJobs = filterAndSortJobs(visibleJobs, search, filters);
 
   if (page === "home") {
     return (
-      <HomePage
-        jobs={visibleJobs}
-        heroJobs={heroJobs}
+      <JobsPage
         jobsLoading={jobsLoading}
+        page="home"
         setPage={navigateToPage}
         search={search}
         setSearch={setSearch}
-        savedJobs={savedJobs}
-        handleSave={handleSave}
-        showToast={showToast}
+        filters={filters}
+        setFilters={setFilters}
+        filteredJobs={filteredJobs}
         openJobDetail={openJobDetail}
         applyJob={applyJob}
         setApplyJob={setApplyJob}
         handleApplySubmit={handleApplySubmit}
-        emailInput={emailInput}
-        setEmailInput={setEmailInput}
-        subscribed={subscribed}
-        setSubscribed={setSubscribed}
-        subscribeLoading={subscribeLoading}
-        onSubscribe={handleNewsletterSubscribe}
         toast={toast}
         user={user}
         onSignOut={handleSignOut}
@@ -926,7 +953,7 @@ export default function App() {
         jobsLoading={jobsLoading}
         page={page}
         setPage={navigateToPage}
-        jobs={visibleJobs}
+        jobs={userRole === "employer" ? jobs : visibleJobs}
         savedJobs={savedJobs}
         applications={applications}
         handleSave={handleSave}
@@ -1011,7 +1038,7 @@ export default function App() {
         jobs={jobs}
         users={adminUsers}
         applications={applications}
-        onApprove={(id) => handleModerateJob(id, "approved")}
+        onApprove={(id) => handleModerateJob(id, "published")}
         onReject={(id) => handleModerateJob(id, "rejected")}
         onDelete={handleDeleteJob}
         isLoading={adminLoading}
